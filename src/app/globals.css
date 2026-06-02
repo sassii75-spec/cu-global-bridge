@@ -2004,19 +2004,57 @@ a {
   .intro-grid {
     grid-template-columns: 1fr;
   }
-  .timeline-node {
-    grid-template-columns: 80px 1fr;
+  
+  /* Timeline Mobile Centering Mode to prevent visual breakages */
+  .timeline-section {
+    padding: 20px 0;
   }
   .timeline-line {
-    left: 40px;
+    display: none !important; /* Remove line to allow clean linear stacking */
   }
-  .timeline-node.left .timeline-content {
-    grid-column: 2;
-    text-align: left;
+  .timeline-container {
+    gap: 24px;
+  }
+  .timeline-node {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+    padding: 0 !important;
+    grid-template-columns: none !important;
+  }
+  .timeline-content {
+    width: 100% !important;
+    max-width: 540px !important;
+    text-align: center !important;
+    padding: 24px !important;
+  }
+  .timeline-node.left .timeline-content,
+  .timeline-node.right .timeline-content {
+    grid-column: auto !important;
+    text-align: center !important;
   }
   .timeline-bullet {
-    grid-column: 1;
+    display: none !important; /* Hide circular badge on mobile */
   }
+  .timeline-year {
+    font-size: 1.35rem;
+    margin-bottom: 6px;
+    display: inline-block;
+    padding: 2px 12px;
+    background: rgba(0, 185, 242, 0.1);
+    border-radius: 20px;
+    border: 1px solid rgba(0, 185, 242, 0.2);
+  }
+  .timeline-title {
+    font-size: 1.08rem !important;
+    word-break: keep-all;
+  }
+  .timeline-desc {
+    text-align: center !important;
+    word-break: keep-all;
+  }
+
   .learning-layout {
     grid-template-columns: 1fr;
   }
@@ -2048,9 +2086,83 @@ a {
   .gcu-logo-text {
     font-size: 1.05rem;
   }
+
+  /* Core Section Header Mobile Centering */
+  .section-header {
+    justify-content: center !important;
+    text-align: center !important;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+  .section-title {
+    justify-content: center !important;
+    text-align: center !important;
+    width: 100%;
+    font-size: 1.38rem !important; /* Compress title font size to prevent wrapping clipping */
+    word-break: keep-all;
+  }
+  .section-title-dot {
+    display: none !important; /* Hide dot to keep clean center alignment */
+  }
 }
 
 @media (max-width: 576px) {
+  /* Hero Dynamic Section Mobile Optimization */
+  .hero-section {
+    padding: 28px 18px !important;
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 28px !important;
+  }
+  .hero-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  .hero-title {
+    font-size: 1.65rem !important;
+    text-align: center !important;
+    word-break: keep-all;
+    line-height: 1.3 !important;
+    margin-bottom: 14px !important;
+    width: 100%;
+  }
+  .hero-desc {
+    font-size: 0.88rem !important;
+    text-align: center !important;
+    line-height: 1.6 !important;
+    word-break: keep-all;
+    margin-bottom: 24px !important;
+    padding: 0 4px !important;
+    width: 100%;
+  }
+  .hero-buttons {
+    justify-content: center !important;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .btn-primary, .btn-secondary {
+    width: 100% !important;
+    max-width: 280px !important;
+    justify-content: center;
+    padding: 10px 20px !important;
+    font-size: 0.88rem !important;
+  }
+  .hero-stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+    width: 100%;
+  }
+  .hero-stats-card {
+    padding: 16px 8px !important;
+  }
+  .hero-stat-val {
+    font-size: 1.55rem !important;
+  }
+
   .dashboard-shortcuts {
     grid-template-columns: 1fr;
   }
@@ -2062,6 +2174,16 @@ a {
   }
   .btn-header-cta {
     display: none !important; /* Hide secondary cta on ultra-narrow phones */
+  }
+
+  /* Toast Notification mobile centering */
+  .toast-notification {
+    left: 16px !important;
+    right: 16px !important;
+    bottom: 16px !important;
+    max-width: none !important;
+    padding: 14px 18px !important;
+    border-radius: 12px !important;
   }
 }
 
