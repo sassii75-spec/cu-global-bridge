@@ -963,7 +963,7 @@ export default function LearningPage() {
         </button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 340px", gap: isMobile ? "24px" : "32px", alignItems: "start" }}>
+      <div style={{ display: "grid", gridTemplateColumns: (isMobile || activeTab === "mocktest") ? "1fr" : "1fr 340px", gap: (isMobile || activeTab === "mocktest") ? "0" : (isMobile ? "24px" : "32px"), alignItems: "start" }}>
         <div>
           {/* 1. Regular Courses Tab */}
           {activeTab === "courses" && (
@@ -2314,60 +2314,62 @@ export default function LearningPage() {
         </div>
 
         {/* Right Side Sticky Guide Dashboard */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-          <section className="glass-panel" style={{ padding: "24px" }}>
-            <h3 style={{ fontSize: "1.1rem", marginBottom: "14px", fontFamily: "var(--font-brand)", letterSpacing: "-0.5px" }}>{tLearn.sideTitle}</h3>
-            <ul style={{ listStyle: "none", fontSize: "0.85rem", color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: "10px" }}>
-              <li style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "8px" }}>
-                {tLearn.sideReg}
-              </li>
-              <li style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "8px" }}>
-                {tLearn.sideReq}
-              </li>
-              <li style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "8px" }}>
-                {tLearn.sideGcu}
-              </li>
-              <li style={{ paddingTop: "8px" }}>
-                <a 
-                  href="https://www.topik.go.kr/TWGUID/TWGUID0010.do" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  onClick={(e) => {
-                    if (!confirm(tLearn.sideConfirm)) {
-                      e.preventDefault();
-                    }
-                  }}
-                  className="btn-primary" 
-                  style={{ 
-                    width: "100%", 
-                    justifyContent: "center", 
-                    fontSize: "0.8rem", 
-                    padding: "10px 12px", 
-                    borderRadius: "8px",
-                    color: "#ffffff",
-                    display: "flex",
-                    fontWeight: "700",
-                    boxShadow: "0 4px 10px rgba(18, 42, 77, 0.15)",
-                    textDecoration: "none"
-                  }}
-                >
-                  {tLearn.sideLink}
-                </a>
-              </li>
-            </ul>
-          </section>
+        {activeTab !== "mocktest" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            <section className="glass-panel" style={{ padding: "24px" }}>
+              <h3 style={{ fontSize: "1.1rem", marginBottom: "14px", fontFamily: "var(--font-brand)", letterSpacing: "-0.5px" }}>{tLearn.sideTitle}</h3>
+              <ul style={{ listStyle: "none", fontSize: "0.85rem", color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: "10px" }}>
+                <li style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "8px" }}>
+                  {tLearn.sideReg}
+                </li>
+                <li style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "8px" }}>
+                  {tLearn.sideReq}
+                </li>
+                <li style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "8px" }}>
+                  {tLearn.sideGcu}
+                </li>
+                <li style={{ paddingTop: "8px" }}>
+                  <a 
+                    href="https://www.topik.go.kr/TWGUID/TWGUID0010.do" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    onClick={(e) => {
+                      if (!confirm(tLearn.sideConfirm)) {
+                        e.preventDefault();
+                      }
+                    }}
+                    className="btn-primary" 
+                    style={{ 
+                      width: "100%", 
+                      justifyContent: "center", 
+                      fontSize: "0.8rem", 
+                      padding: "10px 12px", 
+                      borderRadius: "8px",
+                      color: "#ffffff",
+                      display: "flex",
+                      fontWeight: "700",
+                      boxShadow: "0 4px 10px rgba(18, 42, 77, 0.15)",
+                      textDecoration: "none"
+                    }}
+                  >
+                    {tLearn.sideLink}
+                  </a>
+                </li>
+              </ul>
+            </section>
 
-          <section className="widget-banner glass-panel" style={{ background: "linear-gradient(135deg, rgba(33, 64, 154, 0.2) 0%, rgba(114, 191, 68, 0.1) 100%)", border: "1px solid rgba(0, 185, 242, 0.2)" }}>
-            <div className="widget-banner-icon">🗣️</div>
-            <div className="widget-banner-title">{tLearn.tutorTitle}</div>
-            <p className="widget-banner-desc" style={{ fontSize: "0.8rem" }}>
-              {tLearn.tutorDesc}
-            </p>
-            <button onClick={() => alert(tLearn.tutorAlert)} className="widget-banner-btn">
-              {tLearn.tutorBtn}
-            </button>
-          </section>
-        </div>
+            <section className="widget-banner glass-panel" style={{ background: "linear-gradient(135deg, rgba(33, 64, 154, 0.2) 0%, rgba(114, 191, 68, 0.1) 100%)", border: "1px solid rgba(0, 185, 242, 0.2)" }}>
+              <div className="widget-banner-icon">🗣️</div>
+              <div className="widget-banner-title">{tLearn.tutorTitle}</div>
+              <p className="widget-banner-desc" style={{ fontSize: "0.8rem" }}>
+                {tLearn.tutorDesc}
+              </p>
+              <button onClick={() => alert(tLearn.tutorAlert)} className="widget-banner-btn">
+                {tLearn.tutorBtn}
+              </button>
+            </section>
+          </div>
+        )}
       </div>
 
       {/* 🔍 IBT 모의고사 상세 성적표 & 해설 모달 */}
