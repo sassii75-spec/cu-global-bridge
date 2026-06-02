@@ -7,7 +7,7 @@ import { useLanguage } from "../context/LanguageContext";
 const LOGIN_TRANSLATIONS = {
   ko: {
     welcomeBack: "당신의 글로벌 꿈\nGCU와 함께 시작하세요",
-    loginDesc: "GCU Global Bridge 통합 학사 및 취업 관리 계정 포털에 오신 것을 환영합니다.",
+    loginDesc: "GCU Post School 통합 학사 및 취업 관리 계정 포털에 오신 것을 환영합니다.",
     emailLabel: "이메일 주소",
     emailPlaceholder: "학적 또는 근로 계약용 이메일을 입력하세요...",
     passLabel: "비밀번호",
@@ -22,7 +22,7 @@ const LOGIN_TRANSLATIONS = {
   },
   en: {
     welcomeBack: "Start Your Global Dream\nwith GCU",
-    loginDesc: "Welcome to GCU Global Bridge integrated academic and employment portal.",
+    loginDesc: "Welcome to GCU Post School integrated academic and employment portal.",
     emailLabel: "Email Address",
     emailPlaceholder: "Enter your registered email...",
     passLabel: "Password",
@@ -37,7 +37,7 @@ const LOGIN_TRANSLATIONS = {
   },
   vn: {
     welcomeBack: "Khởi đầu Ước mơ Toàn cầu\ncùng GCU",
-    loginDesc: "Chào mừng đến với cổng quản lý học vụ & việc làm tích hợp GCU Global Bridge.",
+    loginDesc: "Chào mừng đến với cổng quản lý học vụ & việc làm tích hợp GCU Post School.",
     emailLabel: "Địa chỉ Email",
     emailPlaceholder: "Nhập email đăng ký học tập/làm việc...",
     passLabel: "Mật khẩu",
@@ -52,7 +52,7 @@ const LOGIN_TRANSLATIONS = {
   },
   mn: {
     welcomeBack: "Глобал мөрөөдлөө\nGCU-тай хамт эхлүүлээрэй",
-    loginDesc: "GCU Global Bridge нэгдсэн академик болон ажил эрхлэлтийн удирдлагын системд тавтай морил.",
+    loginDesc: "GCU Post School нэгдсэн академик болон ажил эрхлэлтийн удирдлагын системд тавтай морил.",
     emailLabel: "Цахим шуудан",
     emailPlaceholder: "Сургуульд бүртгэлтэй цахим шуудангаа оруулна уу...",
     passLabel: "Нууц үг",

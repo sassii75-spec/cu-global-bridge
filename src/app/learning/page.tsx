@@ -254,10 +254,10 @@ const ACADEMIC_NOTICES = [
     },
     date: "2026-06-02",
     desc: {
-      ko: "글로벌 브릿지 사업 일환으로 한국어 전공 이수 외국인 학생 50명에 대한 장학금 지급 및 정착 필수 교안 1000부 배포 일정을 안내합니다.",
-      en: "As part of the Global Bridge project, we announce the scholarship disbursement schedule for 50 foreign students majoring in Korean and the distribution of 1,000 essential settlement textbooks.",
-      vn: "Là một phần của dự án Global Bridge, chúng tôi thông báo lịch trình cấp học bổng cho 50 học sinh nước ngoài chuyên ngành tiếng Hàn và phát hành 1000 tài liệu hướng dẫn định cư thiết yếu.",
-      mn: "Глобал Бридж төслийн хүрээнд солонгос хэлний чиглэлээр суралцаж буй гадаадын 50 оюутанд тэтгэлэг олгох болон 1000 ширхэг гарын авлага тараах хуваарийг зарлаж байна."
+      ko: "GCU Post School 사업 일환으로 한국어 전공 이수 외국인 학생 50명에 대한 장학금 지급 및 정착 필수 교안 1000부 배포 일정을 안내합니다.",
+      en: "As part of the GCU Post School project, we announce the scholarship disbursement schedule for 50 foreign students majoring in Korean and the distribution of 1,000 essential settlement textbooks.",
+      vn: "Là một phần của dự án GCU Post School, chúng tôi thông báo lịch trình cấp học bổng cho 50 học sinh nước ngoài chuyên ngành tiếng Hàn và phát hành 1000 tài liệu hướng dẫn định cư thiết yếu.",
+      mn: "GCU Post School төслийн хүрээнд солонгос хэлний чиглэлээр суралцаж буй гадаадын 50 оюутанд тэтгэлэг олгох болон 1000 ширхэг гарын авлага тараах хуваарийг зарлаж байна."
     }
   },
   {

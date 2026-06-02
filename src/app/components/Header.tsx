@@ -51,7 +51,7 @@ export default function Header() {
               boxShadow: "0 0 12px rgba(0, 185, 242, 0.4)"
             }} 
           />
-          <div className="gcu-logo-text" style={{ whiteSpace: "nowrap" }}>GCU Global Bridge</div>
+          <div className="gcu-logo-text" style={{ whiteSpace: "nowrap" }}>GCU Post School</div>
         </a>
 
         {/* Navigation Menu */}

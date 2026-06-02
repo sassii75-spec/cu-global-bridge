@@ -57,10 +57,10 @@ export const translations: Record<string, Record<Lang, string>> = {
     mn: "Гарах"
   },
   footerDesc: {
-    ko: "글로벌사이버대학교는 세계인에게 홍익인간 정신을 전파하는 글로벌 인재 육성 중심 대학입니다. GCU Global Bridge는 다문화 유학생들과 근로자들의 학업 성공과 국내 안정적 정착을 성실히 지원합니다.",
-    en: "Global Cyber University is a premier institution cultivating global leaders with the spirit of Hongik Ingan. GCU Global Bridge dedicatedly supports the academic success and stable settlement of multicultural students and workers.",
-    vn: "Đại học Global Cyber là trường hàng đầu bồi dưỡng nhân tài toàn cầu với tinh thần Hongik Ingan. GCU Global Bridge hỗ trợ đắc lực cho sự thành công trong học tập và định cư ổn định của sinh viên và người lao động đa văn hóa.",
-    mn: "Глобал Сайбер Их Сургууль нь Хонгик Инган үзэл санааг түгээн дэлхийн хэмжээний боловсон хүчин бэлтгэдэг тэргүүлэгч сургууль юм. GCU Global Bridge нь олон соёлт оюутан, ажилчдын сурлагын амжилт, тогтвортой амьдралыг тууштай дэмжинэ."
+    ko: "글로벌사이버대학교는 세계인에게 홍익인간 정신을 전파하는 글로벌 인재 육성 중심 대학입니다. GCU Post School은 다문화 유학생들과 근로자들의 학업 성공과 국내 안정적 정착을 성실히 지원합니다.",
+    en: "Global Cyber University is a premier institution cultivating global leaders with the spirit of Hongik Ingan. GCU Post School dedicatedly supports the academic success and stable settlement of multicultural students and workers.",
+    vn: "Đại học Global Cyber là trường hàng đầu bồi dưỡng nhân tài toàn cầu với tinh thần Hongik Ingan. GCU Post School hỗ trợ đắc lực cho sự thành công trong học tập và định cư ổn định của sinh viên và người lao động đa văn hóa.",
+    mn: "Глобал Сайбер Их Сургууль нь Хонгик Инган үзэл санааг түгээн дэлхийн хэмжээний боловсон хүчин бэлтгэдэг тэргүүлэгч сургууль юм. GCU Post School нь олон соёлт оюутан, ажилчдын сурлагын амжилт, тогтвортой амьдралыг тууштай дэмжинэ."
   },
 
   // Main Dashboard Landing Page
@@ -77,10 +77,10 @@ export const translations: Record<string, Record<Lang, string>> = {
     mn: "Глобал мөрөөдлөө GCU-тай хамт биелүүлээрэй"
   },
   heroDesc: {
-    ko: "학습지원, 자막/한국어 교육, 취업/생활 정착 정보 및 국가별 커뮤니티 제공까지. 외국인 유학생과 근로자를 위한 가장 믿음직한 러닝 파트너, GCU Global Bridge입니다.",
-    en: "From learning support, translation/Korean education, employment/settlement guides, to national community forums. GCU Global Bridge is your most reliable learning partner.",
-    vn: "Từ hỗ trợ học tập, dịch thuật/giáo dục tiếng Hàn, cẩm nang việc làm & định cư, đến diễn đàn cộng đồng. GCU Global Bridge là đối tác học tập đáng tin cậy nhất của bạn.",
-    mn: "Суралцах дэмжлэг, орчуулга/солонгос хэлний боловсрол, ажил эрхлэлт/суурьших зааварчилгаа, улс орнуудын хамт олны форум. GCU Global Bridge нь таны хамгийн найдвартай түнш юм."
+    ko: "학습지원, 자막/한국어 교육, 취업/생활 정착 정보 및 국가별 커뮤니티 제공까지. 외국인 유학생과 근로자를 위한 가장 믿음직한 러닝 파트너, GCU Post School입니다.",
+    en: "From learning support, translation/Korean education, employment/settlement guides, to national community forums. GCU Post School is your most reliable learning partner.",
+    vn: "Từ hỗ trợ học tập, dịch thuật/giáo dục tiếng Hàn, cẩm nang việc làm & định cư, đến diễn đàn cộng đồng. GCU Post School là đối tác học tập đáng tin cậy nhất của bạn.",
+    mn: "Суралцах дэмжлэг, орчуулга/солонгос хэлний боловсрол, ажил эрхлэлт/суурьших зааварчилгаа, улс орнуудын хамт олны форум. GCU Post School нь таны хамгийн найдвартай түнш юм."
   },
   heroCtaBtn: {
     ko: "학습 지원 받기",

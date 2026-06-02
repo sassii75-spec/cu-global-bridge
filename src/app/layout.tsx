@@ -5,7 +5,7 @@ import Footer from "./components/Footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "GCU Global Bridge | Global Cyber University",
+  title: "GCU Post School | Global Cyber University",
   description: "A premium community and support portal for international students and workers at Global Cyber University.",
 };
 

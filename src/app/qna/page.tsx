@@ -14,10 +14,10 @@ const INITIAL_QNA = [
       mn: "Гадаад оюутнууд үнэхээр бүх сургалт, загвар шалгалтыг үнэ төлбөргүй ашиглах боломжтой юу?"
     },
     answer: {
-      ko: "네! 본 GCU Global Bridge 플랫폼의 모든 단계별 정규 한국어 강좌, TOPIK 대비자료, 그리고 듣기/읽기 능력 시험 모의고사는 로그인 및 회원가입 없이 외국인 누구나 전면 무료로 개방되어 운영됩니다.",
-      en: "Yes! All step-by-step regular Korean courses, TOPIK prep materials, and listening/reading mock exams on the GCU Global Bridge platform are fully open and free for any foreigners without registration or login.",
-      vn: "Đúng vậy! Tất cả các khóa học tiếng Hàn chính quy theo cấp độ, tài liệu ôn thi TOPIK, và đề thi thử kỹ năng Nghe/Đọc trên nền tảng GCU Global Bridge đều được mở hoàn toàn miễn phí cho tất cả người nước ngoài mà không cần đăng ký hay đăng nhập.",
-      mn: "Тийм ээ! Энэхүү GCU Global Bridge платформын бүх шатны солонгос хэлний үндсэн хичээл, TOPIK-д бэлтгэх материал, сонсох/унших шалгалтын загвар шалгалтууд нь нэвтрэх болон бүртгүүлэх шаардлагагүйгээр гадаадын хэн бүхэнд бүрэн үнэ төлбөргүй нээлттэй ажиллаж байна."
+      ko: "네! 본 GCU Post School 플랫폼의 모든 단계별 정규 한국어 강좌, TOPIK 대비자료, 그리고 듣기/읽기 능력 시험 모의고사는 로그인 및 회원가입 없이 외국인 누구나 전면 무료로 개방되어 운영됩니다.",
+      en: "Yes! All step-by-step regular Korean courses, TOPIK prep materials, and listening/reading mock exams on the GCU Post School platform are fully open and free for any foreigners without registration or login.",
+      vn: "Đúng vậy! Tất cả các khóa học tiếng Hàn chính quy theo cấp độ, tài liệu ôn thi TOPIK, và đề thi thử kỹ năng Nghe/Đọc trên nền tảng GCU Post School đều được mở hoàn toàn miễn phí cho tất cả người nước ngoài mà không cần đăng ký hay đăng nhập.",
+      mn: "Тийм ээ! Энэхүү GCU Post School платформын бүх шатны солонгос хэлний үндсэн хичээл, TOPIK-д бэлтгэх материал, сонсох/унших шалгалтын загвар шалгалтууд нь нэвтрэх болон бүртгүүлэх шаардлагагүйгээр гадаадын хэн бүхэнд бүрэн үнэ төлбөргүй нээлттэй ажиллаж байна."
     }
   },
   {
@@ -44,10 +44,10 @@ const INITIAL_QNA = [
       mn: "Хичээл сурах явцад алдаа гарах болон цагийн ажил хийх зөвшөөрлийн зөвлөгөөг хаанаас авах вэ?"
     },
     answer: {
-      ko: "글로벌 브릿지 종합 행정 지원처(☎ 02-1234-5678)로 전화해 문의하시거나 아래의 Q&A 실시간 질문 신청 양식을 작성해 전송해 주시면 24시간 이내에 개별 메일로 상세 답변을 회신해 드립니다.",
-      en: "You can call our Global Bridge administrative helpdesk (☎ 02-1234-5678) or fill out and submit the Q&A ticket form below. A detailed response will be sent to your registered email address within 24 hours.",
-      vn: "Vui lòng gọi điện đến Văn phòng Hỗ trợ Hành chính Tổng hợp Global Bridge (☎ 02-1234-5678) эсвэл điền vào biểu mẫu đăng ký Q&A trực tuyến bên dưới. Chúng tôi sẽ phản hồi chi tiết qua email cá nhân của bạn trong vòng 24 giờ.",
-      mn: "Глобал Бридж нэгдсэн тусламжийн төв рүү (☎ 02-1234-5678) утасдаж асуух эсвэл доорх Q&A асуулт илгээх хуудсаар асуултаа илгээвэл 24 цагийн дотор таны цахим шууданд хариу илгээнэ."
+      ko: "글로벌 포스트 스쿨 종합 행정 지원처(☎ 02-1234-5678)로 전화해 문의하시거나 아래의 Q&A 실시간 질문 신청 양식을 작성해 전송해 주시면 24시간 이내에 개별 메일로 상세 답변을 회신해 드립니다.",
+      en: "You can call our Post School administrative helpdesk (☎ 02-1234-5678) or fill out and submit the Q&A ticket form below. A detailed response will be sent to your registered email address within 24 hours.",
+      vn: "Vui lòng gọi điện đến Văn phòng Hỗ trợ Hành chính Tổng hợp Post School (☎ 02-1234-5678) эсвэл điền vào biểu mẫu đăng ký Q&A trực tuyến bên dưới. Chúng tôi sẽ phản hồi chi tiết qua email cá nhân của bạn trong vòng 24 giờ.",
+      mn: "Пост Скүүл нэгдсэн тусламжийн төв рүү (☎ 02-1234-5678) утасдаж асуух эсвэл доорх Q&A асуулт илгээх хуудсаар асуултаа илгээвэл 24 цагийн дотор таны цахим шууданд хариу илгээнэ."
     }
   }
 ];
@@ -97,7 +97,7 @@ const QNA_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
     formContentLabel: "문의 세부 내용",
     formContentPlaceholder: "구체적인 질문 사안을 입력해주십시오. 기재하신 학적 대조 이메일로 답변서가 자동 회신됩니다...",
     formSubmitBtn: "Q&A 질문 제출하기",
-    sidebarTitle: "📞 글로벌 브릿지 종합 행정 지원처",
+    sidebarTitle: "📞 GCU Post School 종합 행정 지원처",
     sidebarHelpline1: "학사/교육상담: 02-1234-5678",
     sidebarHelpline2: "비자/정착지원: 02-1234-8765",
     sidebarEmail: "대표 이메일: support@global.ac.kr",
@@ -125,7 +125,7 @@ const QNA_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
     formContentLabel: "Detailed Content",
     formContentPlaceholder: "Enter detailed questions. A reply will be sent automatically to your academic matching email...",
     formSubmitBtn: "Submit Q&A Ticket",
-    sidebarTitle: "📞 Global Bridge Support Center",
+    sidebarTitle: "📞 Post School Support Center",
     sidebarHelpline1: "Academics Helpline: 02-1234-5678",
     sidebarHelpline2: "Visa / Settlement: 02-1234-8765",
     sidebarEmail: "Official Email: support@global.ac.kr",
@@ -153,7 +153,7 @@ const QNA_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
     formContentLabel: "Nội dung chi tiết",
     formContentPlaceholder: "Nhập câu hỏi chi tiết. Câu trả lời sẽ tự động được gửi về email đối chiếu học tịch của bạn...",
     formSubmitBtn: "Gửi câu hỏi Q&A",
-    sidebarTitle: "📞 Trung tâm Hỗ trợ GCU Global Bridge",
+    sidebarTitle: "📞 Trung tâm Hỗ trợ GCU Post School",
     sidebarHelpline1: "Hỗ trợ học vụ: 02-1234-5678",
     sidebarHelpline2: "Hỗ trợ Visa/Định cư: 02-1234-8765",
     sidebarEmail: "Email đại diện: support@global.ac.kr",
@@ -181,7 +181,7 @@ const QNA_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
     formContentLabel: "Асуултын дэлгэрэнгүй",
     formContentPlaceholder: "Дэлгэрэнгүй асуултаа бичнэ үү. Таны бүртгэлтэй цахим шуудангаар хариу илгээгдэх болно...",
     formSubmitBtn: "Q&A Асуулт илгээх",
-    sidebarTitle: "📞 Глобал Бридж нэгдсэн тусламжийн төв",
+    sidebarTitle: "📞 GCU Post School нэгдсэн тусламжийн төв",
     sidebarHelpline1: "Хичээлийн зөвлөгөө: 02-1234-5678",
     sidebarHelpline2: "Виз / Суурьшилтын тусламж: 02-1234-8765",
     sidebarEmail: "Цахим шуудан: support@global.ac.kr",

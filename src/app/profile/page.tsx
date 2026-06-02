@@ -80,10 +80,10 @@ const FAQ_ITEMS = [
       mn: "🏫 Олон соёлт гэр бүл, гадаад оюутанд зориулсан сургалтын төлбөрийн тэтгэлэг байдаг уу?"
     },
     answer: {
-      ko: "글로벌사이버대학교 글로벌 브릿지 사업부는 다문화 유학생들과 국내 거주 외국인 근로자들의 지속적 학업 의지를 독려하고자 학기별 평점 요건(GPA 2.5 이상 유지) 충족 시 등록금의 30%에서 최대 50%까지의 감면 장학 혜택을 다각도로 매칭해 드립니다. 자세한 신청서 작성 양식과 지원 서류 검토 일정은 학습지원센터 자료실 및 학사 공지사항 탭을 참조해주시기 바랍니다.",
-      en: "To encourage continuous academic passion among international students and workers, Global Cyber University's Global Bridge office provides tuition scholarships ranging from 30% to 50% per semester if credit requirements (GPA 2.5+) are met. Detailed application forms and submission schedules can be viewed under the Learning Center Prep Materials and Notice tabs.",
-      vn: "Nhằm khuyến khích tinh thần học tập bền bỉ của du học sinh đa văn hóa và lao động nước ngoài, ban Global Bridge của Đại học Global Cyber hỗ trợ khớp các khoản học bổng giảm học phí từ 30% đến tối đa 50% mỗi học kỳ khi đáp ứng chuẩn điểm số tích lũy (GPA từ 2.5 trở lên). Mẫu đơn đăng ký chi tiết và lịch xét duyệt tài liệu có thể tham khảo tại bảng thông báo học vụ.",
-      mn: "Глобал Сайбер Их Сургуулийн Глобал Бридж хэлтэс нь гадаад оюутан, ажилчдын сурах эрмэлзлийг дэмжих зорилгоор хичээлийн голч дүн (GPA 2.5-аас дээш) хангасан тохиолдолд сургалтын төлбөрийг 30%-иас 50% хүртэл хөнгөлөх тэтгэлэг олгодог. Өргөдлийн маягт болон шаардлагатай бичиг баримтын зааврыг сургуулийн зарлан мэдээллийн хэсгээс харна уу."
+      ko: "글로벌사이버대학교 글로벌 포스트 스쿨 사업부는 다문화 유학생들과 국내 거주 외국인 근로자들의 지속적 학업 의지를 독려하고자 학기별 평점 요건(GPA 2.5 이상 유지) 충족 시 등록금의 30%에서 최대 50%까지의 감면 장학 혜택을 다각도로 매칭해 드립니다. 자세한 신청서 작성 양식과 지원 서류 검토 일정은 학습지원센터 자료실 및 학사 공지사항 탭을 참조해주시기 바랍니다.",
+      en: "To encourage continuous academic passion among international students and workers, Global Cyber University's Post School office provides tuition scholarships ranging from 30% to 50% per semester if credit requirements (GPA 2.5+) are met. Detailed application forms and submission schedules can be viewed under the Learning Center Prep Materials and Notice tabs.",
+      vn: "Nhằm khuyến khích tinh thần học tập bền bỉ của du học sinh đa văn hóa và lao động nước ngoài, ban Post School của Đại học Global Cyber hỗ trợ khớp các khoản học bổng giảm học phí từ 30% đến tối đa 50% mỗi học kỳ khi đáp ứng chuẩn điểm số tích lũy (GPA từ 2.5 trở lên). Mẫu đơn đăng ký chi tiết và lịch xét duyệt tài liệu có thể tham khảo tại bảng thông báo học vụ.",
+      mn: "Глобал Сайбер Их Сургуулийн Пост Скүүл хэлтэс нь гадаад оюутан, ажилчдын сурах эрмэлзлийг дэмжих зорилгоор хичээлийн голч дүн (GPA 2.5-аас дээш) хангасан тохиолдолд сургалтын төлбөрийг 30%-иас 50% хүртэл хөнгөлөх тэтгэлэг олгодог. Өргөдлийн маягт болон шаардлагатай бичиг баримтын зааврыг сургуулийн зарлан мэдээллийн хэсгээс харна уу."
     }
   }
 ];
@@ -524,7 +524,7 @@ export default function ProfilePage() {
                       }}
                     >
                       <strong style={{ color: "var(--gcu-green)", display: "block", marginBottom: "4px" }}>
-                        💡 {lang === "ko" ? "글로벌브릿지 공식 답변:" : "Official Bridge Response:"}
+                        💡 {lang === "ko" ? "GCU Post School 공식 답변:" : "Official Post School Response:"}
                       </strong>
                       {aText}
                     </div>

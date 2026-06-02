@@ -119,7 +119,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-copyright">
-          &copy; {new Date().getFullYear()} GLOBAL CYBER UNIVERSITY. All Rights Reserved. Designed for GCU Global Bridge Initiative.
+          &copy; {new Date().getFullYear()} GLOBAL CYBER UNIVERSITY. All Rights Reserved. Designed for GCU Post School Initiative.
         </div>
       </div>
 

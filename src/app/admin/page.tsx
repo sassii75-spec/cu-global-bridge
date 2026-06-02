@@ -793,7 +793,7 @@ export default function AdminPage() {
           <span style={{ fontSize: "3rem" }}>🚨</span>
           <h2 style={{ fontSize: "1.35rem", fontWeight: "800", color: "var(--text-primary)", margin: "16px 0 8px 0" }}>{t.accessDenied}</h2>
           <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "24px", lineHeight: "1.6" }}>
-            본 제어판은 글로벌사이버대 글로벌 브릿지 최고 관리자(Admin) 권한 보유 계정으로만 개설 및 접근이 허가됩니다.
+            본 제어판은 글로벌사이버대 GCU Post School 최고 관리자(Admin) 권한 보유 계정으로만 개설 및 접근이 허가됩니다.
           </p>
           <a href="/" className="btn-primary" style={{ display: "inline-block" }}>
             {t.goHome}

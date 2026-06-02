@@ -117,8 +117,8 @@ const INTRO_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
 }> = {
   ko: {
     pageTitle: "사업 소개",
-    pageDesc: "글로벌사이버대학교는 전 세계 학생과 한국 사회를 연결하는 가교 역할을 수행합니다. GCU Global Bridge는 다문화 외국인 유학생 및 근로자의 교육, 생활, 비자, 취업 정착을 통합 지원하여 글로벌 인재 도약을 완성합니다.",
-    stratTitle: "GCU Global Bridge 핵심 전략",
+    pageDesc: "글로벌사이버대학교는 전 세계 학생과 한국 사회를 연결하는 가교 역할을 수행합니다. GCU Post School은 다문화 외국인 유학생 및 근로자의 교육, 생활, 비자, 취업 정착을 통합 지원하여 글로벌 인재 도약을 완성합니다.",
+    stratTitle: "GCU Post School 핵심 전략",
     strat1Title: "스마트 교육 다문화 학습",
     strat1Desc: "한국어 능력 향상을 위한 고품질 온라인 강좌, TOPIK 대비반 및 무료 교재 다운로드 아카이브를 상시 제공합니다.",
     strat2Title: "일자리 및 산업체 연계",
@@ -141,8 +141,8 @@ const INTRO_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
   },
   en: {
     pageTitle: "Project Introduction",
-    pageDesc: "Global Cyber University serves as a bridge connecting students worldwide with Korean society. GCU Global Bridge provides integrated support for the education, lifestyle, visa, and employment settlement of multicultural students and workers to cultivate global talent.",
-    stratTitle: "GCU Global Bridge Core Strategies",
+    pageDesc: "Global Cyber University serves as a bridge connecting students worldwide with Korean society. GCU Post School provides integrated support for the education, lifestyle, visa, and employment settlement of multicultural students and workers to cultivate global talent.",
+    stratTitle: "GCU Post School Core Strategies",
     strat1Title: "Smart Multicultural Education",
     strat1Desc: "We provide high-quality online courses, TOPIK preparation classes, and free prep material download archives to improve Korean proficiency.",
     strat2Title: "Job & Industry Partnership",
@@ -165,8 +165,8 @@ const INTRO_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
   },
   vn: {
     pageTitle: "Giới thiệu Dự án",
-    pageDesc: "Đại học Global Cyber đóng vai trò là cầu nối kết nối sinh viên trên toàn thế giới với xã hội Hàn Quốc. GCU Global Bridge hỗ trợ tích hợp về giáo dục, đời sống, visa và định cư việc làm cho sinh viên và người lao động đa văn hóa để hoàn thiện bước đệm tài năng toàn cầu.",
-    stratTitle: "Chiến lược Trọng tâm GCU Global Bridge",
+    pageDesc: "Đại học Global Cyber đóng vai trò là cầu nối kết nối sinh viên trên toàn thế giới với xã hội Hàn Quốc. GCU Post School hỗ trợ tích hợp về giáo dục, đời sống, visa và định cư việc làm cho sinh viên và người lao động đa văn hóa để hoàn thiện bước đệm tài năng toàn cầu.",
+    stratTitle: "Chiến lược Trọng tâm GCU Post School",
     strat1Title: "Học tập Đa văn hóa & Giáo dục Thông minh",
     strat1Desc: "Cung cấp các khóa học trực tuyến chất lượng cao để nâng cao tiếng Hàn, các lớp ôn thi TOPIK và kho lưu trữ tài liệu giáo trình tải xuống miễn phí.",
     strat2Title: "Liên kết Doanh nghiệp & Việc làm",
@@ -189,8 +189,8 @@ const INTRO_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
   },
   mn: {
     pageTitle: "Төслийн танилцуулга",
-    pageDesc: "Глобал Сайбер Их Сургууль нь дэлхийн оюутнуудыг солонгосын нийгэмтэй холбох гүүр болж ажилладаг. GCU Global Bridge нь олон соёлт гадаад оюутан, ажилчдын боловсрол, амьдрал, виз, ажил эрхлэлтийг цогцоор нь дэмжиж, дэлхийн хэмжээний боловсон хүчин болоход тусалдаг.",
-    stratTitle: "GCU Global Bridge-ийн үндсэн стратеги",
+    pageDesc: "Глобал Сайбер Их Сургууль нь дэлхийн оюутнуудыг солонгосын нийгэмтэй холбох гүүр болж ажилладаг. GCU Post School нь олон соёлт гадаад оюутан, ажилчдын боловсрол, амьдрал, виз, ажил эрхлэлтийг цогцоор нь дэмжиж, дэлхийн хэмжээний боловсон хүчин болоход тусалдаг.",
+    stratTitle: "GCU Post School-ийн үндсэн стратеги",
     strat1Title: "Ухаалаг боловсрол олон соёлт сургалт",
     strat1Desc: "Солонгос хэлний түвшнийг сайжруулахад зориулсан чанартай цахим хичээл, TOPIK бэлтгэл анги болон үнэгүй материалыг тогтмол олгоно.",
     strat2Title: "Ажлын байр ба аж үйлдвэрийн хамтын ажиллагаа",
