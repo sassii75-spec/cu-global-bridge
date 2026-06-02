@@ -1594,16 +1594,84 @@ export default function LearningPage() {
                                     />
                                   )}
                                   
-                                  <div style={{ textAlign: "center", fontSize: "0.76rem", color: "var(--text-secondary)", lineHeight: "1.4" }}>
+                                  <div style={{ textAlign: "center", fontSize: "0.76rem", color: "var(--text-secondary)", lineHeight: "1.4", marginTop: "12px", display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", width: "100%" }}>
                                     {activeExam.audioTracks && activeExam.audioTracks[activeTrackIndex] ? (
-                                      <>
-                                        📻 {t("examAudioPlaying")} <strong>{activeExam.audioTracks[activeTrackIndex].name}</strong>
-                                      </>
+                                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
+                                        <span style={{ color: "var(--gcu-navy)", fontWeight: "700" }}>
+                                          📻 {t("examAudioPlaying")} <strong>{activeExam.audioTracks[activeTrackIndex].name}</strong>
+                                        </span>
+                                      </div>
                                     ) : null}
                                     {activeExam.questions[activeQuestionIndex].audioUrl && (
-                                      <span style={{ color: "var(--gcu-red)", display: "block", marginTop: "4px", fontWeight: "600" }}>
-                                        {t("examAudioDedicatedPlaying")}
+                                      <span style={{ color: "var(--gcu-navy)", display: "block", fontWeight: "700" }}>
+                                        🎵 {t("examAudioDedicatedPlaying")}
                                       </span>
+                                    )}
+
+                                    {/* 오디오 플레이어 단축 제어 패널 */}
+                                    {((activeExam.audioTracks && activeExam.audioTracks[activeTrackIndex]) || activeExam.questions[activeQuestionIndex].audioUrl) && (
+                                      <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginTop: "2px" }}>
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            const aud = document.getElementById("ibt-audio-player") as HTMLAudioElement;
+                                            if (aud) {
+                                              aud.currentTime = 0;
+                                              aud.play().catch(e => console.log("Replay failed:", e));
+                                            }
+                                          }}
+                                          style={{
+                                            padding: "5px 12px",
+                                            fontSize: "0.74rem",
+                                            fontWeight: "700",
+                                            borderRadius: "6px",
+                                            background: "rgba(18, 42, 77, 0.05)",
+                                            border: "1px solid rgba(18, 42, 77, 0.15)",
+                                            color: "var(--gcu-navy)",
+                                            cursor: "pointer",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "4px",
+                                            transition: "all 0.15s ease"
+                                          }}
+                                          onMouseOver={(e) => e.currentTarget.style.background = "rgba(18, 42, 77, 0.1)"}
+                                          onMouseOut={(e) => e.currentTarget.style.background = "rgba(18, 42, 77, 0.05)"}
+                                        >
+                                          🔄 {lang === "ko" ? "다시듣기" : "Replay"}
+                                        </button>
+                                        
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            const aud = document.getElementById("ibt-audio-player") as HTMLAudioElement;
+                                            if (aud) {
+                                              if (aud.paused) {
+                                                aud.play().catch(e => console.log("Play failed:", e));
+                                              } else {
+                                                aud.pause();
+                                              }
+                                            }
+                                          }}
+                                          style={{
+                                            padding: "5px 12px",
+                                            fontSize: "0.74rem",
+                                            fontWeight: "700",
+                                            borderRadius: "6px",
+                                            background: "rgba(18, 42, 77, 0.05)",
+                                            border: "1px solid rgba(18, 42, 77, 0.15)",
+                                            color: "var(--gcu-navy)",
+                                            cursor: "pointer",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "4px",
+                                            transition: "all 0.15s ease"
+                                          }}
+                                          onMouseOver={(e) => e.currentTarget.style.background = "rgba(18, 42, 77, 0.1)"}
+                                          onMouseOut={(e) => e.currentTarget.style.background = "rgba(18, 42, 77, 0.05)"}
+                                        >
+                                          ⏯️ {lang === "ko" ? "재생 / 일시정지" : "Play / Pause"}
+                                        </button>
+                                      </div>
                                     )}
                                   </div>
                                 </>
