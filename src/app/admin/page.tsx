@@ -826,7 +826,7 @@ export default function AdminPage() {
               <button 
                 onClick={handleOpenAddModal}
                 className="btn-primary"
-                style={{ whiteSpace: "nowrap", borderRadius: "8px", fontSize: "0.85rem", padding: "8px 16px", color: "#060A1A", fontWeight: "700" }}
+                style={{ whiteSpace: "nowrap", borderRadius: "8px", fontSize: "0.85rem", padding: "8px 16px", color: "#ffffff", fontWeight: "700" }}
               >
                 {t.btnAddUser}
               </button>
@@ -916,10 +916,10 @@ export default function AdminPage() {
                             fontSize: "0.75rem", 
                             padding: "2px 8px", 
                             borderRadius: "4px", 
-                            background: user.provider === "google" ? "rgba(255,255,255,0.06)" : user.provider === "kakao" ? "rgba(254,229,0,0.15)" : user.provider === "naver" ? "rgba(3,199,90,0.15)" : "rgba(33,64,154,0.15)",
-                            border: "1px solid rgba(255,255,255,0.05)",
+                            background: user.provider === "google" ? "rgba(0, 0, 0, 0.04)" : user.provider === "kakao" ? "rgba(254, 229, 0, 0.15)" : user.provider === "naver" ? "rgba(3, 199, 90, 0.12)" : "rgba(18, 42, 77, 0.08)",
+                            border: user.provider === "google" ? "1px solid rgba(0, 0, 0, 0.08)" : user.provider === "kakao" ? "1px solid rgba(254, 229, 0, 0.3)" : user.provider === "naver" ? "1px solid rgba(3, 199, 90, 0.25)" : "1px solid rgba(18, 42, 77, 0.15)",
                             fontWeight: "600",
-                            color: user.provider === "kakao" ? "#FFE600" : user.provider === "naver" ? "#57FF9A" : "#fff"
+                            color: user.provider === "google" ? "var(--text-primary)" : user.provider === "kakao" ? "#9b7f00" : user.provider === "naver" ? "#03C75A" : "var(--gcu-navy)"
                           }}
                         >
                           {user.provider.toUpperCase()}
@@ -1075,7 +1075,7 @@ export default function AdminPage() {
                 <button 
                   type="submit" 
                   className="btn-primary"
-                  style={{ padding: "8px 20px", fontSize: "0.85rem", borderRadius: "8px", color: "#060A1A", fontWeight: "700" }}
+                  style={{ padding: "8px 20px", fontSize: "0.85rem", borderRadius: "8px", color: "#ffffff", fontWeight: "700" }}
                 >
                   {t.btnSave}
                 </button>
@@ -1101,14 +1101,14 @@ export default function AdminPage() {
             }}
           >
             <div>
-              <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#fff", margin: 0 }}>✏️ IBT 모의고사 기출 리스트</h3>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "var(--text-primary)", margin: 0 }}>✏️ IBT 모의고사 기출 리스트</h3>
               <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", margin: "4px 0 0 0" }}>현재 출제되어 학생들이 응시할 수 있는 시험지 목록입니다.</p>
             </div>
             
             <button 
               onClick={handleOpenAddExamModal}
               className="btn-primary"
-              style={{ whiteSpace: "nowrap", borderRadius: "8px", fontSize: "0.85rem", padding: "8px 16px", color: "#060A1A", fontWeight: "700" }}
+              style={{ whiteSpace: "nowrap", borderRadius: "8px", fontSize: "0.85rem", padding: "8px 16px", color: "#ffffff", fontWeight: "700" }}
             >
               ➕ 신규 모의고사 출제하기
             </button>
@@ -1712,7 +1712,7 @@ export default function AdminPage() {
                   type="submit" 
                   disabled={isUploading}
                   className="btn-primary"
-                  style={{ padding: "8px 20px", fontSize: "0.85rem", borderRadius: "8px", color: "#060A1A", fontWeight: "700", opacity: isUploading ? 0.6 : 1 }}
+                  style={{ padding: "8px 20px", fontSize: "0.85rem", borderRadius: "8px", color: "#ffffff", fontWeight: "700", opacity: isUploading ? 0.6 : 1 }}
                 >
                   {isUploading ? "업로드 중..." : "출제하기"}
                 </button>

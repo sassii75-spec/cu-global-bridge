@@ -214,7 +214,7 @@ export default function ProfilePage() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
         
         {/* User Card */}
-        <div className="glass-panel" style={{ padding: "32px", display: "flex", flexDirection: "column", gap: "24px", background: "rgba(255,255,255,0.015)" }}>
+        <div className="glass-panel" style={{ padding: "32px", display: "flex", flexDirection: "column", gap: "24px", background: "#ffffff", border: "1px solid rgba(0, 0, 0, 0.06)", boxShadow: "var(--shadow-md)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
             <div 
               style={{ 
@@ -234,7 +234,7 @@ export default function ProfilePage() {
               {activeUser.name.slice(0, 1).toUpperCase()}
             </div>
             <div>
-              <h3 style={{ fontSize: "1.25rem", fontWeight: "800", color: "#fff", margin: "0 0 4px 0" }}>{activeUser.name}</h3>
+              <h3 style={{ fontSize: "1.25rem", fontWeight: "800", color: "var(--text-primary)", margin: "0 0 4px 0" }}>{activeUser.name}</h3>
               <span className={`feed-tag ${activeUser.role === "admin" ? "notice" : activeUser.role === "worker" ? "guide" : "event"}`} style={{ fontSize: "0.75rem", padding: "2px 8px" }}>
                 {activeUser.role === "admin" 
                   ? (lang === "ko" ? "🔑 통합 전산 관리자" : "Admin")
@@ -245,18 +245,18 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px", borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "20px", fontSize: "0.85rem" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px", borderTop: "1px solid rgba(0, 0, 0, 0.06)", paddingTop: "20px", fontSize: "0.85rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span style={{ color: "var(--text-muted)" }}>{lang === "ko" ? "이메일 계정" : "Email"}</span>
-              <span style={{ color: "#fff", fontWeight: "600" }}>{activeUser.email}</span>
+              <span style={{ color: "var(--text-primary)", fontWeight: "600" }}>{activeUser.email}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span style={{ color: "var(--text-muted)" }}>{lang === "ko" ? "소속 국적" : "Nationality"}</span>
-              <span style={{ color: "#fff", fontWeight: "600" }}>{activeUser.nationality}</span>
+              <span style={{ color: "var(--text-primary)", fontWeight: "600" }}>{activeUser.nationality}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span style={{ color: "var(--text-muted)" }}>{lang === "ko" ? "최초 가입일" : "Joined Date"}</span>
-              <span style={{ color: "#fff", fontWeight: "600" }}>{activeUser.joinedDate || "2026-05-20"}</span>
+              <span style={{ color: "var(--text-primary)", fontWeight: "600" }}>{activeUser.joinedDate || "2026-05-20"}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span style={{ color: "var(--text-muted)" }}>{lang === "ko" ? "연동 채널" : "Provider"}</span>
@@ -265,10 +265,10 @@ export default function ProfilePage() {
                   fontSize: "0.75rem", 
                   padding: "1px 6px", 
                   borderRadius: "4px", 
-                  background: activeUser.provider === "google" ? "rgba(255,255,255,0.06)" : "rgba(33,64,154,0.15)",
-                  border: "1px solid rgba(255,255,255,0.05)",
+                  background: activeUser.provider === "google" ? "rgba(0, 0, 0, 0.04)" : "rgba(33, 64, 154, 0.08)",
+                  border: activeUser.provider === "google" ? "1px solid rgba(0,0,0,0.08)" : "1px solid rgba(33,64,154,0.15)",
                   fontWeight: "700",
-                  color: "#fff"
+                  color: activeUser.provider === "google" ? "var(--text-primary)" : "var(--gcu-navy)"
                 }}
               >
                 {activeUser.provider.toUpperCase()}
@@ -278,8 +278,8 @@ export default function ProfilePage() {
         </div>
 
         {/* Dynamic Activity Metrics Summary Card */}
-        <div className="glass-panel" style={{ padding: "32px", display: "flex", flexDirection: "column", gap: "20px", background: "rgba(255,255,255,0.015)" }}>
-          <h3 style={{ fontSize: "1.05rem", fontWeight: "700", color: "#fff", margin: 0 }}>
+        <div className="glass-panel" style={{ padding: "32px", display: "flex", flexDirection: "column", gap: "20px", background: "#ffffff", border: "1px solid rgba(0, 0, 0, 0.06)", boxShadow: "var(--shadow-md)" }}>
+          <h3 style={{ fontSize: "1.05rem", fontWeight: "700", color: "var(--text-primary)", margin: 0 }}>
             {lang === "ko" ? "📊 나의 학업 활동 요약" : "📊 My Academic Contributions"}
           </h3>
           <p style={{ fontSize: "0.78rem", color: "var(--text-secondary)", margin: 0 }}>
@@ -289,25 +289,25 @@ export default function ProfilePage() {
           </p>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginTop: "4px" }}>
-            <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.03)" }}>
+            <div style={{ background: "rgba(0, 0, 0, 0.015)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(0, 0, 0, 0.03)" }}>
               <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
                 {lang === "ko" ? "💬 커뮤니티 참여 건수" : "Community Activities"}
               </span>
               <strong style={{ fontSize: "1.6rem", color: "var(--gcu-green)", fontFamily: "monospace" }}>{communityCount}{lang === "ko" ? "건" : " EA"}</strong>
             </div>
 
-            <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.03)" }}>
+            <div style={{ background: "rgba(0, 0, 0, 0.015)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(0, 0, 0, 0.03)" }}>
               <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
                 {lang === "ko" ? "❓ 1:1 상담 접수 내역" : "Submitted Q&As"}
               </span>
               <strong style={{ fontSize: "1.6rem", color: "var(--gcu-orange)", fontFamily: "monospace" }}>{qnaCount}{lang === "ko" ? "건" : " EA"}</strong>
             </div>
 
-            <div style={{ background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.03)", gridColumn: "span 2" }}>
+            <div style={{ background: "rgba(0, 0, 0, 0.015)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(0, 0, 0, 0.03)", gridColumn: "span 2" }}>
               <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>
                 {lang === "ko" ? "💼 취업 비자 계산 완료 이력" : "Visa Simulation Done"}
               </span>
-              <span style={{ fontSize: "0.85rem", color: "#fff", fontWeight: "600" }}>
+              <span style={{ fontSize: "0.85rem", color: "var(--text-primary)", fontWeight: "600" }}>
                 {lang === "ko" ? "지역특화형 F-2-R 점수 산출 데이터 활성화됨" : "F-2-R Regional points record synced"}
               </span>
             </div>
@@ -317,8 +317,8 @@ export default function ProfilePage() {
       </div>
 
       {/* 3. TOPIK Mock Exam Performance Analysis Dashboard (모의고사 풀이 분석) */}
-      <div className="glass-panel" style={{ padding: "32px", background: "rgba(255,255,255,0.015)" }}>
-        <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#fff", marginBottom: "8px" }}>
+      <div className="glass-panel" style={{ padding: "32px", background: "#ffffff", border: "1px solid rgba(0, 0, 0, 0.06)", boxShadow: "var(--shadow-md)" }}>
+        <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "var(--text-primary)", marginBottom: "8px" }}>
           {lang === "ko" ? "🎯 TOPIK IBT 모의고사 학업 성취도 진단" : "🎯 TOPIK IBT Academic Achievement Diagnosis"}
         </h3>
         <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "24px" }}>
@@ -334,7 +334,7 @@ export default function ProfilePage() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "16px" }}>
               <div style={{ background: "rgba(0,185,242,0.04)", padding: "18px", borderRadius: "10px", border: "1px solid rgba(0,185,242,0.15)", textAlign: "center" }}>
                 <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>{lang === "ko" ? "총 응시 횟수" : "Total Attempts"}</span>
-                <strong style={{ fontSize: "1.8rem", color: "#fff", fontFamily: "monospace" }}>{totalExams}{lang === "ko" ? "회" : " Times"}</strong>
+                <strong style={{ fontSize: "1.8rem", color: "var(--text-primary)", fontFamily: "monospace" }}>{totalExams}{lang === "ko" ? "회" : " Times"}</strong>
               </div>
 
               <div style={{ background: averageScore >= 60 ? "rgba(87,255,154,0.04)" : "rgba(247,147,30,0.04)", padding: "18px", borderRadius: "10px", border: averageScore >= 60 ? "1px solid rgba(87,255,154,0.15)" : "1px solid rgba(247,147,30,0.15)", textAlign: "center" }}>
@@ -342,19 +342,19 @@ export default function ProfilePage() {
                 <strong style={{ fontSize: "1.8rem", color: averageScore >= 60 ? "var(--gcu-green)" : "var(--gcu-orange)", fontFamily: "monospace" }}>{averageScore}{lang === "ko" ? "점" : "%"}</strong>
               </div>
 
-              <div style={{ background: "rgba(0, 0, 0, 0.02)", padding: "18px", borderRadius: "10px", border: "1px solid rgba(0, 0, 0, 0.06)", textAlign: "center" }}>
+              <div style={{ background: "rgba(0, 0, 0, 0.015)", padding: "18px", borderRadius: "10px", border: "1px solid rgba(0, 0, 0, 0.06)", textAlign: "center" }}>
                 <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>{lang === "ko" ? "최고 득점" : "High Score"}</span>
                 <strong style={{ fontSize: "1.8rem", color: "var(--gcu-navy)", fontFamily: "monospace" }}>{highestScore}{lang === "ko" ? "점" : "%"}</strong>
               </div>
 
-              <div style={{ background: "rgba(0, 0, 0, 0.02)", padding: "18px", borderRadius: "10px", border: "1px solid rgba(0, 0, 0, 0.06)", textAlign: "center" }}>
+              <div style={{ background: "rgba(0, 0, 0, 0.015)", padding: "18px", borderRadius: "10px", border: "1px solid rgba(0, 0, 0, 0.06)", textAlign: "center" }}>
                 <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>{lang === "ko" ? "TOPIK 합격률" : "TOPIK Pass Rate"}</span>
-                <strong style={{ fontSize: "1.8rem", color: "#2e7d32", fontFamily: "monospace" }}>{passRate}%</strong>
+                <strong style={{ fontSize: "1.8rem", color: "#2e7d32", fontFamily: "monospace", fontWeight: "800" }}>{passRate}%</strong>
               </div>
             </div>
 
             {/* Visual Achievement Bar Chart */}
-            <div style={{ background: "rgba(0, 0, 0, 0.03)", padding: "20px", borderRadius: "12px", border: "1px solid rgba(0, 0, 0, 0.06)" }}>
+            <div style={{ background: "rgba(0, 0, 0, 0.015)", padding: "20px", borderRadius: "12px", border: "1px solid rgba(0, 0, 0, 0.06)" }}>
               <span style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontWeight: "700", display: "block", marginBottom: "12px" }}>
                 📊 {lang === "ko" ? "TOPIK 목표 성취 구간별 학습 진도율" : "TOPIK Target Accomplish Ratio"}
               </span>
@@ -370,14 +370,14 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div style={{ borderTop: "1px solid rgba(255,255,255,0.03)", paddingTop: "8px" }}>
+                <div style={{ borderTop: "1px solid rgba(0, 0, 0, 0.06)", paddingTop: "8px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", marginBottom: "4px" }}>
                     <span style={{ color: "var(--text-secondary)" }}>{lang === "ko" ? "중·고급 고득점 달성 (TOPIK II 수준 80점 이상)" : "Intermediate/Advanced High Score Met (Score >= 80)"}</span>
                     <span style={{ color: "var(--gcu-sky)", fontWeight: "700" }}>
                       {examHistory.filter(h => h.score >= 80).length} / {totalExams} ({totalExams > 0 ? Math.round((examHistory.filter(h => h.score >= 80).length / totalExams) * 100) : 0}%)
                     </span>
                   </div>
-                  <div style={{ width: "100%", height: "8px", background: "rgba(255,255,255,0.05)", borderRadius: "4px", overflow: "hidden" }}>
+                  <div style={{ width: "100%", height: "8px", background: "rgba(0, 0, 0, 0.05)", borderRadius: "4px", overflow: "hidden" }}>
                     <div style={{ width: `${totalExams > 0 ? (examHistory.filter(h => h.score >= 80).length / totalExams) * 100 : 0}%`, height: "100%", background: "linear-gradient(90deg, var(--gcu-sky) 0%, #00FFE0 100%)", borderRadius: "4px", transition: "width 0.5s ease" }}></div>
                   </div>
                 </div>
@@ -390,7 +390,7 @@ export default function ProfilePage() {
                 📂 {lang === "ko" ? "응시 완료된 모의고사 성적 기록 대장" : "Mock Exam Registered Logs"}
               </span>
               
-              <div className="glass-panel" style={{ padding: "8px", overflowX: "auto", background: "rgba(0,0,0,0.15)" }}>
+              <div className="glass-panel" style={{ padding: "8px", overflowX: "auto", background: "rgba(0, 0, 0, 0.01)", border: "1px solid rgba(0, 0, 0, 0.04)" }}>
                 <table className="resource-table" style={{ width: "100%", borderCollapse: "collapse", margin: 0 }}>
                   <thead>
                     <tr>
@@ -445,9 +445,9 @@ export default function ProfilePage() {
               textAlign: "center", 
               fontSize: "0.85rem", 
               color: "var(--text-secondary)", 
-              background: "rgba(255,255,255,0.02)", 
+              background: "rgba(0, 0, 0, 0.015)", 
               borderRadius: "10px",
-              border: "1px dashed rgba(255,255,255,0.06)"
+              border: "1px dashed rgba(0, 0, 0, 0.06)"
             }}
           >
             ℹ️ {lang === "ko" 
@@ -465,8 +465,8 @@ export default function ProfilePage() {
       </div>
 
       {/* 4. Custom Submitted Q&As Section (내가 접수한 1:1 상담) */}
-      <div className="glass-panel" style={{ padding: "32px", background: "rgba(255,255,255,0.015)" }}>
-        <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#fff", marginBottom: "8px" }}>
+      <div className="glass-panel" style={{ padding: "32px", background: "#ffffff", border: "1px solid rgba(0, 0, 0, 0.06)", boxShadow: "var(--shadow-md)" }}>
+        <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "var(--text-primary)", marginBottom: "8px" }}>
           {lang === "ko" ? "❓ 내가 접수한 1:1 상담 및 온라인 민원 내역" : "❓ My Submitted 1:1 Inquiries & Q&As"}
         </h3>
         <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "24px" }}>
@@ -488,8 +488,8 @@ export default function ProfilePage() {
                   className="glass-panel" 
                   style={{ 
                     padding: "16px 20px", 
-                    background: "rgba(255,255,255,0.01)", 
-                    border: isExpanded ? "1px solid var(--gcu-sky)" : "1px solid rgba(255,255,255,0.04)",
+                    background: "rgba(0, 0, 0, 0.015)", 
+                    border: isExpanded ? "1px solid var(--gcu-sky)" : "1px solid rgba(0, 0, 0, 0.06)",
                     borderRadius: "8px",
                     transition: "all 0.25s ease"
                   }}
@@ -498,7 +498,7 @@ export default function ProfilePage() {
                     onClick={() => toggleQna(item.id)}
                     style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}
                   >
-                    <span style={{ fontWeight: "700", fontSize: "0.88rem", color: "#fff" }}>
+                    <span style={{ fontWeight: "700", fontSize: "0.88rem", color: "var(--text-primary)" }}>
                       Q. {qText}
                     </span>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -515,7 +515,7 @@ export default function ProfilePage() {
                     <div 
                       style={{ 
                         marginTop: "14px", 
-                        borderTop: "1px solid rgba(255,255,255,0.05)", 
+                        borderTop: "1px solid rgba(0, 0, 0, 0.06)", 
                         paddingTop: "14px", 
                         fontSize: "0.82rem", 
                         color: "var(--text-secondary)",
@@ -540,9 +540,9 @@ export default function ProfilePage() {
               textAlign: "center", 
               fontSize: "0.82rem", 
               color: "var(--text-muted)", 
-              background: "rgba(255,255,255,0.02)", 
+              background: "rgba(0, 0, 0, 0.015)", 
               borderRadius: "8px",
-              border: "1px solid rgba(255,255,255,0.03)"
+              border: "1px solid rgba(0, 0, 0, 0.04)"
             }}
           >
             ℹ️ {lang === "ko" ? "최근 1:1 상담 접수 내역이 존재하지 않습니다." : "No submitted inquiries found."}
@@ -551,8 +551,8 @@ export default function ProfilePage() {
       </div>
 
       {/* 5. Helpful FAQ Accordion Board (유학생 필수 FAQ) */}
-      <div className="glass-panel" style={{ padding: "32px", background: "rgba(255,255,255,0.015)" }}>
-        <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#fff", marginBottom: "8px" }}>
+      <div className="glass-panel" style={{ padding: "32px", background: "#ffffff", border: "1px solid rgba(0, 0, 0, 0.06)", boxShadow: "var(--shadow-md)" }}>
+        <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "var(--text-primary)", marginBottom: "8px" }}>
           {lang === "ko" ? "📕 다문화 유학생 & 근로자 필수 FAQ 보드" : "📕 Essential Academic FAQs"}
         </h3>
         <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "24px" }}>
@@ -573,8 +573,8 @@ export default function ProfilePage() {
                 className="glass-panel" 
                 style={{ 
                   padding: "16px 20px", 
-                  background: "rgba(255,255,255,0.01)", 
-                  border: isExpanded ? "1px solid var(--gcu-sky)" : "1px solid rgba(255,255,255,0.04)",
+                  background: "rgba(0, 0, 0, 0.015)", 
+                  border: isExpanded ? "1px solid var(--gcu-sky)" : "1px solid rgba(0, 0, 0, 0.06)",
                   borderRadius: "8px",
                   transition: "all 0.25s ease"
                 }}
@@ -583,7 +583,7 @@ export default function ProfilePage() {
                   onClick={() => toggleFaq(faq.id)}
                   style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}
                 >
-                  <span style={{ fontWeight: "700", fontSize: "0.85rem", color: "#fff", paddingRight: "10px" }}>
+                  <span style={{ fontWeight: "700", fontSize: "0.85rem", color: "var(--text-primary)", paddingRight: "10px" }}>
                     {qText}
                   </span>
                   <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
@@ -595,7 +595,7 @@ export default function ProfilePage() {
                   <div 
                     style={{ 
                       marginTop: "14px", 
-                      borderTop: "1px solid rgba(255,255,255,0.05)", 
+                      borderTop: "1px solid rgba(0, 0, 0, 0.06)", 
                       paddingTop: "14px", 
                       fontSize: "0.82rem", 
                       color: "var(--text-secondary)",
