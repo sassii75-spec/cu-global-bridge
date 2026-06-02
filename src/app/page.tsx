@@ -433,8 +433,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3. Comprehensive Info Feeds & Side Campaign Panels */}
-      <div className="dashboard-grid">
+      {/* 3. Comprehensive Info Feeds (100% full-width expanded layout) */}
+      <div style={{ marginBottom: "56px" }}>
         <section className="glass-panel" style={{ padding: "32px", overflow: "hidden" }}>
           <div className="section-header" style={{ marginBottom: "20px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "20px" }}>
             {/* Wrap container supporting wrap to completely prevent word splits and breakages on small viewports */}
@@ -557,18 +557,6 @@ export default function Home() {
               );
             })}
           </div>
-        </section>
-
-        {/* 4. Active Side Widget Card */}
-        <section className="widget-banner glass-panel">
-          <div className="widget-banner-icon">🎯</div>
-          <div className="widget-banner-title">{tHome.widgetTitle}</div>
-          <p className="widget-banner-desc">
-            {tHome.widgetDesc}
-          </p>
-          <a href="/learning?tab=mocktest" className="widget-banner-btn">
-            {tHome.widgetBtn}
-          </a>
         </section>
       </div>
 
