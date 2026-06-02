@@ -185,7 +185,7 @@ export interface MockExam {
   answerPdfDataUrl?: string;
   mp3FileName: string;
   mp3DataUrl: string;
-  audioTracks?: Array<{ name: string; url: string }>;
+  audioTracks?: Array<{ name: string; url: string; questionRange?: string }>;
   answerKey: number[]; // e.g. [2, 1, 3, ...]
   createdDate: string;
 }
@@ -262,8 +262,9 @@ export default function AdminPage() {
 
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [mp3File, setMp3File] = useState<File | null>(null);
-  const [mp3Files, setMp3Files] = useState<File[]>([]);
-  const [audioTracks, setAudioTracks] = useState<Array<{ name: string; url: string }>>([]);
+  const [mp3Files, setMp3Files] = useState<Array<{ file: File; questionRange: string }>>([]);
+  const [audioTracks, setAudioTracks] = useState<Array<{ name: string; url: string; questionRange?: string }>>([]);
+
   const [answerPdfFile, setAnswerPdfFile] = useState<File | null>(null);
   const [answerPdfFileName, setAnswerPdfFileName] = useState("");
   const [answerPdfDataUrl, setAnswerPdfDataUrl] = useState("");
@@ -439,7 +440,14 @@ export default function AdminPage() {
     setMp3FileName(exam.mp3FileName);
     setMp3DataUrl(exam.mp3DataUrl);
     setMp3Files([]);
-    setAudioTracks(exam.audioTracks || (exam.mp3DataUrl ? [{ name: exam.mp3FileName, url: exam.mp3DataUrl }] : []));
+    setAudioTracks(
+      exam.audioTracks?.map(track => ({
+        name: track.name,
+        url: track.url,
+        questionRange: track.questionRange || ""
+      })) || (exam.mp3DataUrl ? [{ name: exam.mp3FileName, url: exam.mp3DataUrl, questionRange: "1" }] : [])
+    );
+
     setAnswerPdfFileName(exam.answerPdfFileName || "");
     setAnswerPdfDataUrl(exam.answerPdfDataUrl || "");
     setPdfFile(null);
@@ -505,17 +513,18 @@ export default function AdminPage() {
       // Handle multi-MP3 files concurrent upload
       if (mp3Files.length > 0) {
         const uploadedTracks = await Promise.all(
-          mp3Files.map(async (file) => {
-            const url = await uploadFileToServer(file);
-            return { name: file.name, url };
+          mp3Files.map(async (item) => {
+            const url = await uploadFileToServer(item.file);
+            return { name: item.file.name, url, questionRange: item.questionRange.trim() };
           })
         );
-        finalAudioTracks = uploadedTracks;
+        finalAudioTracks = [...audioTracks, ...uploadedTracks];
       } else if (mp3File) {
         // Single file upload fallback
         const singleUrl = await uploadFileToServer(mp3File);
-        finalAudioTracks = [{ name: mp3File.name, url: singleUrl }];
+        finalAudioTracks = [...audioTracks, { name: mp3File.name, url: singleUrl, questionRange: "1" }];
       }
+
 
       // Sync default audio compatibility
       if (finalAudioTracks.length > 0) {
@@ -1224,8 +1233,11 @@ export default function AdminPage() {
                     onChange={(e) => {
                       if (e.target.files && e.target.files.length > 0) {
                         const filesArray = Array.from(e.target.files);
-                        setMp3Files(filesArray);
-                        setMp3FileName(filesArray.map(f => f.name).join(", "));
+                        const filesWithRanges = filesArray.map((file, idx) => ({
+                          file,
+                          questionRange: `${audioTracks.length + idx + 1}`
+                        }));
+                        setMp3Files(prev => [...prev, ...filesWithRanges]);
                       }
                     }}
                     style={{ display: "none" }}
@@ -1247,25 +1259,52 @@ export default function AdminPage() {
                     }}
                   >
                     {mp3Files.length > 0 
-                      ? `✔️ ${mp3Files.length}개 파일 선택됨` 
+                      ? `✔️ ${mp3Files.length}개 파일 대기 중` 
                       : (audioTracks.length > 0 ? `✔️ ${audioTracks.length}개 트랙 등록됨` : "MP3 파일 선택 (다중)")}
                   </label>
 
                   {/* Staging/Pending Upload Files List */}
                   {mp3Files.length > 0 && (
-                    <div style={{ marginTop: "8px", background: "rgba(255,255,255,0.03)", padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.05)" }}>
-                      <span style={{ fontSize: "0.72rem", color: "var(--gcu-green)", fontWeight: "700", display: "block", marginBottom: "4px" }}>
+                    <div style={{ marginTop: "8px", background: "rgba(255,255,255,0.03)", padding: "10px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.05)" }}>
+                      <span style={{ fontSize: "0.72rem", color: "var(--gcu-green)", fontWeight: "700", display: "block", marginBottom: "6px" }}>
                         ⏳ 업로드 대기 중 ({mp3Files.length}개):
                       </span>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "4px", maxHeight: "100px", overflowY: "auto" }}>
-                        {mp3Files.map((file, idx) => (
-                          <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.75rem", color: "var(--text-secondary)" }}>
-                            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "80%" }}>
-                              {idx + 1}. 🎵 {file.name}
-                            </span>
-                            <span style={{ fontSize: "0.68rem", color: "var(--text-muted)" }}>
-                              ({(file.size / (1024 * 1024)).toFixed(2)} MB)
-                            </span>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "160px", overflowY: "auto" }}>
+                        {mp3Files.map((item, idx) => (
+                          <div key={idx} style={{ display: "flex", flexDirection: "column", gap: "4px", padding: "6px", background: "rgba(255,255,255,0.01)", border: "1px solid rgba(255,255,255,0.03)", borderRadius: "4px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.74rem", color: "var(--text-secondary)" }}>
+                              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "75%" }} title={item.file.name}>
+                                🎵 {item.file.name}
+                              </span>
+                              <span style={{ fontSize: "0.65rem", color: "var(--text-muted)", flexShrink: 0 }}>
+                                ({(item.file.size / (1024 * 1024)).toFixed(2)} MB)
+                              </span>
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                              <span style={{ fontSize: "0.65rem", color: "var(--text-muted)", whiteSpace: "nowrap" }}>연계 문항 범위:</span>
+                              <input 
+                                type="text"
+                                value={item.questionRange}
+                                onChange={(e) => {
+                                  const updated = [...mp3Files];
+                                  updated[idx].questionRange = e.target.value;
+                                  setMp3Files(updated);
+                                }}
+                                placeholder="예: 1 또는 1-5"
+                                className="search-input"
+                                style={{ height: "22px", padding: "2px 6px", fontSize: "0.7rem", borderRadius: "4px", flex: 1 }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMp3Files(prev => prev.filter((_, fIdx) => fIdx !== idx));
+                                }}
+                                style={{ background: "none", border: "none", color: "#FF6666", cursor: "pointer", fontSize: "0.75rem", fontWeight: "700" }}
+                                title="제거"
+                              >
+                                ✕
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -1273,62 +1312,65 @@ export default function AdminPage() {
                         type="button"
                         onClick={() => {
                           setMp3Files([]);
-                          setMp3FileName("");
                         }}
                         style={{
-                          marginTop: "6px",
+                          marginTop: "8px",
                           width: "100%",
-                          padding: "4px",
-                          fontSize: "0.68rem",
+                          padding: "5px",
+                          fontSize: "0.7rem",
                           background: "rgba(255, 75, 75, 0.15)",
                           border: "1px solid rgba(255, 75, 75, 0.3)",
                           color: "#FF8888",
                           borderRadius: "4px",
-                          cursor: "pointer"
+                          cursor: "pointer",
+                          fontWeight: "700"
                         }}
                       >
-                        선택 취소 (Clear Selection)
+                        대기 목록 모두 비우기 (Clear Staging)
                       </button>
                     </div>
                   )}
 
                   {/* Stored/Existing Audio Tracks List */}
-                  {mp3Files.length === 0 && audioTracks.length > 0 && (
-                    <div style={{ marginTop: "8px", background: "rgba(0,0,0,0.2)", padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.05)" }}>
-                      <span style={{ fontSize: "0.72rem", color: "var(--gcu-sky)", fontWeight: "700", display: "block", marginBottom: "4px" }}>
+                  {audioTracks.length > 0 && (
+                    <div style={{ marginTop: "8px", background: "rgba(0,0,0,0.2)", padding: "10px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.05)" }}>
+                      <span style={{ fontSize: "0.72rem", color: "var(--gcu-sky)", fontWeight: "700", display: "block", marginBottom: "6px" }}>
                         🎧 현재 등록된 트랙 플레이리스트 ({audioTracks.length}개):
                       </span>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "4px", maxHeight: "100px", overflowY: "auto" }}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "160px", overflowY: "auto" }}>
                         {audioTracks.map((track, idx) => (
-                          <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.75rem", color: "var(--text-secondary)", padding: "2px 4px", background: "rgba(255,255,255,0.02)", borderRadius: "4px" }}>
-                            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "80%" }} title={track.name}>
-                              {idx + 1}. 📻 {track.name}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newTracks = audioTracks.filter((_, tIdx) => tIdx !== idx);
-                                setAudioTracks(newTracks);
-                                if (newTracks.length > 0) {
-                                  setMp3FileName(newTracks[0].name);
-                                  setMp3DataUrl(newTracks[0].url);
-                                } else {
-                                  setMp3FileName("");
-                                  setMp3DataUrl("");
-                                }
-                              }}
-                              style={{
-                                background: "none",
-                                border: "none",
-                                color: "#FF6666",
-                                cursor: "pointer",
-                                fontSize: "0.75rem",
-                                padding: "0 4px"
-                              }}
-                              title="삭제"
-                            >
-                              ✕
-                            </button>
+                          <div key={idx} style={{ display: "flex", flexDirection: "column", gap: "4px", padding: "6px", background: "rgba(255,255,255,0.02)", borderRadius: "4px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.74rem", color: "var(--text-secondary)" }}>
+                              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "85%" }} title={track.name}>
+                                {idx + 1}. 📻 {track.name}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newTracks = audioTracks.filter((_, tIdx) => tIdx !== idx);
+                                  setAudioTracks(newTracks);
+                                }}
+                                style={{ background: "none", border: "none", color: "#FF6666", cursor: "pointer", fontSize: "0.75rem", fontWeight: "700" }}
+                                title="삭제"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                              <span style={{ fontSize: "0.65rem", color: "var(--text-muted)", whiteSpace: "nowrap" }}>연계 문항 범위:</span>
+                              <input 
+                                type="text"
+                                value={track.questionRange || ""}
+                                onChange={(e) => {
+                                  const updated = [...audioTracks];
+                                  updated[idx].questionRange = e.target.value;
+                                  setAudioTracks(updated);
+                                }}
+                                placeholder="예: 1 또는 1-5"
+                                className="search-input"
+                                style={{ height: "22px", padding: "2px 6px", fontSize: "0.7rem", borderRadius: "4px", flex: 1 }}
+                              />
+                            </div>
                           </div>
                         ))}
                       </div>

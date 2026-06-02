@@ -611,6 +611,38 @@ const LEARNING_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
   }
 };
 
+// Helper function to find audio track matched with question number
+function findTrackForQuestion(qNum: number, tracks: any[]): number {
+  if (!tracks || tracks.length === 0) return -1;
+  
+  for (let i = 0; i < tracks.length; i++) {
+    const range = tracks[i].questionRange;
+    if (!range) continue;
+    
+    // Clear spaces and convert to lowercase/standard representation
+    const cleanRange = range.replace(/\s+/g, "");
+    
+    // Support comma-separated ranges (e.g. "1-5,7")
+    const parts = cleanRange.split(",");
+    for (const part of parts) {
+      if (part.includes("-") || part.includes("~")) {
+        const limits = part.split(/[-~]/);
+        const start = parseInt(limits[0], 10);
+        const end = parseInt(limits[1], 10);
+        if (!isNaN(start) && !isNaN(end) && qNum >= start && qNum <= end) {
+          return i;
+        }
+      } else {
+        const singleNum = parseInt(part, 10);
+        if (!isNaN(singleNum) && qNum === singleNum) {
+          return i;
+        }
+      }
+    }
+  }
+  return -1;
+}
+
 export default function LearningPage() {
   const { lang, t } = useLanguage();
   const tLearn = LEARNING_TRANSLATIONS[lang as "ko" | "en" | "vn" | "mn"] || LEARNING_TRANSLATIONS.ko;
@@ -635,6 +667,7 @@ export default function LearningPage() {
   const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(0);
   const [omrViewMode, setOmrViewMode] = useState<"single" | "full">("single");
   const [mobileTab, setMobileTab] = useState<"pdf" | "omr">("pdf");
+  const [ibtMode, setIbtMode] = useState<"card" | "pdf">("card");
   const [windowWidth, setWindowWidth] = useState<number>(1200);
 
   useEffect(() => {
@@ -720,6 +753,22 @@ export default function LearningPage() {
 
     return () => clearInterval(interval);
   }, [quizStarted, quizFinished, timeLeft]);
+
+  // Find matched track based on current active question index
+  useEffect(() => {
+    if (activeExam && activeExam.audioTracks && activeExam.audioTracks.length > 0) {
+      const matchedTrackIdx = findTrackForQuestion(activeQuestionIndex + 1, activeExam.audioTracks);
+      if (matchedTrackIdx !== -1 && matchedTrackIdx !== activeTrackIndex) {
+        setActiveTrackIndex(matchedTrackIdx);
+        const aud = document.getElementById("ibt-audio-player") as HTMLAudioElement;
+        if (aud) {
+          aud.src = activeExam.audioTracks[matchedTrackIdx].url;
+          aud.playbackRate = audioSpeed;
+          aud.play().catch(e => console.log("Auto-play blocked or failed:", e));
+        }
+      }
+    }
+  }, [activeQuestionIndex, activeExam]);
 
   // Handle Starting IBT Exam
   const handleStartExam = (exam: any) => {
@@ -1222,6 +1271,69 @@ export default function LearningPage() {
                     </div>
                   </div>
 
+                  {/* Glassmorphic IBT View Mode Selector */}
+                  <div 
+                    style={{ 
+                      display: "flex", 
+                      justifyContent: "center", 
+                      marginBottom: "4px" 
+                    }}
+                  >
+                    <div 
+                      style={{ 
+                        display: "inline-flex", 
+                        background: "rgba(255, 255, 255, 0.03)", 
+                        padding: "4px", 
+                        borderRadius: "10px", 
+                        border: "1px solid rgba(255, 255, 255, 0.05)",
+                        gap: "4px"
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setIbtMode("card")}
+                        style={{
+                          padding: "8px 18px",
+                          fontSize: "0.82rem",
+                          fontWeight: "700",
+                          borderRadius: "8px",
+                          border: "none",
+                          cursor: "pointer",
+                          background: ibtMode === "card" ? "var(--gcu-sky)" : "transparent",
+                          color: ibtMode === "card" ? "#060A1A" : "var(--text-secondary)",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                          boxShadow: ibtMode === "card" ? "0 4px 12px rgba(0, 185, 242, 0.3)" : "none"
+                        }}
+                      >
+                        🎯 1문항씩 풀기 (IBT 집중)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIbtMode("pdf")}
+                        style={{
+                          padding: "8px 18px",
+                          fontSize: "0.82rem",
+                          fontWeight: "700",
+                          borderRadius: "8px",
+                          border: "none",
+                          cursor: "pointer",
+                          background: ibtMode === "pdf" ? "var(--gcu-sky)" : "transparent",
+                          color: ibtMode === "pdf" ? "#060A1A" : "var(--text-secondary)",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                          boxShadow: ibtMode === "pdf" ? "0 4px 12px rgba(0, 185, 242, 0.3)" : "none"
+                        }}
+                      >
+                        📄 전체 시험지 보기 (PDF)
+                      </button>
+                    </div>
+                  </div>
+
                   {/* Mobile View Switcher Tabs (Only visible on mobile screen widths <= 860px) */}
                   {isMobile && (
                     <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
@@ -1231,7 +1343,7 @@ export default function LearningPage() {
                         className={`comm-tab-btn ${mobileTab === "pdf" ? "active" : ""}`}
                         style={{ flex: 1, padding: "10px 0", fontSize: "0.85rem", fontWeight: "700", whiteSpace: "nowrap" }}
                       >
-                        📄 시험지 보기 (Passage)
+                        {ibtMode === "card" ? "🎯 1문항 집중 풀기" : "📄 시험지 보기 (Passage)"}
                       </button>
                       <button 
                         type="button"
@@ -1253,7 +1365,7 @@ export default function LearningPage() {
                     }}
                   >
                     
-                    {/* Left Pane: Passage PDF Viewer (Occupies ~63.6% width on desktop) */}
+                    {/* Left Pane: Passage PDF Viewer or IBT Focus Card */}
                     <div 
                       style={{ 
                         display: (!isMobile || mobileTab === "pdf") ? "flex" : "none", 
@@ -1263,24 +1375,286 @@ export default function LearningPage() {
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span style={{ fontSize: "0.85rem", fontWeight: "700", color: "var(--text-secondary)" }}>
-                          📄 {lang === "ko" ? "IBT 문항지 지문 영역" : "Passage Paper"}
+                          {ibtMode === "card" ? "🎯 IBT 단일 문항 집중 카드" : `📄 ${lang === "ko" ? "IBT 문항지 지문 영역" : "Passage Paper"}`}
                         </span>
-                        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>PDF: {activeExam.pdfFileName}</span>
+                        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                          {ibtMode === "card" ? `Question ${activeQuestionIndex + 1}` : `PDF: ${activeExam.pdfFileName}`}
+                        </span>
                       </div>
                       
-                      {/* High-fidelity PDF display container */}
-                      <div className="glass-panel" style={{ padding: "4px", background: "#0c101a", borderRadius: "12px" }}>
-                        <iframe 
-                          src={activeExam.pdfDataUrl || "https://pdfobject.com/pdf/sample.pdf"} 
+                      {ibtMode === "card" ? (
+                        /* IBT 집중 퀴즈 카드 */
+                        <div 
+                          className="glass-panel" 
                           style={{ 
-                            width: "100%", 
-                            height: isMobile ? "500px" : "650px", 
-                            borderRadius: "8px", 
-                            border: "none"
+                            padding: isMobile ? "24px 16px" : "40px", 
+                            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.005) 100%)", 
+                            borderRadius: "16px",
+                            border: "1px solid rgba(255, 255, 255, 0.05)",
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "center",
+                            alignItems: "stretch",
+                            gap: "24px",
+                            minHeight: isMobile ? "400px" : "550px",
+                            transition: "all 0.3s ease",
+                            position: "relative",
+                            boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.37)",
+                            backdropFilter: "blur(20px)"
                           }}
-                          title="TOPIK Exam Passage PDF"
-                        ></iframe>
-                      </div>
+                        >
+                          {/* 배경 장식 글로우 */}
+                          <div 
+                            style={{
+                              position: "absolute",
+                              top: "-10%",
+                              left: "50%",
+                              transform: "translateX(-50%)",
+                              width: "250px",
+                              height: "250px",
+                              background: "radial-gradient(circle, rgba(0, 185, 242, 0.08) 0%, rgba(0,0,0,0) 70%)",
+                              pointerEvents: "none",
+                              zIndex: 0
+                            }}
+                          />
+
+                          <div style={{ textAlign: "center", zIndex: 1 }}>
+                            <span 
+                              style={{ 
+                                fontSize: "0.72rem", 
+                                color: "var(--gcu-sky)", 
+                                fontWeight: "800", 
+                                letterSpacing: "1.5px", 
+                                textTransform: "uppercase",
+                                display: "block",
+                                marginBottom: "8px"
+                              }}
+                            >
+                              {activeExam.audioTracks && activeExam.audioTracks[activeTrackIndex]?.questionRange 
+                                ? `Listening Q-Range: ${activeExam.audioTracks[activeTrackIndex].questionRange}`
+                                : "TOPIK IBT SIMULATION"}
+                            </span>
+                            <h3 
+                              style={{ 
+                                fontSize: isMobile ? "1.45rem" : "1.85rem", 
+                                fontWeight: "800", 
+                                color: "#fff", 
+                                margin: "0 0 10px 0",
+                                fontFamily: "var(--font-brand)",
+                                textShadow: "0 2px 10px rgba(0,0,0,0.5)"
+                              }}
+                            >
+                              {lang === "ko" ? `제 ${activeQuestionIndex + 1} 문항` : `Question ${activeQuestionIndex + 1}`}
+                            </h3>
+                            
+                            {activeExam.id === "exam-topik-sample" && MOCK_QUESTIONS[activeQuestionIndex] ? (
+                              <div style={{ marginTop: "16px", marginBottom: "24px" }}>
+                                <p 
+                                  style={{ 
+                                    fontSize: "0.85rem", 
+                                    color: "var(--gcu-sky)", 
+                                    background: "rgba(0, 185, 242, 0.08)", 
+                                    padding: "8px 12px", 
+                                    borderRadius: "8px",
+                                    display: "inline-block",
+                                    marginBottom: "12px",
+                                    lineHeight: "1.4"
+                                  }}
+                                >
+                                  {MOCK_QUESTIONS[activeQuestionIndex].audioText[lang as "ko" | "en" | "vn" | "mn"] || MOCK_QUESTIONS[activeQuestionIndex].audioText.ko}
+                                </p>
+                                <h4 
+                                  style={{ 
+                                    fontSize: isMobile ? "1.05rem" : "1.2rem", 
+                                    fontWeight: "700", 
+                                    color: "#fff", 
+                                    lineHeight: "1.6",
+                                    margin: "0 auto",
+                                    maxWidth: "600px"
+                                  }}
+                                >
+                                  {MOCK_QUESTIONS[activeQuestionIndex].question}
+                                </h4>
+                              </div>
+                            ) : (
+                              <div style={{ margin: "20px 0", padding: "16px", background: "rgba(255,255,255,0.01)", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.03)" }}>
+                                <p style={{ fontSize: "0.88rem", color: "var(--text-secondary)", lineHeight: "1.6", margin: 0 }}>
+                                  {activeExam.audioTracks && activeExam.audioTracks[activeTrackIndex] ? (
+                                    <>
+                                      📻 현재 재생 중인 음원 트랙: <strong>{activeExam.audioTracks[activeTrackIndex].name}</strong><br />
+                                      <span style={{ fontSize: "0.8rem", color: "var(--gcu-sky)", display: "inline-block", marginTop: "8px" }}>
+                                        👉 귀로 들리는 문제를 조용히 경청한 뒤, 아래에서 가장 올바른 보기를 골라 터치 마킹하십시오.
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      📄 지문 독해 및 읽기 영역입니다. 전체 화면이나 PDF 시험지 보기를 원하시면 우측 상단 <strong>[📄 전체 시험지 보기]</strong> 탭을 선택하여 지문을 읽고 답을 마킹하십시오.
+                                    </>
+                                  )}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* 4지선다형 마킹 버튼 그리드 (Premium Touch Elements) */}
+                          <div 
+                            style={{ 
+                              display: "flex", 
+                              flexDirection: "column", 
+                              gap: "12px",
+                              width: "100%",
+                              maxWidth: "500px",
+                              margin: "0 auto",
+                              zIndex: 1
+                            }}
+                          >
+                            {[0, 1, 2, 3].map((optIdx) => {
+                              const isMarked = selectedAnswers[activeQuestionIndex] === optIdx;
+                              
+                              let optionLabel = `보기 ${optIdx + 1}번`;
+                              if (activeExam.id === "exam-topik-sample" && MOCK_QUESTIONS[activeQuestionIndex]) {
+                                optionLabel = `(${optIdx + 1}) ${MOCK_QUESTIONS[activeQuestionIndex].options[optIdx]}`;
+                              }
+
+                              return (
+                                <button
+                                  key={optIdx}
+                                  type="button"
+                                  onClick={() => {
+                                    handleMarkOMR(activeQuestionIndex, optIdx);
+                                    if (activeQuestionIndex < activeExam.questionCount - 1) {
+                                      setTimeout(() => {
+                                        setActiveQuestionIndex(prev => prev + 1);
+                                      }, 250);
+                                    }
+                                  }}
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "16px",
+                                    width: "100%",
+                                    padding: isMobile ? "14px 18px" : "18px 24px",
+                                    background: isMarked ? "rgba(0, 185, 242, 0.15)" : "rgba(255,255,255,0.02)",
+                                    border: "2px solid",
+                                    borderColor: isMarked ? "var(--gcu-sky)" : "rgba(255, 255, 255, 0.08)",
+                                    borderRadius: "12px",
+                                    color: isMarked ? "#fff" : "var(--text-secondary)",
+                                    fontSize: isMobile ? "0.9rem" : "1.05rem",
+                                    fontWeight: isMarked ? "800" : "500",
+                                    textAlign: "left",
+                                    cursor: "pointer",
+                                    transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                                    boxShadow: isMarked ? "0 4px 15px rgba(0, 185, 242, 0.2)" : "none"
+                                  }}
+                                >
+                                  {/* 마킹 동그라미 심볼 */}
+                                  <div 
+                                    style={{
+                                      width: "24px",
+                                      height: "24px",
+                                      borderRadius: "50%",
+                                      border: "2px solid",
+                                      borderColor: isMarked ? "var(--gcu-sky)" : "var(--text-muted)",
+                                      background: isMarked ? "var(--gcu-sky)" : "transparent",
+                                      color: isMarked ? "#060A1A" : "var(--text-secondary)",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      fontSize: "0.85rem",
+                                      fontWeight: "800"
+                                    }}
+                                  >
+                                    {optIdx + 1}
+                                  </div>
+                                  <span style={{ flex: 1 }}>{optionLabel}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {/* 하단 카드 전용 네비게이션 컨트롤 (Pagination) */}
+                          <div 
+                            style={{ 
+                              display: "flex", 
+                              justifyContent: "space-between", 
+                              alignItems: "center", 
+                              gap: "16px",
+                              width: "100%",
+                              maxWidth: "500px",
+                              margin: "8px auto 0 auto",
+                              zIndex: 1
+                            }}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => setActiveQuestionIndex(prev => Math.max(0, prev - 1))}
+                              disabled={activeQuestionIndex === 0}
+                              className="resource-download-btn"
+                              style={{ 
+                                flex: 1, 
+                                padding: "10px 14px", 
+                                fontSize: "0.8rem", 
+                                fontWeight: "700",
+                                background: activeQuestionIndex === 0 ? "rgba(255,255,255,0.01)" : "rgba(255,255,255,0.04)",
+                                border: "1px solid rgba(255,255,255,0.05)",
+                                opacity: activeQuestionIndex === 0 ? 0.25 : 1,
+                                cursor: activeQuestionIndex === 0 ? "default" : "pointer"
+                              }}
+                            >
+                              ◀ 이전 문항
+                            </button>
+                            
+                            <span 
+                              style={{ 
+                                fontSize: "0.95rem", 
+                                color: "#fff", 
+                                fontWeight: "800", 
+                                fontFamily: "monospace",
+                                background: "rgba(0,0,0,0.2)",
+                                padding: "6px 14px",
+                                borderRadius: "8px",
+                                border: "1px solid rgba(255,255,255,0.03)"
+                              }}
+                            >
+                              {activeQuestionIndex + 1} / {activeExam.questionCount}
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => setActiveQuestionIndex(prev => Math.min(activeExam.questionCount - 1, prev + 1))}
+                              disabled={activeQuestionIndex === activeExam.questionCount - 1}
+                              className="resource-download-btn"
+                              style={{ 
+                                flex: 1, 
+                                padding: "10px 14px", 
+                                fontSize: "0.8rem", 
+                                fontWeight: "700",
+                                background: activeQuestionIndex === activeExam.questionCount - 1 ? "rgba(255,255,255,0.01)" : "rgba(255,255,255,0.04)",
+                                border: "1px solid rgba(255,255,255,0.05)",
+                                opacity: activeQuestionIndex === activeExam.questionCount - 1 ? 0.25 : 1,
+                                cursor: activeQuestionIndex === activeExam.questionCount - 1 ? "default" : "pointer"
+                              }}
+                            >
+                              다음 문항 ▶
+                            </button>
+                          </div>
+
+                        </div>
+                      ) : (
+                        /* 통째 PDF split-screen 뷰 */
+                        <div className="glass-panel" style={{ padding: "4px", background: "#0c101a", borderRadius: "12px" }}>
+                          <iframe 
+                            src={activeExam.pdfDataUrl || "https://pdfobject.com/pdf/sample.pdf"} 
+                            style={{ 
+                              width: "100%", 
+                              height: isMobile ? "500px" : "650px", 
+                              borderRadius: "8px", 
+                              border: "none"
+                            }}
+                            title="TOPIK Exam Passage PDF"
+                          ></iframe>
+                        </div>
+                      )}
                     </div>
 
                     {/* Right Pane: Audio player, OMR sheet, progress bar (Occupies ~36.4% width on desktop) */}
