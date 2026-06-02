@@ -290,9 +290,9 @@ export default function LoginPage() {
             style={{ 
               height: "44px", 
               borderRadius: "8px", 
-              border: "1px solid rgba(255,255,255,0.08)", 
-              background: "rgba(255, 255, 255, 0.04)", 
-              color: "#fff", 
+              border: "1px solid rgba(0, 0, 0, 0.08)", 
+              background: "#ffffff", 
+              color: "var(--text-primary)", 
               fontSize: "0.85rem", 
               fontWeight: "600",
               cursor: "pointer",
@@ -301,12 +301,25 @@ export default function LoginPage() {
               justifyContent: "center",
               gap: "10px",
               transition: "all 0.25s ease",
-              width: "100%"
+              width: "100%",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.02)"
             }}
-            onMouseOver={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.08)"}
-            onMouseOut={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.04)"}
+            onMouseOver={(e) => e.currentTarget.style.background = "#f8f9fa"}
+            onMouseOut={(e) => e.currentTarget.style.background = "#ffffff"}
           >
-            <span style={{ fontSize: "1.2rem" }}>🌐</span>
+            <span style={{ 
+              fontSize: "0.8rem", 
+              fontWeight: "900", 
+              background: "#4285F4", 
+              color: "#ffffff", 
+              width: "20px", 
+              height: "20px", 
+              borderRadius: "4px", 
+              display: "inline-flex", 
+              alignItems: "center", 
+              justifyContent: "center",
+              fontFamily: "var(--font-brand)"
+            }}>G</span>
             <span>{loadingProvider === "google" ? "Syncing..." : t.googleBtn}</span>
           </button>
 
@@ -346,7 +359,7 @@ export default function LoginPage() {
               borderRadius: "8px", 
               border: "none", 
               background: "#03C75A", 
-              color: "#fff", 
+              color: "#ffffff", 
               fontSize: "0.85rem", 
               fontWeight: "600",
               cursor: "pointer",
@@ -360,7 +373,19 @@ export default function LoginPage() {
             onMouseOver={(e) => e.currentTarget.style.background = "#02B34E"}
             onMouseOut={(e) => e.currentTarget.style.background = "#03C75A"}
           >
-            <span style={{ fontSize: "1.2rem" }}>🟩</span>
+            <span style={{ 
+              fontSize: "0.8rem", 
+              fontWeight: "900", 
+              background: "#ffffff", 
+              color: "#03C75A", 
+              width: "20px", 
+              height: "20px", 
+              borderRadius: "4px", 
+              display: "inline-flex", 
+              alignItems: "center", 
+              justifyContent: "center",
+              fontFamily: "var(--font-brand)"
+            }}>N</span>
             <span>{loadingProvider === "naver" ? "Linking..." : t.naverBtn}</span>
           </button>
         </div>
