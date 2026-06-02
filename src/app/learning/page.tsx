@@ -754,15 +754,32 @@ export default function LearningPage() {
     return () => clearInterval(interval);
   }, [quizStarted, quizFinished, timeLeft]);
 
-  // Find matched track based on current active question index
+  // Find matched track or question-specific audio based on current active question index
   useEffect(() => {
-    if (activeExam && activeExam.audioTracks && activeExam.audioTracks.length > 0) {
+    if (!activeExam) return;
+
+    // Check if the current question has a specific audioUrl registered
+    const currentQuestion = activeExam.questions?.[activeQuestionIndex];
+    if (currentQuestion && currentQuestion.audioUrl) {
+      const aud = document.getElementById("ibt-audio-player") as HTMLAudioElement;
+      if (aud && aud.getAttribute("data-src-qid") !== String(activeQuestionIndex)) {
+        aud.src = currentQuestion.audioUrl;
+        aud.setAttribute("data-src-qid", String(activeQuestionIndex));
+        aud.playbackRate = audioSpeed;
+        aud.play().catch(e => console.log("Auto-play blocked or failed:", e));
+      }
+      return;
+    }
+
+    // Fallback to track synchronization for regular PDF/MP3 exams
+    if (activeExam.audioTracks && activeExam.audioTracks.length > 0) {
       const matchedTrackIdx = findTrackForQuestion(activeQuestionIndex + 1, activeExam.audioTracks);
       if (matchedTrackIdx !== -1 && matchedTrackIdx !== activeTrackIndex) {
         setActiveTrackIndex(matchedTrackIdx);
         const aud = document.getElementById("ibt-audio-player") as HTMLAudioElement;
         if (aud) {
           aud.src = activeExam.audioTracks[matchedTrackIdx].url;
+          aud.removeAttribute("data-src-qid");
           aud.playbackRate = audioSpeed;
           aud.play().catch(e => console.log("Auto-play blocked or failed:", e));
         }
@@ -928,7 +945,7 @@ export default function LearningPage() {
               <div className="section-header" style={{ marginBottom: "10px" }}>
                 <div className="section-title">
                   <span className="section-title-dot"></span>
-                  <h2 style={{ fontSize: "1.35rem", fontWeight: "800", color: "#fff" }}>{tLearn.recommendTitle}</h2>
+                  <h2 style={{ fontSize: "1.35rem", fontWeight: "800", color: "var(--gcu-navy)" }}>{tLearn.recommendTitle}</h2>
                 </div>
               </div>
               
@@ -946,8 +963,8 @@ export default function LearningPage() {
                       style={{ 
                         padding: "24px", 
                         borderRadius: "16px",
-                        border: "1px solid rgba(255,255,255,0.05)",
-                        background: "rgba(255,255,255,0.015)",
+                        border: "1px solid rgba(0, 0, 0, 0.06)",
+                        background: "#ffffff",
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "space-between",
@@ -959,7 +976,7 @@ export default function LearningPage() {
                           <span className="feed-tag guide" style={{ padding: "3px 10px", fontSize: "0.75rem" }}>{cLevel}</span>
                           <span style={{ fontSize: "0.82rem", color: "var(--text-muted)", fontWeight: "600" }}>{cLecturer}</span>
                         </div>
-                        <h4 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#fff", marginBottom: "10px", lineHeight: "1.4" }}>
+                        <h4 style={{ fontSize: "1.1rem", fontWeight: "700", color: "var(--gcu-navy)", marginBottom: "10px", lineHeight: "1.4" }}>
                           {cTitle}
                         </h4>
                         <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", margin: 0, lineHeight: "1.6" }}>
@@ -989,7 +1006,7 @@ export default function LearningPage() {
               <div className="glass-panel" style={{ padding: "32px", borderRadius: "16px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
                   <span style={{ fontSize: "1.5rem" }}>📋</span>
-                  <h3 style={{ fontSize: "1.25rem", fontWeight: "800", color: "#fff", margin: 0 }}>
+                  <h3 style={{ fontSize: "1.25rem", fontWeight: "800", color: "var(--gcu-navy)", margin: 0 }}>
                     {(TOPIK_GUIDE[lang as "ko" | "en" | "vn" | "mn"] || TOPIK_GUIDE.ko).guideTitle}
                   </h3>
                 </div>
@@ -1012,18 +1029,18 @@ export default function LearningPage() {
                   </div>
 
                   {/* Levels card */}
-                  <div className="glass-panel" style={{ padding: "20px", background: "rgba(255,255,255,0.01)", border: "1px solid rgba(255,255,255,0.04)" }}>
+                  <div className="glass-panel" style={{ padding: "20px", background: "#ffffff", border: "1px solid rgba(0, 0, 0, 0.06)" }}>
                     <h4 style={{ fontSize: "0.95rem", fontWeight: "700", color: "var(--gcu-green)", marginBottom: "12px" }}>
                       {(TOPIK_GUIDE[lang as "ko" | "en" | "vn" | "mn"] || TOPIK_GUIDE.ko).levelsTitle}
                     </h4>
                     <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "0.8rem" }}>
                       <div>
-                        <strong style={{ color: "#fff", display: "block" }}>{(TOPIK_GUIDE[lang as "ko" | "en" | "vn" | "mn"] || TOPIK_GUIDE.ko).level1Name}</strong>
+                        <strong style={{ color: "var(--gcu-navy)", display: "block" }}>{(TOPIK_GUIDE[lang as "ko" | "en" | "vn" | "mn"] || TOPIK_GUIDE.ko).level1Name}</strong>
                         <span style={{ color: "var(--text-secondary)" }}>{(TOPIK_GUIDE[lang as "ko" | "en" | "vn" | "mn"] || TOPIK_GUIDE.ko).level1Desc}</span>
                         <span style={{ color: "var(--text-muted)", display: "block", fontSize: "0.75rem" }}>{(TOPIK_GUIDE[lang as "ko" | "en" | "vn" | "mn"] || TOPIK_GUIDE.ko).level1Detail}</span>
                       </div>
-                      <div style={{ borderTop: "1px solid rgba(255,255,255,0.04)", paddingTop: "8px" }}>
-                        <strong style={{ color: "#fff", display: "block" }}>{(TOPIK_GUIDE[lang as "ko" | "en" | "vn" | "mn"] || TOPIK_GUIDE.ko).level2Name}</strong>
+                      <div style={{ borderTop: "1px solid rgba(0, 0, 0, 0.06)", paddingTop: "8px" }}>
+                        <strong style={{ color: "var(--gcu-navy)", display: "block" }}>{(TOPIK_GUIDE[lang as "ko" | "en" | "vn" | "mn"] || TOPIK_GUIDE.ko).level2Name}</strong>
                         <span style={{ color: "var(--text-secondary)" }}>{(TOPIK_GUIDE[lang as "ko" | "en" | "vn" | "mn"] || TOPIK_GUIDE.ko).level2Desc}</span>
                         <span style={{ color: "var(--text-muted)", display: "block", fontSize: "0.75rem" }}>{(TOPIK_GUIDE[lang as "ko" | "en" | "vn" | "mn"] || TOPIK_GUIDE.ko).level2Detail}</span>
                       </div>
@@ -1031,17 +1048,17 @@ export default function LearningPage() {
                   </div>
 
                   {/* Timetable card */}
-                  <div className="glass-panel" style={{ padding: "20px", background: "rgba(255,255,255,0.01)", border: "1px solid rgba(255,255,255,0.04)" }}>
+                  <div className="glass-panel" style={{ padding: "20px", background: "#ffffff", border: "1px solid rgba(0, 0, 0, 0.06)" }}>
                     <h4 style={{ fontSize: "0.95rem", fontWeight: "700", color: "var(--gcu-orange)", marginBottom: "12px" }}>
                       {(TOPIK_GUIDE[lang as "ko" | "en" | "vn" | "mn"] || TOPIK_GUIDE.ko).timetableTitle}
                     </h4>
                     <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: "1.5" }}>
                       <div>
-                        <strong style={{ color: "#fff" }}>{(TOPIK_GUIDE[lang as "ko" | "en" | "vn" | "mn"] || TOPIK_GUIDE.ko).topik1TimeTitle}</strong>
+                        <strong style={{ color: "var(--gcu-navy)" }}>{(TOPIK_GUIDE[lang as "ko" | "en" | "vn" | "mn"] || TOPIK_GUIDE.ko).topik1TimeTitle}</strong>
                         <span style={{ display: "block", fontSize: "0.75rem", color: "var(--text-muted)" }}>{(TOPIK_GUIDE[lang as "ko" | "en" | "vn" | "mn"] || TOPIK_GUIDE.ko).topik1TimeDetail}</span>
                       </div>
                       <div>
-                        <strong style={{ color: "#fff" }}>{(TOPIK_GUIDE[lang as "ko" | "en" | "vn" | "mn"] || TOPIK_GUIDE.ko).topik2TimeTitle}</strong>
+                        <strong style={{ color: "var(--gcu-navy)" }}>{(TOPIK_GUIDE[lang as "ko" | "en" | "vn" | "mn"] || TOPIK_GUIDE.ko).topik2TimeTitle}</strong>
                         <span style={{ display: "block", fontSize: "0.75rem", color: "var(--text-muted)" }}>{(TOPIK_GUIDE[lang as "ko" | "en" | "vn" | "mn"] || TOPIK_GUIDE.ko).topik2TimeDetail}</span>
                       </div>
                     </div>
@@ -1052,7 +1069,7 @@ export default function LearningPage() {
 
               {/* Study Resources Download Hub Grid */}
               <div>
-                <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#fff", marginBottom: "16px" }}>📚 TOPIK 학습 자료 다운로드</h3>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "var(--gcu-navy)", marginBottom: "16px" }}>📚 TOPIK 학습 자료 다운로드</h3>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px" }}>
                   {RESOURCES.map((res) => {
                     const resName = res.name[lang as "ko" | "en" | "vn" | "mn"] || res.name.ko;
@@ -1068,7 +1085,8 @@ export default function LearningPage() {
                           flexDirection: "column", 
                           justifyContent: "space-between", 
                           gap: "16px",
-                          background: "rgba(255,255,255,0.01)" 
+                          background: "#ffffff",
+                          border: "1px solid rgba(0, 0, 0, 0.06)"
                         }}
                       >
                         <div>
@@ -1076,7 +1094,7 @@ export default function LearningPage() {
                             <span className="feed-tag guide" style={{ padding: "2px 8px", fontSize: "0.72rem" }}>{resType}</span>
                             <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{res.size}</span>
                           </div>
-                          <h4 style={{ fontSize: "0.92rem", fontWeight: "700", color: "#fff", margin: 0, lineHeight: "1.4" }}>
+                          <h4 style={{ fontSize: "0.92rem", fontWeight: "700", color: "var(--gcu-navy)", margin: 0, lineHeight: "1.4" }}>
                             {resName}
                           </h4>
                         </div>
@@ -1104,7 +1122,7 @@ export default function LearningPage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
                   <div style={{ textAlign: "center", padding: "20px 0", borderBottom: "1px solid var(--border-color)" }}>
                     <span style={{ fontSize: "3.2rem", display: "block", marginBottom: "16px" }}>✏️</span>
-                    <h2 style={{ fontSize: "1.6rem", marginBottom: "12px", fontFamily: "var(--font-brand)", fontWeight: "800", color: "#fff" }}>
+                    <h2 style={{ fontSize: "1.6rem", marginBottom: "12px", fontFamily: "var(--font-brand)", fontWeight: "800", color: "var(--gcu-navy)" }}>
                       {t("examLobbyTitle")}
                     </h2>
                     <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", lineHeight: "1.6", maxWidth: "700px", margin: "0 auto" }}>
@@ -1114,7 +1132,7 @@ export default function LearningPage() {
 
                   {/* Registered Exams Grid */}
                   <div>
-                    <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#fff", marginBottom: "16px" }}>📋 응시 가능한 모의고사 시험지</h3>
+                    <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "var(--gcu-navy)", marginBottom: "16px" }}>{t("examAcademicNoticeTitle")}</h3>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px" }}>
                       {exams.map((exam) => {
                         const examTitle = exam.title[lang as "ko" | "en" | "vn" | "mn"] || exam.title.ko;
@@ -1127,8 +1145,8 @@ export default function LearningPage() {
                             style={{ 
                               padding: "24px", 
                               borderRadius: "16px", 
-                              border: "1px solid rgba(255, 255, 255, 0.05)",
-                              background: "rgba(255, 255, 255, 0.015)",
+                              border: "1px solid rgba(0, 0, 0, 0.06)",
+                              background: "#ffffff",
                               display: "flex",
                               flexDirection: "column",
                               justifyContent: "space-between",
@@ -1142,7 +1160,7 @@ export default function LearningPage() {
                                 </span>
                                 <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{exam.createdDate}</span>
                               </div>
-                              <h4 style={{ fontSize: "1rem", fontWeight: "700", color: "#fff", margin: "0 0 12px 0", lineHeight: "1.4" }}>
+                              <h4 style={{ fontSize: "1rem", fontWeight: "700", color: "var(--gcu-navy)", margin: "0 0 12px 0", lineHeight: "1.4" }}>
                                 {examTitle}
                               </h4>
                               <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "0.8rem", color: "var(--text-secondary)" }}>
@@ -1167,18 +1185,18 @@ export default function LearningPage() {
                   {/* 📈 My Scorecards History */}
                   {examHistory.length > 0 && (
                     <div style={{ borderTop: "1px solid var(--border-color)", paddingTop: "24px" }}>
-                      <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "#fff", marginBottom: "16px" }}>
+                      <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "var(--gcu-navy)", marginBottom: "16px" }}>
                         {t("examHistoryTitle")}
                       </h3>
                       <div className="glass-panel" style={{ padding: "8px", overflowX: "auto" }}>
                         <table className="resource-table" style={{ width: "100%", borderCollapse: "collapse" }}>
                           <thead>
                             <tr>
-                              <th>모의고사 시험지명</th>
-                              <th>응시 일자</th>
-                              <th>획득 점수</th>
-                              <th>판정 수준</th>
-                              <th style={{ textAlign: "center" }}>상세 채점표</th>
+                              <th>{t("examHistoryName")}</th>
+                              <th>{t("examHistoryDate")}</th>
+                              <th>{t("examHistoryScore")}</th>
+                              <th>{t("examHistoryResult")}</th>
+                              <th style={{ textAlign: "center" }}>{t("examHistoryDetail")}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -1186,7 +1204,7 @@ export default function LearningPage() {
                               <tr key={hIdx}>
                                 <td style={{ fontWeight: "700", color: "var(--text-primary)" }}>{history.examTitle}</td>
                                 <td style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>{history.date}</td>
-                                <td style={{ color: "var(--gcu-sky)", fontWeight: "800" }}>{history.score}점</td>
+                                <td style={{ color: "var(--gcu-sky)", fontWeight: "800" }}>{history.score}{t("examPoints")}</td>
                                 <td>
                                   <span className="feed-tag event" style={{ fontSize: "0.75rem", padding: "2px 8px" }}>
                                     {history.level}
@@ -1206,7 +1224,7 @@ export default function LearningPage() {
                                       borderRadius: "6px"
                                     }}
                                   >
-                                    🔍 상세 보기
+                                    🔍 {t("examHistoryBtnView")}
                                   </button>
                                 </td>
                               </tr>
@@ -1298,16 +1316,16 @@ export default function LearningPage() {
                           borderRadius: "8px",
                           border: "none",
                           cursor: "pointer",
-                          background: ibtMode === "card" ? "var(--gcu-sky)" : "transparent",
-                          color: ibtMode === "card" ? "#060A1A" : "var(--text-secondary)",
+                          background: ibtMode === "card" ? "var(--gcu-navy)" : "transparent",
+                          color: ibtMode === "card" ? "#ffffff" : "var(--text-secondary)",
                           display: "flex",
                           alignItems: "center",
                           gap: "6px",
                           transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-                          boxShadow: ibtMode === "card" ? "0 4px 12px rgba(0, 185, 242, 0.3)" : "none"
+                          boxShadow: ibtMode === "card" ? "0 4px 12px rgba(18, 42, 77, 0.15)" : "none"
                         }}
                       >
-                        🎯 1문항씩 풀기 (IBT 집중)
+                        {t("examBtnModeCard")}
                       </button>
                       <button
                         type="button"
@@ -1319,16 +1337,16 @@ export default function LearningPage() {
                           borderRadius: "8px",
                           border: "none",
                           cursor: "pointer",
-                          background: ibtMode === "pdf" ? "var(--gcu-sky)" : "transparent",
-                          color: ibtMode === "pdf" ? "#060A1A" : "var(--text-secondary)",
+                          background: ibtMode === "pdf" ? "var(--gcu-navy)" : "transparent",
+                          color: ibtMode === "pdf" ? "#ffffff" : "var(--text-secondary)",
                           display: "flex",
                           alignItems: "center",
                           gap: "6px",
                           transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-                          boxShadow: ibtMode === "pdf" ? "0 4px 12px rgba(0, 185, 242, 0.3)" : "none"
+                          boxShadow: ibtMode === "pdf" ? "0 4px 12px rgba(18, 42, 77, 0.15)" : "none"
                         }}
                       >
-                        📄 전체 시험지 보기 (PDF)
+                        {t("examBtnModePdf")}
                       </button>
                     </div>
                   </div>
@@ -1342,7 +1360,7 @@ export default function LearningPage() {
                         className={`comm-tab-btn ${mobileTab === "pdf" ? "active" : ""}`}
                         style={{ flex: 1, padding: "10px 0", fontSize: "0.85rem", fontWeight: "700", whiteSpace: "nowrap" }}
                       >
-                        {ibtMode === "card" ? "🎯 1문항 집중 풀기" : "📄 시험지 보기 (Passage)"}
+                        {ibtMode === "card" ? t("examModeCardMobile") : t("examModePassageMobile")}
                       </button>
                       <button 
                         type="button"
@@ -1350,7 +1368,7 @@ export default function LearningPage() {
                         className={`comm-tab-btn ${mobileTab === "omr" ? "active" : ""}`}
                         style={{ flex: 1, padding: "10px 0", fontSize: "0.85rem", fontWeight: "700", whiteSpace: "nowrap" }}
                       >
-                        ✏️ 답안 마킹 OMR
+                        {t("examModeOmrMobile")}
                       </button>
                     </div>
                   )}
@@ -1374,10 +1392,10 @@ export default function LearningPage() {
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span style={{ fontSize: "0.85rem", fontWeight: "700", color: "var(--text-secondary)" }}>
-                          {ibtMode === "card" ? "🎯 IBT 단일 문항 집중 카드" : `📄 ${lang === "ko" ? "IBT 문항지 지문 영역" : "Passage Paper"}`}
+                          {ibtMode === "card" ? t("examLabelCardTitle") : t("examLabelPassageTitle")}
                         </span>
                         <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                          {ibtMode === "card" ? `Question ${activeQuestionIndex + 1}` : `PDF: ${activeExam.pdfFileName}`}
+                          {ibtMode === "card" ? `${t("examQuestionPrefix")} ${activeQuestionIndex + 1} ${t("examQuestionSuffix")}` : `PDF: ${activeExam.pdfFileName}`}
                         </span>
                       </div>
                       
@@ -1442,56 +1460,101 @@ export default function LearningPage() {
                                 fontFamily: "var(--font-brand)"
                               }}
                             >
-                              {lang === "ko" ? `제 ${activeQuestionIndex + 1} 문항` : `Question ${activeQuestionIndex + 1}`}
+                              {`${t("examQuestionPrefix")} ${activeQuestionIndex + 1} ${t("examQuestionSuffix")}`}
                             </h3>
                             
-                            {activeExam.id === "exam-topik-sample" && MOCK_QUESTIONS[activeQuestionIndex] ? (
-                              <div style={{ marginTop: "16px", marginBottom: "24px" }}>
-                                <p 
-                                  style={{ 
-                                    fontSize: "0.85rem", 
-                                    color: "var(--gcu-red)", 
-                                    background: "rgba(198, 26, 43, 0.06)", 
-                                    padding: "8px 12px", 
-                                    borderRadius: "8px",
-                                    display: "inline-block",
-                                    marginBottom: "12px",
-                                    lineHeight: "1.4"
-                                  }}
-                                >
-                                  {MOCK_QUESTIONS[activeQuestionIndex].audioText[lang as "ko" | "en" | "vn" | "mn"] || MOCK_QUESTIONS[activeQuestionIndex].audioText.ko}
-                                </p>
-                                <h4 
-                                  style={{ 
-                                    fontSize: isMobile ? "1.05rem" : "1.2rem", 
-                                    fontWeight: "700", 
-                                    color: "var(--text-primary)", 
-                                    lineHeight: "1.6",
-                                    margin: "0 auto",
-                                    maxWidth: "600px"
-                                  }}
-                                >
-                                  {MOCK_QUESTIONS[activeQuestionIndex].question}
-                                </h4>
-                              </div>
-                            ) : (
-                              <div style={{ margin: "20px 0", padding: "16px", background: "rgba(0, 0, 0, 0.01)", borderRadius: "12px", border: "1px solid rgba(0, 0, 0, 0.04)" }}>
-                                <p style={{ fontSize: "0.88rem", color: "var(--text-secondary)", lineHeight: "1.6", margin: 0 }}>
+                            <div 
+                              className="glass-panel" 
+                              style={{ 
+                                margin: "20px 0", 
+                                padding: "24px", 
+                                background: "rgba(0, 0, 0, 0.015)", 
+                                borderRadius: "14px", 
+                                border: "1px solid rgba(0, 0, 0, 0.05)",
+                                minHeight: "260px",
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: "14px"
+                              }}
+                            >
+                              {activeExam.questions?.[activeQuestionIndex]?.imageUrl ? (
+                                <>
+                                  <img 
+                                    src={activeExam.questions[activeQuestionIndex].imageUrl} 
+                                    alt={`Question ${activeQuestionIndex + 1}`}
+                                    style={{ 
+                                      maxWidth: "100%", 
+                                      maxHeight: "180px", 
+                                      objectFit: "contain",
+                                      borderRadius: "10px", 
+                                      border: "1px solid rgba(0, 0, 0, 0.06)", 
+                                      boxShadow: "0 4px 15px rgba(0, 0, 0, 0.03)" 
+                                    }} 
+                                  />
+                                  <div style={{ textAlign: "center", fontSize: "0.76rem", color: "var(--text-secondary)", lineHeight: "1.4" }}>
+                                    {activeExam.audioTracks && activeExam.audioTracks[activeTrackIndex] ? (
+                                      <>
+                                        📻 {t("examAudioPlaying")} <strong>{activeExam.audioTracks[activeTrackIndex].name}</strong>
+                                      </>
+                                    ) : null}
+                                    {activeExam.questions[activeQuestionIndex].audioUrl && (
+                                      <span style={{ color: "var(--gcu-red)", display: "block", marginTop: "4px", fontWeight: "600" }}>
+                                        {t("examAudioDedicatedPlaying")}
+                                      </span>
+                                    )}
+                                  </div>
+                                </>
+                              ) : activeExam.id === "exam-topik-sample" && MOCK_QUESTIONS[activeQuestionIndex] ? (
+                                <div style={{ width: "100%" }}>
+                                  <p 
+                                    style={{ 
+                                      fontSize: "0.82rem", 
+                                      color: "var(--gcu-red)", 
+                                      background: "rgba(198, 26, 43, 0.06)", 
+                                      padding: "8px 12px", 
+                                      borderRadius: "8px",
+                                      display: "inline-block",
+                                      marginBottom: "12px",
+                                      lineHeight: "1.4",
+                                      textAlign: "center",
+                                      width: "100%"
+                                    }}
+                                  >
+                                    {MOCK_QUESTIONS[activeQuestionIndex].audioText[lang as "ko" | "en" | "vn" | "mn"] || MOCK_QUESTIONS[activeQuestionIndex].audioText.ko}
+                                  </p>
+                                  <h4 
+                                    style={{ 
+                                      fontSize: isMobile ? "0.95rem" : "1.05rem", 
+                                      fontWeight: "700", 
+                                      color: "var(--text-primary)", 
+                                      lineHeight: "1.6",
+                                      margin: "0 auto",
+                                      maxWidth: "600px",
+                                      textAlign: "center"
+                                    }}
+                                  >
+                                    {MOCK_QUESTIONS[activeQuestionIndex].question}
+                                  </h4>
+                                </div>
+                              ) : (
+                                <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: "1.6", margin: 0, textAlign: "center" }}>
                                   {activeExam.audioTracks && activeExam.audioTracks[activeTrackIndex] ? (
                                     <>
-                                      📻 현재 재생 중인 음원 트랙: <strong>{activeExam.audioTracks[activeTrackIndex].name}</strong><br />
-                                      <span style={{ fontSize: "0.8rem", color: "var(--gcu-sky)", display: "inline-block", marginTop: "8px" }}>
-                                        👉 귀로 들리는 문제를 조용히 경청한 뒤, 아래에서 가장 올바른 보기를 골라 터치 마킹하십시오.
+                                      {t("examAudioPlaying")} <strong>{activeExam.audioTracks[activeTrackIndex].name}</strong><br />
+                                      <span style={{ fontSize: "0.8rem", color: "var(--gcu-navy)", display: "inline-block", marginTop: "8px", fontWeight: "600" }}>
+                                        {t("examListeningGuide")}
                                       </span>
                                     </>
                                   ) : (
                                     <>
-                                      📄 지문 독해 및 읽기 영역입니다. 전체 화면이나 PDF 시험지 보기를 원하시면 우측 상단 <strong>[📄 전체 시험지 보기]</strong> 탭을 선택하여 지문을 읽고 답을 마킹하십시오.
+                                      {t("examReadingGuide")}
                                     </>
                                   )}
                                 </p>
-                              </div>
-                            )}
+                              )}
+                            </div>
                           </div>
 
                           {/* 4지선다형 마킹 버튼 그리드 (Premium Touch Elements) */}
@@ -1499,7 +1562,7 @@ export default function LearningPage() {
                             style={{ 
                               display: "flex", 
                               flexDirection: "column", 
-                              gap: "12px",
+                              gap: "8px",
                               width: "100%",
                               maxWidth: "500px",
                               margin: "0 auto",
@@ -1509,7 +1572,7 @@ export default function LearningPage() {
                             {[0, 1, 2, 3].map((optIdx) => {
                               const isMarked = selectedAnswers[activeQuestionIndex] === optIdx;
                               
-                              let optionLabel = `보기 ${optIdx + 1}번`;
+                              let optionLabel = `${t("examOptionLabel")} ${optIdx + 1}${t("examOptionSuffix")}`;
                               if (activeExam.id === "exam-topik-sample" && MOCK_QUESTIONS[activeQuestionIndex]) {
                                 optionLabel = `(${optIdx + 1}) ${MOCK_QUESTIONS[activeQuestionIndex].options[optIdx]}`;
                               }
@@ -1529,15 +1592,15 @@ export default function LearningPage() {
                                   style={{
                                     display: "flex",
                                     alignItems: "center",
-                                    gap: "16px",
+                                    gap: "12px",
                                     width: "100%",
-                                    padding: isMobile ? "14px 18px" : "18px 24px",
+                                    padding: isMobile ? "10px 14px" : "12px 18px",
                                     background: isMarked ? "rgba(198, 26, 43, 0.08)" : "rgba(255, 255, 255, 0.65)",
                                     border: "2px solid",
                                     borderColor: isMarked ? "var(--gcu-red)" : "rgba(0, 0, 0, 0.06)",
-                                    borderRadius: "12px",
+                                    borderRadius: "10px",
                                     color: isMarked ? "var(--gcu-red)" : "var(--text-secondary)",
-                                    fontSize: isMobile ? "0.9rem" : "1.05rem",
+                                    fontSize: isMobile ? "0.82rem" : "0.92rem",
                                     fontWeight: isMarked ? "800" : "500",
                                     textAlign: "left",
                                     cursor: "pointer",
@@ -1548,8 +1611,8 @@ export default function LearningPage() {
                                   {/* 마킹 동그라미 심볼 */}
                                   <div 
                                     style={{
-                                      width: "24px",
-                                      height: "24px",
+                                      width: "20px",
+                                      height: "20px",
                                       borderRadius: "50%",
                                       border: "2px solid",
                                       borderColor: isMarked ? "var(--gcu-red)" : "var(--text-muted)",
@@ -1558,7 +1621,7 @@ export default function LearningPage() {
                                       display: "flex",
                                       alignItems: "center",
                                       justifyContent: "center",
-                                      fontSize: "0.85rem",
+                                      fontSize: "0.78rem",
                                       fontWeight: "800"
                                     }}
                                   >
@@ -1599,7 +1662,7 @@ export default function LearningPage() {
                                 cursor: activeQuestionIndex === 0 ? "default" : "pointer"
                               }}
                             >
-                              ◀ 이전 문항
+                              {t("examBtnPrevQuestion")}
                             </button>
                             
                             <span 
@@ -1633,7 +1696,7 @@ export default function LearningPage() {
                                 cursor: activeQuestionIndex === activeExam.questionCount - 1 ? "default" : "pointer"
                               }}
                             >
-                              다음 문항 ▶
+                              {t("examBtnNextQuestion")}
                             </button>
                           </div>
 
@@ -1667,7 +1730,7 @@ export default function LearningPage() {
                       {/* Listening Audio Controller */}
                       <div className="glass-panel" style={{ padding: "16px" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                          <span style={{ fontSize: "0.82rem", fontWeight: "700", color: "var(--text-secondary)" }}>🔊 듣기 평가 재생기</span>
+                          <span style={{ fontSize: "0.82rem", fontWeight: "700", color: "var(--text-secondary)" }}>{t("examAudioPlayerHeader")}</span>
                           
                           {/* Playback speed selector */}
                           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -1695,14 +1758,14 @@ export default function LearningPage() {
                         <audio 
                           id="ibt-audio-player"
                           controls 
-                          src={(activeExam.audioTracks && activeExam.audioTracks[activeTrackIndex]?.url) || activeExam.mp3DataUrl || "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"} 
-                          style={{ width: "100%", borderRadius: "8px", background: "rgba(0,0,0,0.15)" }} 
+                          src={(activeExam.questions?.[activeQuestionIndex]?.audioUrl) || (activeExam.audioTracks && activeExam.audioTracks[activeTrackIndex]?.url) || activeExam.mp3DataUrl || "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"} 
+                          style={{ width: "100%", borderRadius: "8px", background: "rgba(0, 0, 0, 0.08)", border: "1px solid rgba(0, 0, 0, 0.1)" }} 
                         />
 
                         {activeExam.audioTracks && activeExam.audioTracks.length > 0 && (
-                          <div style={{ marginTop: "12px", borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "12px" }}>
-                            <span style={{ fontSize: "0.78rem", color: "var(--gcu-sky)", fontWeight: "700", display: "block", marginBottom: "8px" }}>
-                              🎧 청취 음원 트랙 선택 (Audio Tracks):
+                          <div style={{ marginTop: "12px", borderTop: "1px solid rgba(0, 0, 0, 0.06)", paddingTop: "12px" }}>
+                            <span style={{ fontSize: "0.78rem", color: "var(--gcu-navy)", fontWeight: "700", display: "block", marginBottom: "8px" }}>
+                              {t("examAudioTrackSelector")}
                             </span>
                             <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "150px", overflowY: "auto" }}>
                               {activeExam.audioTracks.map((track: any, idx: number) => {
@@ -1726,11 +1789,11 @@ export default function LearningPage() {
                                       gap: "8px",
                                       width: "100%",
                                       padding: "8px 12px",
-                                      background: isActive ? "rgba(0, 185, 242, 0.15)" : "rgba(255,255,255,0.02)",
+                                      background: isActive ? "rgba(18, 42, 77, 0.08)" : "rgba(0, 0, 0, 0.02)",
                                       border: "1px solid",
-                                      borderColor: isActive ? "var(--gcu-sky)" : "rgba(255,255,255,0.05)",
+                                      borderColor: isActive ? "var(--gcu-navy)" : "rgba(0, 0, 0, 0.06)",
                                       borderRadius: "6px",
-                                      color: isActive ? "#fff" : "var(--text-secondary)",
+                                      color: isActive ? "var(--gcu-navy)" : "var(--text-secondary)",
                                       fontSize: "0.78rem",
                                       fontWeight: isActive ? "700" : "400",
                                       textAlign: "left",
@@ -1753,18 +1816,18 @@ export default function LearningPage() {
                       {/* OMR bubble sheet card */}
                       <div className="glass-panel" style={{ padding: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border-color)", paddingBottom: "10px", flexWrap: "wrap", gap: "8px" }}>
-                          <span style={{ fontSize: "0.88rem", fontWeight: "700", color: "#fff" }}>📝 {t("examOmarker")}</span>
+                          <span style={{ fontSize: "0.88rem", fontWeight: "700", color: "var(--gcu-navy)" }}>📝 {t("examOmarker")}</span>
                           
                           {/* View Mode Toggle: Single Question vs Full List */}
-                          <div style={{ display: "flex", gap: "4px", background: "rgba(255,255,255,0.03)", padding: "3px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.05)" }}>
+                          <div style={{ display: "flex", gap: "4px", background: "rgba(0, 0, 0, 0.03)", padding: "3px", borderRadius: "8px", border: "1px solid rgba(0, 0, 0, 0.06)" }}>
                             <button
                               type="button"
                               onClick={() => setOmrViewMode("single")}
                               style={{
                                 padding: "4px 8px",
                                 fontSize: "0.72rem",
-                                background: omrViewMode === "single" ? "var(--gcu-sky)" : "transparent",
-                                color: omrViewMode === "single" ? "#060A1A" : "var(--text-secondary)",
+                                background: omrViewMode === "single" ? "var(--gcu-navy)" : "transparent",
+                                color: omrViewMode === "single" ? "#ffffff" : "var(--text-secondary)",
                                 border: "none",
                                 borderRadius: "6px",
                                 fontWeight: "700",
@@ -1772,7 +1835,7 @@ export default function LearningPage() {
                                 transition: "all 0.2s ease"
                               }}
                             >
-                              🎯 단일 문항
+                              {t("examBtnSingleQuestion")}
                             </button>
                             <button
                               type="button"
@@ -1780,8 +1843,8 @@ export default function LearningPage() {
                               style={{
                                 padding: "4px 8px",
                                 fontSize: "0.72rem",
-                                background: omrViewMode === "full" ? "var(--gcu-sky)" : "transparent",
-                                color: omrViewMode === "full" ? "#060A1A" : "var(--text-secondary)",
+                                background: omrViewMode === "full" ? "var(--gcu-navy)" : "transparent",
+                                color: omrViewMode === "full" ? "#ffffff" : "var(--text-secondary)",
                                 border: "none",
                                 borderRadius: "6px",
                                 fontWeight: "700",
@@ -1789,11 +1852,11 @@ export default function LearningPage() {
                                 transition: "all 0.2s ease"
                               }}
                             >
-                              📋 전체 시트
+                              {t("examBtnFullSheet")}
                             </button>
                           </div>
 
-                          <span style={{ fontSize: "0.78rem", color: "var(--gcu-sky)", fontWeight: "600" }}>
+                          <span style={{ fontSize: "0.78rem", color: "var(--gcu-red)", fontWeight: "600" }}>
                             {t("examMarkerProgress")}: {selectedAnswers.filter((a) => a !== -1).length} / {activeExam.questionCount}
                           </span>
                         </div>
@@ -1807,17 +1870,17 @@ export default function LearningPage() {
                               className="glass-panel" 
                               style={{ 
                                 padding: "18px 20px", 
-                                background: "rgba(255,255,255,0.02)", 
-                                border: "1px solid rgba(0, 185, 242, 0.15)",
+                                background: "#ffffff", 
+                                border: "1px solid rgba(0, 0, 0, 0.06)",
                                 borderRadius: "10px",
                                 textAlign: "center"
                               }}
                             >
-                              <span style={{ fontSize: "0.75rem", color: "var(--gcu-sky)", fontWeight: "700", display: "block", marginBottom: "6px" }}>
-                                FOCUS QUESTION
+                              <span style={{ fontSize: "0.75rem", color: "var(--gcu-red)", fontWeight: "700", display: "block", marginBottom: "6px" }}>
+                                {t("examFocusQuestion")}
                               </span>
-                              <h4 style={{ fontSize: "1.15rem", fontWeight: "800", color: "#fff", margin: "0 0 14px 0" }}>
-                                문항 {activeQuestionIndex + 1}
+                              <h4 style={{ fontSize: "1.15rem", fontWeight: "800", color: "var(--gcu-navy)", margin: "0 0 14px 0" }}>
+                                {t("examFocusQuestionLabel")} {activeQuestionIndex + 1}
                               </h4>
                               
                               {/* Large bubble selectors */}
@@ -1841,9 +1904,9 @@ export default function LearningPage() {
                                         height: "42px",
                                         borderRadius: "50%",
                                         border: "2px solid",
-                                        borderColor: isMarked ? "var(--gcu-sky)" : "var(--text-muted)",
-                                        background: isMarked ? "var(--gcu-sky)" : "transparent",
-                                        color: isMarked ? "#060A1A" : "#fff",
+                                        borderColor: isMarked ? "var(--gcu-navy)" : "var(--text-muted)",
+                                        background: isMarked ? "var(--gcu-navy)" : "transparent",
+                                        color: isMarked ? "#ffffff" : "var(--gcu-navy)",
                                         fontSize: "1.1rem",
                                         fontWeight: "800",
                                         cursor: "pointer",
@@ -1860,7 +1923,7 @@ export default function LearningPage() {
                               </div>
                               
                               <span style={{ fontSize: "0.7rem", color: "var(--text-muted)", display: "block", marginTop: "12px" }}>
-                                ※ 마킹 시 0.25초 뒤 다음 문항으로 자동 이동합니다.
+                                {t("examAutoMoveNotice")}
                               </span>
                             </div>
 
@@ -1875,15 +1938,15 @@ export default function LearningPage() {
                                   flex: 1, 
                                   padding: "6px", 
                                   fontSize: "0.75rem", 
-                                  background: activeQuestionIndex === 0 ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.05)",
+                                  background: activeQuestionIndex === 0 ? "rgba(0, 0, 0, 0.01)" : "rgba(0, 0, 0, 0.04)",
                                   opacity: activeQuestionIndex === 0 ? 0.3 : 1,
                                   cursor: activeQuestionIndex === 0 ? "default" : "pointer"
                                 }}
                               >
-                                ◀ 이전
+                                {t("examBtnPrev")}
                               </button>
                               
-                              <span style={{ fontSize: "0.85rem", color: "#fff", fontWeight: "700", fontFamily: "monospace" }}>
+                              <span style={{ fontSize: "0.85rem", color: "var(--gcu-navy)", fontWeight: "700", fontFamily: "monospace" }}>
                                 {activeQuestionIndex + 1} / {activeExam.questionCount}
                               </span>
 
@@ -1896,19 +1959,19 @@ export default function LearningPage() {
                                   flex: 1, 
                                   padding: "6px", 
                                   fontSize: "0.75rem", 
-                                  background: activeQuestionIndex === activeExam.questionCount - 1 ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.05)",
+                                  background: activeQuestionIndex === activeExam.questionCount - 1 ? "rgba(0, 0, 0, 0.01)" : "rgba(0, 0, 0, 0.04)",
                                   opacity: activeQuestionIndex === activeExam.questionCount - 1 ? 0.3 : 1,
                                   cursor: activeQuestionIndex === activeExam.questionCount - 1 ? "default" : "pointer"
                                 }}
                               >
-                                다음 ▶
+                                {t("examBtnNext")}
                               </button>
                             </div>
 
                             {/* Question Direct Navigation Matrix Grid */}
                             <div>
                               <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: "600", display: "block", marginBottom: "6px" }}>
-                                🧭 빠른 문항 네비게이터:
+                                {t("examNavigatorLabel")}
                               </span>
                               <div 
                                 style={{ 
@@ -1918,9 +1981,9 @@ export default function LearningPage() {
                                   maxHeight: "110px", 
                                   overflowY: "auto",
                                   padding: "6px",
-                                  background: "rgba(0,0,0,0.15)",
+                                  background: "rgba(0, 0, 0, 0.03)",
                                   borderRadius: "6px",
-                                  border: "1px solid rgba(255,255,255,0.03)"
+                                  border: "1px solid rgba(0, 0, 0, 0.06)"
                                 }}
                               >
                                 {selectedAnswers.map((ans, idx) => {
@@ -1937,12 +2000,12 @@ export default function LearningPage() {
                                         fontWeight: "700",
                                         borderRadius: "4px",
                                         border: "1px solid",
-                                        borderColor: isActive ? "var(--gcu-sky)" : (isMarked ? "rgba(87,255,154,0.3)" : "rgba(255,255,255,0.05)"),
-                                        background: isActive ? "var(--gcu-sky)" : (isMarked ? "rgba(87,255,154,0.1)" : "transparent"),
-                                        color: isActive ? "#060A1A" : (isMarked ? "#57FF9A" : "var(--text-secondary)"),
+                                        borderColor: isActive ? "var(--gcu-navy)" : (isMarked ? "rgba(114, 191, 68, 0.4)" : "rgba(0, 0, 0, 0.06)"),
+                                        background: isActive ? "var(--gcu-navy)" : (isMarked ? "rgba(114, 191, 68, 0.08)" : "transparent"),
+                                        color: isActive ? "#ffffff" : (isMarked ? "#2e7d32" : "var(--text-secondary)"),
                                         cursor: "pointer",
                                         transition: "all 0.15s ease",
-                                        boxShadow: isActive ? "0 0 8px rgba(0,185,242,0.4)" : "none"
+                                        boxShadow: isActive ? "0 0 8px rgba(18, 42, 77, 0.25)" : "none"
                                       }}
                                     >
                                       {idx + 1}
@@ -1965,14 +2028,14 @@ export default function LearningPage() {
                                     alignItems: "center", 
                                     justifyContent: "space-between",
                                     padding: "8px 12px",
-                                    background: ans !== -1 ? "rgba(0, 185, 242, 0.04)" : "rgba(255,255,255,0.01)",
+                                    background: ans !== -1 ? "rgba(18, 42, 77, 0.04)" : "rgba(0, 0, 0, 0.01)",
                                     border: "1px solid",
-                                    borderColor: ans !== -1 ? "rgba(0, 185, 242, 0.15)" : "rgba(255,255,255,0.03)",
+                                    borderColor: ans !== -1 ? "rgba(18, 42, 77, 0.12)" : "rgba(0, 0, 0, 0.06)",
                                     borderRadius: "8px",
                                     transition: "all 0.2s ease"
                                   }}
                                 >
-                                  <span style={{ fontSize: "0.82rem", fontWeight: "700", color: ans !== -1 ? "var(--gcu-sky)" : "#fff" }}>
+                                  <span style={{ fontSize: "0.82rem", fontWeight: "700", color: ans !== -1 ? "var(--gcu-navy)" : "var(--text-primary)" }}>
                                     문항 {idx + 1}
                                   </span>
 
@@ -1990,9 +2053,9 @@ export default function LearningPage() {
                                             height: "26px",
                                             borderRadius: "50%",
                                             border: "1px solid",
-                                            borderColor: isMarked ? "var(--gcu-sky)" : "var(--text-muted)",
-                                            background: isMarked ? "var(--gcu-sky)" : "transparent",
-                                            color: isMarked ? "#060A1A" : "var(--text-secondary)",
+                                            borderColor: isMarked ? "var(--gcu-navy)" : "var(--text-muted)",
+                                            background: isMarked ? "var(--gcu-navy)" : "transparent",
+                                            color: isMarked ? "#ffffff" : "var(--text-secondary)",
                                             fontSize: "0.8rem",
                                             fontWeight: "700",
                                             cursor: "pointer",
@@ -2044,7 +2107,7 @@ export default function LearningPage() {
                 /* 3. Detailed grading scorecards feedback screen */
                 <div style={{ textAlign: "center", padding: "20px 0" }}>
                   <span style={{ fontSize: "3.5rem", display: "block", marginBottom: "16px" }}>🏆</span>
-                  <h2 style={{ fontSize: "1.5rem", fontWeight: "800", color: "#fff", marginBottom: "8px" }}>
+                  <h2 style={{ fontSize: "1.5rem", fontWeight: "800", color: "var(--gcu-navy)", marginBottom: "8px" }}>
                     {t("examResultTitle")}
                   </h2>
                   <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", marginBottom: "28px" }}>
@@ -2060,19 +2123,19 @@ export default function LearningPage() {
                       display: "flex", 
                       flexDirection: "column", 
                       gap: "14px",
-                      border: "1px solid rgba(0, 185, 242, 0.25)"
+                      border: "1px solid rgba(18, 42, 77, 0.12)"
                     }}
                   >
                     <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: "600" }}>
                       {t("examResultScore")}
                     </span>
-                    <span style={{ fontSize: "3.5rem", fontWeight: "900", color: examScore >= 60 ? "var(--gcu-sky)" : "var(--gcu-orange)", fontFamily: "monospace" }}>
+                    <span style={{ fontSize: "3.5rem", fontWeight: "900", color: examScore >= 60 ? "var(--gcu-navy)" : "var(--gcu-orange)", fontFamily: "monospace" }}>
                       {examScore}점
                     </span>
                     
-                    <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "14px", display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <div style={{ borderTop: "1px solid rgba(0, 0, 0, 0.06)", paddingTop: "14px", display: "flex", flexDirection: "column", gap: "6px" }}>
                       <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>{t("examResultPass")}</span>
-                      <span style={{ fontSize: "1.15rem", fontWeight: "700", color: examScore >= 30 ? "#57FF9A" : "var(--text-muted)" }}>
+                      <span style={{ fontSize: "1.15rem", fontWeight: "700", color: examScore >= 30 ? "#2e7d32" : "var(--text-muted)" }}>
                         {examLevel}
                       </span>
                     </div>
@@ -2080,7 +2143,7 @@ export default function LearningPage() {
 
                   {/* Review Sheets: Question-by-Question grading logs list */}
                   <div style={{ textAlign: "left", maxWidth: "680px", margin: "0 auto 36px auto" }}>
-                    <h3 style={{ fontSize: "1rem", fontWeight: "700", color: "#fff", marginBottom: "16px" }}>🎯 문항별 마킹 결과 오답 노트</h3>
+                    <h3 style={{ fontSize: "1rem", fontWeight: "700", color: "var(--gcu-navy)", marginBottom: "16px" }}>🎯 문항별 마킹 결과 오답 노트</h3>
                     <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                       {selectedAnswers.map((ans, idx) => {
                         const correctAns = activeExam.answerKey[idx];
@@ -2093,16 +2156,17 @@ export default function LearningPage() {
                             style={{ 
                               padding: "16px 20px", 
                               borderLeft: isCorrect ? "4px solid var(--gcu-green)" : "4px solid var(--gcu-orange)",
-                              background: "rgba(255,255,255,0.01)"
+                              background: "#ffffff",
+                              border: "1px solid rgba(0, 0, 0, 0.05)"
                             }}
                           >
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <span style={{ fontWeight: "700", fontSize: "0.88rem", color: isCorrect ? "#57FF9A" : "var(--gcu-orange)" }}>
+                              <span style={{ fontWeight: "700", fontSize: "0.88rem", color: isCorrect ? "#2e7d32" : "var(--gcu-red)" }}>
                                 Q.{idx + 1} {isCorrect ? "✅ 정답 (Correct)" : "❌ 오답 (Incorrect)"}
                               </span>
                               
                               <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
-                                마킹한 답: {ans !== -1 ? ans + 1 : "미마킹"} | 실제 정답: <strong style={{ color: "var(--gcu-sky)" }}>{correctAns + 1}</strong>
+                                마킹한 답: {ans !== -1 ? ans + 1 : "미마킹"} | 실제 정답: <strong style={{ color: "var(--gcu-navy)" }}>{correctAns + 1}</strong>
                               </span>
                             </div>
                           </div>
@@ -2121,14 +2185,14 @@ export default function LearningPage() {
                         display: "flex", 
                         justifyContent: "space-between", 
                         alignItems: "center",
-                        border: "1px solid rgba(247, 147, 30, 0.3)",
-                        background: "linear-gradient(90deg, rgba(247,147,30,0.06) 0%, rgba(0,0,0,0.2) 100%)"
+                        border: "1px solid rgba(247, 147, 30, 0.2)",
+                        background: "rgba(247, 147, 30, 0.05)"
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "12px", textAlign: "left" }}>
                         <span style={{ fontSize: "1.8rem" }}>🔑</span>
                         <div style={{ display: "flex", flexDirection: "column" }}>
-                          <span style={{ fontSize: "0.88rem", fontWeight: "800", color: "#fff" }}>
+                          <span style={{ fontSize: "0.88rem", fontWeight: "800", color: "var(--gcu-navy)" }}>
                             {lang === "ko" ? "공식 모의고사 해설 및 해법 답안지" : "Official Mock Exam Answer & Explanation Guide"}
                           </span>
                           <span style={{ fontSize: "0.76rem", color: "var(--text-secondary)" }}>
@@ -2145,13 +2209,13 @@ export default function LearningPage() {
                           padding: "10px 18px", 
                           fontSize: "0.8rem", 
                           borderRadius: "8px", 
-                          color: "#060A1A", 
+                          color: "#ffffff", 
                           fontWeight: "700",
                           textDecoration: "none",
                           display: "inline-flex",
                           alignItems: "center",
                           gap: "6px",
-                          boxShadow: "0 4px 10px rgba(247,147,30,0.3)"
+                          boxShadow: "0 4px 10px rgba(247, 147, 30, 0.15)"
                         }}
                       >
                         📥 {lang === "ko" ? "해설지 다운로드" : "Download PDF"}
@@ -2233,10 +2297,10 @@ export default function LearningPage() {
                     fontSize: "0.8rem", 
                     padding: "10px 12px", 
                     borderRadius: "8px",
-                    color: "#060A1A",
+                    color: "#ffffff",
                     display: "flex",
                     fontWeight: "700",
-                    boxShadow: "0 4px 10px rgba(0, 185, 242, 0.2)",
+                    boxShadow: "0 4px 10px rgba(18, 42, 77, 0.15)",
                     textDecoration: "none"
                   }}
                 >
@@ -2252,7 +2316,7 @@ export default function LearningPage() {
             <p className="widget-banner-desc" style={{ fontSize: "0.8rem" }}>
               {tLearn.tutorDesc}
             </p>
-            <button onClick={() => alert(tLearn.tutorAlert)} className="widget-banner-btn" style={{ background: "var(--gcu-sky)" }}>
+            <button onClick={() => alert(tLearn.tutorAlert)} className="widget-banner-btn">
               {tLearn.tutorBtn}
             </button>
           </section>
@@ -2272,8 +2336,8 @@ export default function LearningPage() {
               padding: "36px", 
               position: "relative", 
               background: "var(--bg-secondary)",
-              border: "1px solid var(--gcu-sky)",
-              boxShadow: "0 24px 64px rgba(0, 185, 242, 0.35)",
+              border: "1px solid rgba(18, 42, 77, 0.12)",
+              boxShadow: "0 24px 64px rgba(18, 42, 77, 0.18)",
               animation: "toastSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
             }}
             onClick={(e) => e.stopPropagation()}
@@ -2289,10 +2353,10 @@ export default function LearningPage() {
             <div style={{ textAlign: "center", marginBottom: "24px" }}>
               <span style={{ fontSize: "3rem", display: "block", marginBottom: "8px" }}>📊</span>
               <h3 style={{ fontSize: "1.35rem", fontWeight: "800", color: "var(--text-primary)", fontFamily: "var(--font-brand)", margin: "0 0 6px 0", letterSpacing: "-0.5px" }}>
-                {lang === "ko" ? "💡 IBT 모의고사 개인 성적 & 해설 상세 보고서" : "💡 IBT Mock Exam Detailed Score & Explanation Report"}
+                {t("examReportTitle")}
               </h3>
               <span className="feed-tag guide" style={{ fontSize: "0.75rem", padding: "3px 10px" }}>
-                {lang === "ko" ? "응시 기출 시험지" : "Exam Paper"}: {selectedHistoryRecord.examTitle}
+                {t("examReportPaper")}: {selectedHistoryRecord.examTitle}
               </span>
             </div>
 
@@ -2303,43 +2367,43 @@ export default function LearningPage() {
                 gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", 
                 gap: "12px", 
                 marginBottom: "24px",
-                background: "rgba(255,255,255,0.02)",
+                background: "rgba(0, 0, 0, 0.02)",
                 padding: "16px",
                 borderRadius: "10px",
-                border: "1px solid rgba(255,255,255,0.04)"
+                border: "1px solid rgba(0, 0, 0, 0.06)"
               }}
             >
               <div style={{ textAlign: "center" }}>
-                <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>{lang === "ko" ? "취득 점수" : "Your Score"}</span>
-                <strong style={{ fontSize: "1.8rem", color: "var(--gcu-sky)", fontFamily: "monospace" }}>{selectedHistoryRecord.score}{lang === "ko" ? "점" : "%"}</strong>
+                <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>{t("examReportScore")}</span>
+                <strong style={{ fontSize: "1.8rem", color: "var(--gcu-navy)", fontFamily: "monospace" }}>{selectedHistoryRecord.score}{t("examPoints")}</strong>
               </div>
-              <div style={{ textAlign: "center", borderLeft: "1px solid rgba(255,255,255,0.06)" }}>
-                <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>{lang === "ko" ? "TOPIK 평가 등급" : "TOPIK Evaluation"}</span>
-                <strong style={{ fontSize: "1.05rem", color: "#57FF9A", display: "block", marginTop: "8px" }}>{selectedHistoryRecord.level}</strong>
+              <div style={{ textAlign: "center", borderLeft: "1px solid rgba(0, 0, 0, 0.08)" }}>
+                <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>{t("examReportGrade")}</span>
+                <strong style={{ fontSize: "1.05rem", color: "#2e7d32", display: "block", marginTop: "8px" }}>{selectedHistoryRecord.level}</strong>
               </div>
-              <div style={{ textAlign: "center", borderLeft: "1px solid rgba(255,255,255,0.06)" }}>
-                <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>{lang === "ko" ? "응시 일자" : "Exam Date"}</span>
+              <div style={{ textAlign: "center", borderLeft: "1px solid rgba(0, 0, 0, 0.08)" }}>
+                <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>{t("examReportDate")}</span>
                 <span style={{ fontSize: "0.92rem", color: "var(--text-secondary)", display: "block", marginTop: "8px", fontWeight: "600" }}>{selectedHistoryRecord.date}</span>
               </div>
             </div>
 
             {/* 문항별 상세 채점 내역 */}
             <div style={{ marginBottom: "24px" }}>
-              <h4 style={{ fontSize: "0.92rem", fontWeight: "700", color: "#fff", marginBottom: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span>🎯 {lang === "ko" ? "문항별 마킹 대조 분석표 (오답노트)" : "Question-by-Question Marking & Analysis"}</span>
-                <span style={{ fontSize: "0.75rem", color: "var(--gcu-sky)" }}>
-                  {lang === "ko" ? "정답률" : "Correct Rate"}: {selectedHistoryRecord.selectedAnswers?.filter((ans: number, idx: number) => ans === selectedHistoryRecord.answerKey[idx]).length} / {selectedHistoryRecord.questionCount}
+              <h4 style={{ fontSize: "0.92rem", fontWeight: "700", color: "var(--gcu-navy)", marginBottom: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span>🎯 {t("examReportTableTitle")}</span>
+                <span style={{ fontSize: "0.75rem", color: "var(--gcu-red)" }}>
+                  {t("examReportCorrectRate")}: {selectedHistoryRecord.selectedAnswers?.filter((ans: number, idx: number) => ans === selectedHistoryRecord.answerKey[idx]).length} / {selectedHistoryRecord.questionCount}
                 </span>
               </h4>
               
-              <div style={{ maxHeight: "250px", overflowY: "auto", border: "1px solid var(--border-color)", borderRadius: "8px", background: "rgba(0,0,0,0.15)" }}>
+              <div style={{ maxHeight: "250px", overflowY: "auto", border: "1px solid var(--border-color)", borderRadius: "8px", background: "rgba(0,0,0,0.02)" }}>
                 <table className="resource-table" style={{ width: "100%", borderCollapse: "collapse", margin: 0 }}>
                   <thead>
                     <tr>
-                      <th style={{ padding: "8px 12px", fontSize: "0.78rem" }}>{lang === "ko" ? "문항 번호" : "Q.No"}</th>
-                      <th style={{ padding: "8px 12px", fontSize: "0.78rem" }}>{lang === "ko" ? "제출한 답안" : "Your Answer"}</th>
-                      <th style={{ padding: "8px 12px", fontSize: "0.78rem" }}>{lang === "ko" ? "실제 정답지" : "Correct Key"}</th>
-                      <th style={{ padding: "8px 12px", fontSize: "0.78rem" }}>{lang === "ko" ? "채점 결과" : "Status"}</th>
+                      <th style={{ padding: "8px 12px", fontSize: "0.78rem" }}>{t("examReportQNo")}</th>
+                      <th style={{ padding: "8px 12px", fontSize: "0.78rem" }}>{t("examReportYourAnswer")}</th>
+                      <th style={{ padding: "8px 12px", fontSize: "0.78rem" }}>{t("examReportCorrectKey")}</th>
+                      <th style={{ padding: "8px 12px", fontSize: "0.78rem" }}>{t("examReportStatus")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2347,12 +2411,12 @@ export default function LearningPage() {
                       const correctAns = selectedHistoryRecord.answerKey[idx];
                       const isCorrect = ans === correctAns;
                       return (
-                        <tr key={idx} style={{ background: isCorrect ? "rgba(87, 255, 154, 0.02)" : "rgba(255, 75, 75, 0.02)" }}>
+                        <tr key={idx} style={{ background: isCorrect ? "rgba(114, 191, 68, 0.03)" : "rgba(198, 26, 43, 0.03)" }}>
                           <td style={{ padding: "8px 12px", textAlign: "center", fontWeight: "700", fontSize: "0.8rem" }}>Q.{idx + 1}</td>
                           <td style={{ padding: "8px 12px", textAlign: "center", fontSize: "0.8rem", color: ans === -1 ? "var(--text-muted)" : "inherit" }}>
-                            {ans !== -1 ? `${ans + 1}${lang === "ko" ? "번" : ""}` : (lang === "ko" ? "미마킹" : "Unmarked")}
+                            {ans !== -1 ? `${ans + 1}${t("examOptionSuffix")}` : t("examReportUnmarked")}
                           </td>
-                          <td style={{ padding: "8px 12px", textAlign: "center", fontSize: "0.8rem", fontWeight: "700", color: "var(--gcu-sky)" }}>{correctAns + 1}{lang === "ko" ? "번" : ""}</td>
+                          <td style={{ padding: "8px 12px", textAlign: "center", fontSize: "0.8rem", fontWeight: "700", color: "var(--gcu-navy)" }}>{correctAns + 1}{t("examOptionSuffix")}</td>
                           <td style={{ padding: "8px 12px", textAlign: "center", fontSize: "0.8rem" }}>
                             <span 
                               style={{ 
@@ -2360,12 +2424,12 @@ export default function LearningPage() {
                                 borderRadius: "4px", 
                                 fontSize: "0.75rem", 
                                 fontWeight: "700", 
-                                background: isCorrect ? "rgba(87, 255, 154, 0.15)" : "rgba(255, 75, 75, 0.15)",
-                                color: isCorrect ? "#57FF9A" : "#FF8888",
-                                border: isCorrect ? "1px solid rgba(87,255,154,0.2)" : "1px solid rgba(255,75,75,0.2)"
+                                background: isCorrect ? "rgba(114, 191, 68, 0.1)" : "rgba(198, 26, 43, 0.08)",
+                                color: isCorrect ? "#2e7d32" : "#c61a2b",
+                                border: isCorrect ? "1px solid rgba(114, 191, 68, 0.25)" : "1px solid rgba(198, 26, 43, 0.2)"
                               }}
                             >
-                              {isCorrect ? (lang === "ko" ? "✅ 정답" : "✅ Correct") : (lang === "ko" ? "❌ 오답" : "❌ Incorrect")}
+                              {isCorrect ? t("examReportCorrect") : t("examReportIncorrect")}
                             </span>
                           </td>
                         </tr>
@@ -2385,19 +2449,19 @@ export default function LearningPage() {
                   display: "flex", 
                   justifyContent: "space-between", 
                   alignItems: "center",
-                  border: "1px solid rgba(247, 147, 30, 0.3)",
-                  background: "linear-gradient(90deg, rgba(247,147,30,0.06) 0%, rgba(0,0,0,0.25) 100%)",
+                  border: "1px solid rgba(247, 147, 30, 0.2)",
+                  background: "rgba(247, 147, 30, 0.05)",
                   marginBottom: "24px"
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", textAlign: "left" }}>
                   <span style={{ fontSize: "1.5rem" }}>🔑</span>
                   <div style={{ display: "flex", flexDirection: "column" }}>
-                    <span style={{ fontSize: "0.82rem", fontWeight: "800", color: "#fff" }}>
-                      {lang === "ko" ? "기출 공식 정답 및 해법 해설집" : "Official Answer & Explanation Guide"}
+                    <span style={{ fontSize: "0.82rem", fontWeight: "800", color: "var(--gcu-navy)" }}>
+                      {t("examReportGuideTitle")}
                     </span>
                     <span style={{ fontSize: "0.72rem", color: "var(--text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "250px" }} title={selectedHistoryRecord.answerPdfFileName}>
-                      {lang === "ko" ? "파일명" : "File"}: {selectedHistoryRecord.answerPdfFileName || "explanation_guide.pdf"}
+                      {t("examReportFileName")}: {selectedHistoryRecord.answerPdfFileName || "explanation_guide.pdf"}
                     </span>
                   </div>
                 </div>
@@ -2410,16 +2474,16 @@ export default function LearningPage() {
                     padding: "8px 14px", 
                     fontSize: "0.76rem", 
                     borderRadius: "6px", 
-                    color: "#060A1A", 
+                    color: "#ffffff", 
                     fontWeight: "700",
                     textDecoration: "none",
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "4px",
-                    boxShadow: "0 4px 10px rgba(247,147,30,0.25)"
+                    boxShadow: "0 4px 10px rgba(247,147,30,0.15)"
                   }}
                 >
-                  📥 {lang === "ko" ? "해설집 PDF 받기" : "Download PDF"}
+                  📥 {t("examReportBtnDownload")}
                 </a>
               </div>
             ) : (
@@ -2429,13 +2493,13 @@ export default function LearningPage() {
                   textAlign: "center", 
                   fontSize: "0.78rem", 
                   color: "var(--text-muted)", 
-                  background: "rgba(255,255,255,0.02)", 
+                  background: "rgba(0, 0, 0, 0.01)", 
                   borderRadius: "6px",
                   border: "1px solid rgba(255,255,255,0.03)",
                   marginBottom: "24px"
                 }}
               >
-                ℹ️ {lang === "ko" ? "본 시험지는 출제자가 등록한 해설지 PDF가 존재하지 않습니다." : "No official explanation PDF is registered for this exam."}
+                {t("examReportNoPdf")}
               </div>
             )}
 
@@ -2445,7 +2509,7 @@ export default function LearningPage() {
                 className="btn-secondary"
                 style={{ padding: "8px 20px", fontSize: "0.85rem", borderRadius: "8px", cursor: "pointer" }}
               >
-                {lang === "ko" ? "닫기" : "Close"}
+                {t("examReportBtnClose")}
               </button>
             </div>
 

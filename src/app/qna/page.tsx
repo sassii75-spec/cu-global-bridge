@@ -77,6 +77,9 @@ const QNA_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
   sidebarLocation: string;
   submitSuccess: string;
   submitReceipt: string;
+  bannerTitle: string;
+  bannerDesc: string;
+  bannerBtn: string;
 }> = {
   ko: {
     pageTitle: "❓ 통합 Q&A 및 FAQ 상담 센터",
@@ -101,7 +104,10 @@ const QNA_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
     sidebarHours: "운영 시간: 평일 09:00 ~ 18:00 (공휴일 제외)",
     sidebarLocation: "위치: 서울특별시 강남구 압구정로 32길 11 (압구정캠퍼스 본관 3층)",
     submitSuccess: "📡 질문 등록 완료! 학우님의 Q&A가 행정처에 정식 접수되었습니다. 답변 완료 시 이메일로 알림이 발송됩니다.",
-    submitReceipt: "📝 작성하신 상담 질문이 대학 행정처로 안전하게 송신되었습니다. 담임 상담사가 배정되어 내용을 검토 중이며, 완료 시 기재하신 개인 이메일로 24시간 이내에 공식 답변이 자동 송부됩니다."
+    submitReceipt: "📝 작성하신 상담 질문이 대학 행정처로 안전하게 송신되었습니다. 담임 상담사가 배정되어 내용을 검토 중이며, 완료 시 기재하신 개인 이메일로 24시간 이내에 공식 답변이 자동 송부됩니다.",
+    bannerTitle: "동문 선배들의 100% 리얼 정착 수기",
+    bannerDesc: "TOPIK 4급 공부 요령부터 연공 요건 충족, 지자체 F-2-R 비자 연동 승인 꿀팁까지! 생생한 후기를 바로 읽어보세요.",
+    bannerBtn: "생생 후기 게시판 가기 ↗"
   },
   en: {
     pageTitle: "❓ Integrated Q&A & FAQ Support Center",
@@ -126,7 +132,10 @@ const QNA_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
     sidebarHours: "Hours: Weekdays 09:00 - 18:00 (KST)",
     sidebarLocation: "Address: 11 Apgujeong-ro 32-gil, Gangnam-gu, Seoul (Apgujeong Campus, 3rd Floor)",
     submitSuccess: "📡 Ticket Submitted! Your Q&A has been registered. You will receive an email notification when reviewed.",
-    submitReceipt: "📝 Your consultation ticket has been securely sent to the administration. A dedicated counselor has been assigned and is reviewing your request. A reply will be sent within 24 hours."
+    submitReceipt: "📝 Your consultation ticket has been securely sent to the administration. A dedicated counselor has been assigned and is reviewing your request. A reply will be sent within 24 hours.",
+    bannerTitle: "Alumni's 100% Real Settlement Stories",
+    bannerDesc: "From TOPIK Level 4 study tips to salary requirements and regional F-2-R visa approval tips! Read real reviews.",
+    bannerBtn: "Go to Real Reviews Board ↗"
   },
   vn: {
     pageTitle: "❓ Trung tâm Hỗ trợ tích hợp Q&A & FAQ",
@@ -151,7 +160,10 @@ const QNA_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
     sidebarHours: "Thời gian làm việc: Ngày thường 09:00 ~ 18:00 (KST)",
     sidebarLocation: "Địa chỉ: 11 Apgujeong-ro 32-gil, Gangnam-gu, Seoul (Tầng 3, Cơ sở Apgujeong)",
     submitSuccess: "📡 Đã gửi câu hỏi! Yêu cầu của bạn đã được tiếp nhận thành công. Bạn sẽ nhận được thông báo qua email khi có phản hồi.",
-    submitReceipt: "📝 Yêu cầu tư vấn của bạn đã được gửi an toàn đến phòng hành chính. Cố vấn chuyên trách đã được chỉ định và đang xem xét yêu cầu. Phản hồi chính thức sẽ được gửi đến bạn trong vòng 24 giờ."
+    submitReceipt: "📝 Yêu cầu tư vấn của bạn đã được gửi an toàn đến phòng hành chính. Cố vấn chuyên trách đã được chỉ định và đang xem xét yêu cầu. Phản hồi chính thức sẽ được gửi đến bạn trong vòng 24 giờ.",
+    bannerTitle: "100% Câu chuyện định cư thực tế của cựu sinh viên",
+    bannerDesc: "Từ mẹo ôn thi TOPIK cấp 4 đến đáp ứng yêu cầu thu nhập, mẹo được duyệt visa F-2-R của địa phương! Đọc những trải nghiệm thực tế ngay.",
+    bannerBtn: "Đi đến Diễn đàn trải nghiệm ↗"
   },
   mn: {
     pageTitle: "❓ Нэгдсэн Q&A болон FAQ зөвлөгөөний төв",
@@ -175,8 +187,11 @@ const QNA_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
     sidebarEmail: "Цахим шуудан: support@global.ac.kr",
     sidebarHours: "Ажиллах цаг: Ажлын өдрүүдэд 09:00 ~ 18:00 (KST)",
     sidebarLocation: "Хаяг: Сөүл хот, Гангнам дүүрэг, Апгүжон-ру 32-р гудамж 11 (Апгүжон кампус, 3-р давхар)",
-    submitSuccess: "📡 Асуултыг хүлээн авлаа! Таны асуулт бүртгэгдсэн тул хариулт бэлэн болох үед цахим шуудангаар мэдэгдэх болно.",
-    submitReceipt: "📝 Таны илгээсэн асуултыг сургуулийн захиргаа хүлээн авлаа. Зөвлөх мэргэжилтэн таны асуулттай танилцаж байгаа бөгөөд 24 цагийн дотор албан ёсны хариултыг таны цахим шуудангаар илгээнэ."
+    submitSuccess: "📡 Асуултыг хүлээн авлаа! Таны асуулт бүртгэгдсэн ту을 хариулт бэлэн болох үед цахим шуудангаар мэдэгдэх болно.",
+    submitReceipt: "📝 Таны илгээсэн асуултыг сургуулийн захиргаа хүлээн авлаа. Зөвлөх мэргэжилтэн таны асуулттай танилцаж байгаа бөгөөд 24 цагийн дотор албан ёсны хариултыг таны цахим шуудангаар илгээнэ.",
+    bannerTitle: "Төгсөгчдийн 100% бодит амьдралын түүхүүд",
+    bannerDesc: "TOPIK 4-р түвшний сурах арга барилаас эхлэн орлогын шаардлага хангалт, орон нутгийн F-2-R виз авахад хэрэгтэй зөвлөгөөнүүд! Бодит сэтгэгдлийг одоо уншина уу.",
+    bannerBtn: "Бодит сэтгэгдлийн форум руу шилжих ↗"
   }
 };
 
@@ -439,12 +454,12 @@ export default function QnaPage() {
           {/* Simple widget banner pointing to community review testimonials */}
           <section className="widget-banner glass-panel" style={{ background: "linear-gradient(135deg, rgba(33, 64, 154, 0.2) 0%, rgba(114, 191, 68, 0.1) 100%)", border: "1px solid rgba(0, 185, 242, 0.2)" }}>
             <div className="widget-banner-icon">🗣️</div>
-            <div className="widget-banner-title">동문 선배들의 100% 리얼 정착 수기</div>
+            <div className="widget-banner-title">{tQna.bannerTitle}</div>
             <p className="widget-banner-desc" style={{ fontSize: "0.8rem" }}>
-              TOPIK 4급 공부 요령부터 연공 요건 충족, 지자체 F-2-R 비자 연동 승인 꿀팁까지! 생생한 후기를 바로 읽어보세요.
+              {tQna.bannerDesc}
             </p>
-            <a href="/community?tab=reviews" className="widget-banner-btn" style={{ background: "var(--gcu-sky)", textDecoration: "none", color: "#060A1A", display: "inline-block", fontWeight: "700", borderRadius: "8px" }}>
-              생생 후기 게시판 가기 ↗
+            <a href="/community?tab=reviews" className="widget-banner-btn" style={{ textDecoration: "none", display: "inline-block" }}>
+              {tQna.bannerBtn}
             </a>
           </section>
         </div>

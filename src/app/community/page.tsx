@@ -533,7 +533,7 @@ export default function CommunityPage() {
             <p className="widget-banner-desc" style={{ fontSize: "0.8rem" }}>
               {tComm.mentorDesc}
             </p>
-            <button onClick={() => alert(tComm.mentorAlert)} className="widget-banner-btn" style={{ background: "var(--gcu-orange)" }}>
+            <button onClick={() => alert(tComm.mentorAlert)} className="widget-banner-btn">
               {tComm.mentorBtn}
             </button>
           </section>

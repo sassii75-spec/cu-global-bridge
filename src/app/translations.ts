@@ -375,6 +375,348 @@ export const translations: Record<string, Record<Lang, string>> = {
     en: "Back to Exam Lobby",
     vn: "Quay lại Sảnh thi",
     mn: "Шалгалтын лоби руу буцах"
+  },
+  examHistoryName: {
+    ko: "모의고사 시험지명",
+    en: "Mock Exam Title",
+    vn: "Tên đề thi thử",
+    mn: "Загвар шалгалтын нэр"
+  },
+  examHistoryDetail: {
+    ko: "상세 채점표",
+    en: "Scorecard Detail",
+    vn: "Chi tiết bảng điểm",
+    mn: "Дэлгэрэнгүй оноо"
+  },
+  examHistoryBtnView: {
+    ko: "상세 보기",
+    en: "View Detail",
+    vn: "Xem chi tiết",
+    mn: "Дэлгэрэнгүй харах"
+  },
+  examBtnModeCard: {
+    ko: "🎯 1문항씩 풀기 (IBT 집중)",
+    en: "🎯 Solve by 1 Question (IBT Focus)",
+    vn: "🎯 Làm từng câu (Tập trung IBT)",
+    mn: "🎯 1 асуултаар шийдвэрлэх"
+  },
+  examBtnModePdf: {
+    ko: "📄 전체 시험지 보기 (PDF)",
+    en: "📄 View Full Exam Paper (PDF)",
+    vn: "📄 Xem toàn bộ đề thi (PDF)",
+    mn: "📄 Бүх шалгалтын хуудсыг харах (PDF)"
+  },
+  examModeCardMobile: {
+    ko: "🎯 1문항 집중 풀기",
+    en: "🎯 1 Question Focus",
+    vn: "🎯 Tập trung 1 câu",
+    mn: "🎯 1 асуултын анхаарал"
+  },
+  examModePassageMobile: {
+    ko: "📄 시험지 보기 (Passage)",
+    en: "📄 View Exam Paper (Passage)",
+    vn: "📄 Xem đề thi (Đoạn văn)",
+    mn: "📄 Шалгалтын хуудсыг харах (Эх)"
+  },
+  examModeOmrMobile: {
+    ko: "✏️ 답안 마킹 OMR",
+    en: "✏️ Answer Marking OMR",
+    vn: "✏️ Tô đáp án OMR",
+    mn: "✏️ Хариулт тэмдэглэх OMR"
+  },
+  examLabelCardTitle: {
+    ko: "🎯 IBT 단일 문항 집중 카드",
+    en: "🎯 IBT Single Question Focus Card",
+    vn: "🎯 Thẻ tập trung câu hỏi đơn IBT",
+    mn: "🎯 IBT Ганц асуултын анхаарлын хуудас"
+  },
+  examLabelPassageTitle: {
+    ko: "📄 IBT 문항지 지문 영역",
+    en: "📄 IBT Exam Paper Passage Area",
+    vn: "📄 Vùng đọc đoạn văn đề thi IBT",
+    mn: "📄 IBT шалгалтын хуудасны эх"
+  },
+  examAudioPlaying: {
+    ko: "📻 현재 재생 중인 음원 트랙:",
+    en: "📻 Currently playing audio track:",
+    vn: "📻 Băng âm thanh đang phát:",
+    mn: "📻 Одоо тоглуулагдаж буй аудио зам:"
+  },
+  examListeningGuide: {
+    ko: "👉 귀로 들리는 문제를 조용히 경청한 뒤, 아래에서 가장 올바른 보기를 골라 터치 마킹하십시오.",
+    en: "👉 Listen quietly to the question through your ears, then select and touch-mark the most correct option below.",
+    vn: "👉 Hãy chú ý lắng nghe câu hỏi bằng tai, sau đó chọn và đánh dấu đáp án chính xác nhất bên dưới.",
+    mn: "👉 Асуултыг анхааралтай сонсоод, доорх хамгийн зөв хариултыг сонгож тэмдэглэнэ үү."
+  },
+  examReadingGuide: {
+    ko: "📄 지문 독해 및 읽기 영역입니다. 전체 화면이나 PDF 시험지 보기를 원하시면 우측 상단 [📄 전체 시험지 보기] 탭을 선택하여 지문을 읽고 답을 마킹하십시오.",
+    en: "📄 This is the reading comprehension area. If you want a full screen or PDF exam paper, select the [📄 View Full Exam Paper] tab at the top right to read the passages and mark your answers.",
+    vn: "📄 Đây là phần đọc hiểu. Nếu bạn muốn xem toàn màn hình hoặc đề thi PDF, hãy chọn tab [📄 Xem toàn bộ đề thi] ở góc trên bên phải để đọc các đoạn văn và đánh dấu câu trả lời của bạn.",
+    mn: "📄 Энэ бол унших хэсэг юм. Хэрэв та бүтэн дэлгэц эсвэл PDF шалгалтын хуудсыг хүсэж байвал баруун дээд талын [📄 Бүх шалгалтын хуудсыг харах] цонхыг сонгон эхийг уншиж хариултаа тэмдэглэнэ үү."
+  },
+  examOptionLabel: {
+    ko: "보기",
+    en: "Option",
+    vn: "Đáp án",
+    mn: "Сонголт"
+  },
+  examOptionSuffix: {
+    ko: "번",
+    en: "",
+    vn: "",
+    mn: ""
+  },
+  examQuestionPrefix: {
+    ko: "제",
+    en: "Question",
+    vn: "Câu",
+    mn: "Асуулт"
+  },
+  examQuestionSuffix: {
+    ko: "문항",
+    en: "",
+    vn: "",
+    mn: ""
+  },
+  examAudioDedicatedPlaying: {
+    ko: "🎵 본 문항 전용 청취 음원이 재생되고 있습니다.",
+    en: "🎵 Dedicated listening audio for this question is playing.",
+    vn: "🎵 Đang phát âm thanh nghe chuyên dụng cho câu hỏi này.",
+    mn: "🎵 Энэ асуултын тусгай аудио тоглогдож байна."
+  },
+  examBtnPrevQuestion: {
+    ko: "◀ 이전 문항",
+    en: "◀ Prev Question",
+    vn: "◀ Câu trước",
+    mn: "◀ Өмнөх асуул트"
+  },
+  examBtnNextQuestion: {
+    ko: "다음 문항 ▶",
+    en: "Next Question ▶",
+    vn: "Câu tiếp theo ▶",
+    mn: "Дараах асуулт ▶"
+  },
+  examAudioPlayerHeader: {
+    ko: "🔊 듣기 평가 재생기",
+    en: "🔊 Listening Audio Player",
+    vn: "🔊 Trình phát âm thanh nghe",
+    mn: "🔊 Сонсох аудио тоглуулагч"
+  },
+  examAudioTrackSelector: {
+    ko: "🎧 청취 음원 트랙 선택 (Audio Tracks):",
+    en: "🎧 Select Audio Track (Audio Tracks):",
+    vn: "🎧 Chọn băng âm thanh (Audio Tracks):",
+    mn: "🎧 Аудио зам сонгох (Audio Tracks):"
+  },
+  examBtnSingleQuestion: {
+    ko: "🎯 단일 문항",
+    en: "🎯 Single Question",
+    vn: "🎯 Câu hỏi đơn",
+    mn: "🎯 Ганц асуулт"
+  },
+  examBtnFullSheet: {
+    ko: "📋 전체 시트",
+    en: "📋 Full Sheet",
+    vn: "📋 Toàn bộ phiếu",
+    mn: "📋 Бүх хуудас"
+  },
+  examFocusQuestion: {
+    ko: "FOCUS QUESTION",
+    en: "FOCUS QUESTION",
+    vn: "CÂU HỎI TẬP TRUNG",
+    mn: "ЧИГЛЭСЭН АСУУЛТ"
+  },
+  examFocusQuestionLabel: {
+    ko: "문항",
+    en: "Question",
+    vn: "Câu",
+    mn: "Асуулт"
+  },
+  examAutoMoveNotice: {
+    ko: "※ 마킹 시 0.25초 뒤 다음 문항으로 자동 이동합니다.",
+    en: "※ Automatically moves to the next question in 0.25 seconds after marking.",
+    vn: "※ Tự động chuyển sang câu tiếp theo sau 0.25 giây sau khi tô.",
+    mn: "※ Тэмдэглэгээ хийснээс хойш 0.25 секундын дараа дараагийн асуулт руу автоматаар шилжинэ."
+  },
+  examBtnPrev: {
+    ko: "◀ 이전",
+    en: "◀ Prev",
+    vn: "◀ Trước",
+    mn: "◀ Өмнөх"
+  },
+  examBtnNext: {
+    ko: "다음 ▶",
+    en: "Next ▶",
+    vn: "Tiếp ▶",
+    mn: "Дараах ▶"
+  },
+  examNavigatorLabel: {
+    ko: "🧭 빠른 문항 네비게이터:",
+    en: "🧭 Quick Question Navigator:",
+    vn: "🧭 Trình điều hướng câu hỏi nhanh:",
+    mn: "🧭 Шуурхай асуултын навигатор:"
+  },
+  examPoints: {
+    ko: "점",
+    en: "pts",
+    vn: "điểm",
+    mn: "оноо"
+  },
+  examDetailScorecardTitle: {
+    ko: "🔍 모의고사 성적 상세 분석 (Detailed Scorecard)",
+    en: "🔍 Detailed Scorecard Analysis",
+    vn: "🔍 Phân tích chi tiết bảng điểm",
+    mn: "🔍 Загвар шалгалтын онооны нарийвчилсан дүн"
+  },
+  examCorrectAnswer: {
+    ko: "정답",
+    en: "Correct Answer",
+    vn: "Đáp án đúng",
+    mn: "Зөв хариулт"
+  },
+  examYourAnswer: {
+    ko: "학우님 답안",
+    en: "Your Answer",
+    vn: "Đáp án của bạn",
+    mn: "Таны хариулт"
+  },
+  examIsCorrect: {
+    ko: "정오 판정",
+    en: "Result",
+    vn: "Đúng/Sai",
+    mn: "Зөв/Буруу"
+  },
+  examScoreCorrect: {
+    ko: "정답 🟢",
+    en: "Correct 🟢",
+    vn: "Đúng 🟢",
+    mn: "Зөв 🟢"
+  },
+  examScoreIncorrect: {
+    ko: "오답 ❌",
+    en: "Incorrect ❌",
+    vn: "Sai ❌",
+    mn: "Буруу ❌"
+  },
+  examAcademicNoticeTitle: {
+    ko: "📋 응시 가능한 모의고사 시험지",
+    en: "📋 Available Mock Exam Papers",
+    vn: "📋 Đề thi thử có sẵn",
+    mn: "📋 Өгөх боломжтой загвар шалгалтын материал"
+  },
+  examReportTitle: {
+    ko: "💡 IBT 모의고사 개인 성적 & 해설 상세 보고서",
+    en: "💡 IBT Mock Exam Detailed Score & Explanation Report",
+    vn: "💡 Báo cáo chi tiết điểm số & giải thích thi thử IBT",
+    mn: "💡 IBT загвар шалгалтын онооны нарийвчилсан тайлан"
+  },
+  examReportPaper: {
+    ko: "응시 기출 시험지",
+    en: "Exam Paper",
+    vn: "Đề thi đã làm",
+    mn: "Өгсөн шалгалтын материал"
+  },
+  examReportScore: {
+    ko: "취득 점수",
+    en: "Your Score",
+    vn: "Điểm số đạt được",
+    mn: "Авсан оноо"
+  },
+  examReportGrade: {
+    ko: "TOPIK 평가 등급",
+    en: "TOPIK Evaluation",
+    vn: "Đánh giá cấp độ TOPIK",
+    mn: "TOPIK Үнэлгээний түвшин"
+  },
+  examReportDate: {
+    ko: "응시 일자",
+    en: "Exam Date",
+    vn: "Ngày thi",
+    mn: "Шалгалт өгсөн огноо"
+  },
+  examReportTableTitle: {
+    ko: "문항별 마킹 대조 분석표 (오답노트)",
+    en: "Question-by-Question Marking & Analysis",
+    vn: "Bảng phân tích đối chiếu đáp án từng câu (Sổ tay câu sai)",
+    mn: "Асуулт бүрийн тэмдэглэгээ ба дүн шинжилгээний хүснэгт"
+  },
+  examReportCorrectRate: {
+    ko: "정답률",
+    en: "Correct Rate",
+    vn: "Tỷ lệ đúng",
+    mn: "Зөв хариултын хувь"
+  },
+  examReportQNo: {
+    ko: "문항 번호",
+    en: "Q.No",
+    vn: "Số câu hỏi",
+    mn: "Асуултын дугаар"
+  },
+  examReportYourAnswer: {
+    ko: "제출한 답안",
+    en: "Your Answer",
+    vn: "Đáp án đã nộp",
+    mn: "Илгээсэн хариулт"
+  },
+  examReportCorrectKey: {
+    ko: "실제 정답지",
+    en: "Correct Key",
+    vn: "Đáp án đúng thực tế",
+    mn: "Бодит зөв хариулт"
+  },
+  examReportStatus: {
+    ko: "채점 결과",
+    en: "Status",
+    vn: "Kết quả",
+    mn: "Шалгалтын дүн"
+  },
+  examReportUnmarked: {
+    ko: "미마킹",
+    en: "Unmarked",
+    vn: "Chưa tô",
+    mn: "Тэмдэглээгүй"
+  },
+  examReportCorrect: {
+    ko: "✅ 정답",
+    en: "✅ Correct",
+    vn: "✅ Đúng",
+    mn: "✅ Зөв"
+  },
+  examReportIncorrect: {
+    ko: "❌ 오답",
+    en: "❌ Incorrect",
+    vn: "❌ Sai",
+    mn: "❌ Буруу"
+  },
+  examReportGuideTitle: {
+    ko: "기출 공식 정답 및 해법 해설집",
+    en: "Official Answer & Explanation Guide",
+    vn: "Sách hướng dẫn đáp án & giải thích chính thức",
+    mn: "Албан ёсны зөв хариулт ба тайлбар гарын авлага"
+  },
+  examReportFileName: {
+    ko: "파일명",
+    en: "File",
+    vn: "Tên tệp",
+    mn: "Файлын нэр"
+  },
+  examReportBtnDownload: {
+    ko: "해설집 PDF 받기",
+    en: "Download PDF",
+    vn: "Tải về PDF giải thích",
+    mn: "Тайлбарын PDF-ийг татах"
+  },
+  examReportNoPdf: {
+    ko: "ℹ️ 본 시험지는 출제자가 등록한 해설지 PDF가 존재하지 않습니다.",
+    en: "ℹ️ No official explanation PDF is registered for this exam.",
+    vn: "ℹ️ Đề thi này không có tài liệu giải thích PDF do người ra đề đăng ký.",
+    mn: "ℹ️ Энэхүү шалгалтын хуудсанд зохиогчоос бүртгүүлсэн PDF тайлбар байхгүй байна."
+  },
+  examReportBtnClose: {
+    ko: "닫기",
+    en: "Close",
+    vn: "Đóng",
+    mn: "Хаах"
   }
 };
 

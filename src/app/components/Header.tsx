@@ -47,7 +47,6 @@ export default function Header() {
               width: "30px", 
               height: "30px", 
               objectFit: "contain", 
-              mixBlendMode: "screen",
               borderRadius: "50%",
               boxShadow: "0 0 12px rgba(0, 185, 242, 0.4)"
             }} 

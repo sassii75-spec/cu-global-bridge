@@ -342,19 +342,19 @@ export default function ProfilePage() {
                 <strong style={{ fontSize: "1.8rem", color: averageScore >= 60 ? "var(--gcu-green)" : "var(--gcu-orange)", fontFamily: "monospace" }}>{averageScore}{lang === "ko" ? "점" : "%"}</strong>
               </div>
 
-              <div style={{ background: "rgba(255,255,255,0.02)", padding: "18px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.04)", textAlign: "center" }}>
+              <div style={{ background: "rgba(0, 0, 0, 0.02)", padding: "18px", borderRadius: "10px", border: "1px solid rgba(0, 0, 0, 0.06)", textAlign: "center" }}>
                 <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>{lang === "ko" ? "최고 득점" : "High Score"}</span>
-                <strong style={{ fontSize: "1.8rem", color: "var(--gcu-sky)", fontFamily: "monospace" }}>{highestScore}{lang === "ko" ? "점" : "%"}</strong>
+                <strong style={{ fontSize: "1.8rem", color: "var(--gcu-navy)", fontFamily: "monospace" }}>{highestScore}{lang === "ko" ? "점" : "%"}</strong>
               </div>
 
-              <div style={{ background: "rgba(255,255,255,0.02)", padding: "18px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.04)", textAlign: "center" }}>
+              <div style={{ background: "rgba(0, 0, 0, 0.02)", padding: "18px", borderRadius: "10px", border: "1px solid rgba(0, 0, 0, 0.06)", textAlign: "center" }}>
                 <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>{lang === "ko" ? "TOPIK 합격률" : "TOPIK Pass Rate"}</span>
-                <strong style={{ fontSize: "1.8rem", color: "#57FF9A", fontFamily: "monospace" }}>{passRate}%</strong>
+                <strong style={{ fontSize: "1.8rem", color: "#2e7d32", fontFamily: "monospace" }}>{passRate}%</strong>
               </div>
             </div>
 
             {/* Visual Achievement Bar Chart */}
-            <div style={{ background: "rgba(0,0,0,0.15)", padding: "20px", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.03)" }}>
+            <div style={{ background: "rgba(0, 0, 0, 0.03)", padding: "20px", borderRadius: "12px", border: "1px solid rgba(0, 0, 0, 0.06)" }}>
               <span style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontWeight: "700", display: "block", marginBottom: "12px" }}>
                 📊 {lang === "ko" ? "TOPIK 목표 성취 구간별 학습 진도율" : "TOPIK Target Accomplish Ratio"}
               </span>
@@ -365,8 +365,8 @@ export default function ProfilePage() {
                     <span style={{ color: "var(--text-secondary)" }}>{lang === "ko" ? "초급 목표 달성 (TOPIK I 합격선 60점 이상)" : "Beginner Level Target Met (Score >= 60)"}</span>
                     <span style={{ color: "var(--gcu-green)", fontWeight: "700" }}>{passCount} / {totalExams} ({passRate}%)</span>
                   </div>
-                  <div style={{ width: "100%", height: "8px", background: "rgba(255,255,255,0.05)", borderRadius: "4px", overflow: "hidden" }}>
-                    <div style={{ width: `${passRate}%`, height: "100%", background: "linear-gradient(90deg, var(--gcu-green) 0%, #57FF9A 100%)", borderRadius: "4px", transition: "width 0.5s ease" }}></div>
+                  <div style={{ width: "100%", height: "8px", background: "rgba(0, 0, 0, 0.05)", borderRadius: "4px", overflow: "hidden" }}>
+                    <div style={{ width: `${passRate}%`, height: "100%", background: "linear-gradient(90deg, var(--gcu-green) 0%, var(--gcu-green) 100%)", borderRadius: "4px", transition: "width 0.5s ease" }}></div>
                   </div>
                 </div>
 
@@ -625,8 +625,8 @@ export default function ProfilePage() {
               padding: "36px", 
               position: "relative", 
               background: "var(--bg-secondary)",
-              border: "1px solid var(--gcu-sky)",
-              boxShadow: "0 24px 64px rgba(0, 185, 242, 0.35)",
+              border: "1px solid rgba(18, 42, 77, 0.12)",
+              boxShadow: "0 24px 64px rgba(18, 42, 77, 0.18)",
               animation: "toastSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
             }}
             onClick={(e) => e.stopPropagation()}
@@ -656,21 +656,21 @@ export default function ProfilePage() {
                 gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", 
                 gap: "12px", 
                 marginBottom: "24px",
-                background: "rgba(255,255,255,0.02)",
+                background: "rgba(0, 0, 0, 0.02)",
                 padding: "16px",
                 borderRadius: "10px",
-                border: "1px solid rgba(255,255,255,0.04)"
+                border: "1px solid rgba(0, 0, 0, 0.06)"
               }}
             >
               <div style={{ textAlign: "center" }}>
                 <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>{lang === "ko" ? "취득 점수" : "Your Score"}</span>
-                <strong style={{ fontSize: "1.8rem", color: "var(--gcu-sky)", fontFamily: "monospace" }}>{selectedHistoryRecord.score}{lang === "ko" ? "점" : "%"}</strong>
+                <strong style={{ fontSize: "1.8rem", color: "var(--gcu-navy)", fontFamily: "monospace" }}>{selectedHistoryRecord.score}{lang === "ko" ? "점" : "%"}</strong>
               </div>
-              <div style={{ textAlign: "center", borderLeft: "1px solid rgba(255,255,255,0.06)" }}>
+              <div style={{ textAlign: "center", borderLeft: "1px solid rgba(0, 0, 0, 0.08)" }}>
                 <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>{lang === "ko" ? "TOPIK 평가 등급" : "TOPIK Evaluation"}</span>
-                <strong style={{ fontSize: "1.05rem", color: "#57FF9A", display: "block", marginTop: "8px" }}>{selectedHistoryRecord.level}</strong>
+                <strong style={{ fontSize: "1.05rem", color: "#2e7d32", display: "block", marginTop: "8px" }}>{selectedHistoryRecord.level}</strong>
               </div>
-              <div style={{ textAlign: "center", borderLeft: "1px solid rgba(255,255,255,0.06)" }}>
+              <div style={{ textAlign: "center", borderLeft: "1px solid rgba(0, 0, 0, 0.08)" }}>
                 <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block", marginBottom: "4px" }}>{lang === "ko" ? "응시 일자" : "Exam Date"}</span>
                 <span style={{ fontSize: "0.92rem", color: "var(--text-secondary)", display: "block", marginTop: "8px", fontWeight: "600" }}>{selectedHistoryRecord.date}</span>
               </div>
@@ -678,14 +678,14 @@ export default function ProfilePage() {
 
             {/* 문항별 상세 채점 내역 */}
             <div style={{ marginBottom: "24px" }}>
-              <h4 style={{ fontSize: "0.92rem", fontWeight: "700", color: "#fff", marginBottom: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h4 style={{ fontSize: "0.92rem", fontWeight: "700", color: "var(--gcu-navy)", marginBottom: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span>🎯 {lang === "ko" ? "문항별 마킹 대조 분석표 (오답노트)" : "Question-by-Question Marking & Analysis"}</span>
-                <span style={{ fontSize: "0.75rem", color: "var(--gcu-sky)" }}>
+                <span style={{ fontSize: "0.75rem", color: "var(--gcu-red)" }}>
                   {lang === "ko" ? "정답률" : "Correct Rate"}: {selectedHistoryRecord.selectedAnswers?.filter((ans: number, idx: number) => ans === selectedHistoryRecord.answerKey[idx]).length} / {selectedHistoryRecord.questionCount}
                 </span>
               </h4>
               
-              <div style={{ maxHeight: "250px", overflowY: "auto", border: "1px solid var(--border-color)", borderRadius: "8px", background: "rgba(0,0,0,0.15)" }}>
+              <div style={{ maxHeight: "250px", overflowY: "auto", border: "1px solid var(--border-color)", borderRadius: "8px", background: "rgba(0,0,0,0.02)" }}>
                 <table className="resource-table" style={{ width: "100%", borderCollapse: "collapse", margin: 0 }}>
                   <thead>
                     <tr>
@@ -700,12 +700,12 @@ export default function ProfilePage() {
                       const correctAns = selectedHistoryRecord.answerKey[idx];
                       const isCorrect = ans === correctAns;
                       return (
-                        <tr key={idx} style={{ background: isCorrect ? "rgba(87, 255, 154, 0.02)" : "rgba(255, 75, 75, 0.02)" }}>
+                        <tr key={idx} style={{ background: isCorrect ? "rgba(114, 191, 68, 0.03)" : "rgba(198, 26, 43, 0.03)" }}>
                           <td style={{ padding: "8px 12px", textAlign: "center", fontWeight: "700", fontSize: "0.8rem" }}>Q.{idx + 1}</td>
                           <td style={{ padding: "8px 12px", textAlign: "center", fontSize: "0.8rem", color: ans === -1 ? "var(--text-muted)" : "inherit" }}>
                             {ans !== -1 ? `${ans + 1}${lang === "ko" ? "번" : ""}` : (lang === "ko" ? "미마킹" : "Unmarked")}
                           </td>
-                          <td style={{ padding: "8px 12px", textAlign: "center", fontSize: "0.8rem", fontWeight: "700", color: "var(--gcu-sky)" }}>{correctAns + 1}{lang === "ko" ? "번" : ""}</td>
+                          <td style={{ padding: "8px 12px", textAlign: "center", fontSize: "0.8rem", fontWeight: "700", color: "var(--gcu-navy)" }}>{correctAns + 1}{lang === "ko" ? "번" : ""}</td>
                           <td style={{ padding: "8px 12px", textAlign: "center", fontSize: "0.8rem" }}>
                             <span 
                               style={{ 
@@ -713,9 +713,9 @@ export default function ProfilePage() {
                                 borderRadius: "4px", 
                                 fontSize: "0.75rem", 
                                 fontWeight: "700", 
-                                background: isCorrect ? "rgba(87, 255, 154, 0.15)" : "rgba(255, 75, 75, 0.15)",
-                                color: isCorrect ? "#57FF9A" : "#FF8888",
-                                border: isCorrect ? "1px solid rgba(87,255,154,0.2)" : "1px solid rgba(255,75,75,0.2)"
+                                background: isCorrect ? "rgba(114, 191, 68, 0.1)" : "rgba(198, 26, 43, 0.08)",
+                                color: isCorrect ? "#2e7d32" : "#c61a2b",
+                                border: isCorrect ? "1px solid rgba(114, 191, 68, 0.25)" : "1px solid rgba(198, 26, 43, 0.2)"
                               }}
                             >
                               {isCorrect ? (lang === "ko" ? "✅ 정답" : "✅ Correct") : (lang === "ko" ? "❌ 오답" : "❌ Incorrect")}
@@ -738,15 +738,15 @@ export default function ProfilePage() {
                   display: "flex", 
                   justifyContent: "space-between", 
                   alignItems: "center",
-                  border: "1px solid rgba(247, 147, 30, 0.3)",
-                  background: "linear-gradient(90deg, rgba(247,147,30,0.06) 0%, rgba(0,0,0,0.25) 100%)",
+                  border: "1px solid rgba(247, 147, 30, 0.2)",
+                  background: "rgba(247, 147, 30, 0.05)",
                   marginBottom: "24px"
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", textAlign: "left" }}>
                   <span style={{ fontSize: "1.5rem" }}>🔑</span>
                   <div style={{ display: "flex", flexDirection: "column" }}>
-                    <span style={{ fontSize: "0.82rem", fontWeight: "800", color: "#fff" }}>
+                    <span style={{ fontSize: "0.82rem", fontWeight: "800", color: "var(--gcu-navy)" }}>
                       {lang === "ko" ? "기출 공식 정답 및 해법 해설집" : "Official Answer & Explanation Guide"}
                     </span>
                     <span style={{ fontSize: "0.72rem", color: "var(--text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "250px" }} title={selectedHistoryRecord.answerPdfFileName}>
@@ -763,13 +763,13 @@ export default function ProfilePage() {
                     padding: "8px 14px", 
                     fontSize: "0.76rem", 
                     borderRadius: "6px", 
-                    color: "#060A1A", 
+                    color: "#ffffff", 
                     fontWeight: "700",
                     textDecoration: "none",
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "4px",
-                    boxShadow: "0 4px 10px rgba(247,147,30,0.25)"
+                    boxShadow: "0 4px 10px rgba(247,147,30,0.15)"
                   }}
                 >
                   📥 {lang === "ko" ? "해설집 PDF 받기" : "Download PDF"}

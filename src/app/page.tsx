@@ -532,7 +532,7 @@ export default function Home() {
                   className="feed-item"
                   style={
                     feed.category === "gov" 
-                      ? { border: "1px solid rgba(179, 136, 255, 0.35)", background: "rgba(147, 112, 219, 0.04)" } 
+                      ? { border: "1px solid rgba(18, 42, 77, 0.12)", background: "rgba(18, 42, 77, 0.02)" } 
                       : {}
                   }
                 >
@@ -542,14 +542,14 @@ export default function Home() {
                     </span>
                     <div 
                       className="feed-title"
-                      style={feed.category === "gov" ? { color: "#E3D8FF", fontWeight: "500" } : {}}
+                      style={feed.category === "gov" ? { color: "var(--gcu-navy)", fontWeight: "700" } : {}}
                     >
                       {displayTitle}
                     </div>
                   </div>
                   <div 
                     className="feed-date"
-                    style={feed.category === "gov" ? { color: "#C6A3FF", fontWeight: "600" } : {}}
+                    style={feed.category === "gov" ? { color: "var(--gcu-red)", fontWeight: "600" } : {}}
                   >
                     {feed.date}
                   </div>
@@ -605,8 +605,8 @@ export default function Home() {
                   textDecoration: "none", 
                   transition: "all 0.3s ease",
                   overflow: "hidden",
-                  border: "1px solid rgba(255, 255, 255, 0.05)",
-                  background: "rgba(255, 255, 255, 0.015)"
+                  border: "1px solid rgba(0, 0, 0, 0.06)",
+                  background: "#ffffff"
                 }}
                 onMouseOver={(e) => {
                   e.currentTarget.style.transform = "translateY(-4px)";
@@ -615,7 +615,7 @@ export default function Home() {
                 }}
                 onMouseOut={(e) => {
                   e.currentTarget.style.transform = "none";
-                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.05)";
+                  e.currentTarget.style.borderColor = "rgba(0, 0, 0, 0.06)";
                   e.currentTarget.style.boxShadow = "none";
                 }}
               >
@@ -624,7 +624,7 @@ export default function Home() {
                 
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
                   <span style={{ fontSize: "1.75rem" }}>{partner.icon}</span>
-                  <h4 style={{ fontSize: "0.95rem", fontWeight: "700", color: "#fff", margin: 0, letterSpacing: "-0.3px", wordBreak: "keep-all" }}>
+                  <h4 style={{ fontSize: "0.95rem", fontWeight: "700", color: "var(--gcu-navy)", margin: 0, letterSpacing: "-0.3px", wordBreak: "keep-all" }}>
                     {partnerName}
                   </h4>
                 </div>

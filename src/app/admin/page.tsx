@@ -259,6 +259,22 @@ export default function AdminPage() {
   const [mp3FileName, setMp3FileName] = useState("");
   const [mp3DataUrl, setMp3DataUrl] = useState("");
   const [examAnswerKey, setExamAnswerKey] = useState<number[]>(new Array(10).fill(0));
+  const [questionsMode, setQuestionsMode] = useState(false);
+  const [questionsData, setQuestionsData] = useState<Array<{
+    id: number;
+    imageUrl: string;
+    imageFileName?: string;
+    audioUrl: string;
+    audioFileName?: string;
+    correctAnswer: number;
+  }>>(new Array(10).fill(null).map((_, i) => ({
+    id: i + 1,
+    imageUrl: "",
+    imageFileName: "",
+    audioUrl: "",
+    audioFileName: "",
+    correctAnswer: 0
+  })));
 
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [mp3File, setMp3File] = useState<File | null>(null);
@@ -424,6 +440,17 @@ export default function AdminPage() {
     setMp3File(null);
     setAnswerPdfFile(null);
     setExamAnswerKey(new Array(10).fill(0));
+    setQuestionsMode(false);
+    setQuestionsData(
+      new Array(10).fill(null).map((_, i) => ({
+        id: i + 1,
+        imageUrl: "",
+        imageFileName: "",
+        audioUrl: "",
+        audioFileName: "",
+        correctAnswer: 0
+      }))
+    );
     setIsExamModalOpen(true);
   };
 
@@ -454,6 +481,33 @@ export default function AdminPage() {
     setMp3File(null);
     setAnswerPdfFile(null);
     setExamAnswerKey([...exam.answerKey]);
+    
+    const hasQuestions = !!(exam as any).questions && (exam as any).questions.length > 0;
+    setQuestionsMode(hasQuestions);
+    if (hasQuestions) {
+      setQuestionsData(
+        (exam as any).questions.map((q: any) => ({
+          id: q.id,
+          imageUrl: q.imageUrl || "",
+          imageFileName: q.imageUrl ? "이미지 등록 완료" : "",
+          audioUrl: q.audioUrl || "",
+          audioFileName: q.audioUrl ? "음원 등록 완료" : "",
+          correctAnswer: q.correctAnswer || 0
+        }))
+      );
+    } else {
+      setQuestionsData(
+        new Array(exam.questionCount).fill(null).map((_, i) => ({
+          id: i + 1,
+          imageUrl: "",
+          imageFileName: "",
+          audioUrl: "",
+          audioFileName: "",
+          correctAnswer: exam.answerKey[i] || 0
+        }))
+      );
+    }
+    
     setIsExamModalOpen(true);
   };
 
@@ -468,12 +522,36 @@ export default function AdminPage() {
         return next.slice(0, newCount);
       }
     });
+    setQuestionsData((prev) => {
+      const next = [...prev];
+      if (next.length < newCount) {
+        const diff = newCount - next.length;
+        const additional = new Array(diff).fill(null).map((_, i) => ({
+          id: next.length + i + 1,
+          imageUrl: "",
+          imageFileName: "",
+          audioUrl: "",
+          audioFileName: "",
+          correctAnswer: 0
+        }));
+        return next.concat(additional);
+      } else {
+        return next.slice(0, newCount);
+      }
+    });
   };
 
   const handleAnswerChange = (qIdx: number, val: number) => {
     setExamAnswerKey((prev) => {
       const next = [...prev];
       next[qIdx] = val;
+      return next;
+    });
+    setQuestionsData((prev) => {
+      const next = [...prev];
+      if (next[qIdx]) {
+        next[qIdx].correctAnswer = val;
+      }
       return next;
     });
   };
@@ -490,6 +568,56 @@ export default function AdminPage() {
     }
     const data = await res.json();
     return data.url;
+  };
+
+  const handleUploadQuestionImage = async (qIdx: number, file: File) => {
+    try {
+      setQuestionsData((prev) => {
+        const next = [...prev];
+        next[qIdx].imageFileName = "업로드 중...";
+        return next;
+      });
+      const url = await uploadFileToServer(file);
+      setQuestionsData((prev) => {
+        const next = [...prev];
+        next[qIdx].imageUrl = url;
+        next[qIdx].imageFileName = file.name;
+        return next;
+      });
+      triggerToast(`Q.${qIdx + 1} 문항 이미지가 성공적으로 업로드되었습니다.`);
+    } catch (e: any) {
+      alert(`이미지 업로드 실패: ${e.message || e}`);
+      setQuestionsData((prev) => {
+        const next = [...prev];
+        next[qIdx].imageFileName = "";
+        return next;
+      });
+    }
+  };
+
+  const handleUploadQuestionAudio = async (qIdx: number, file: File) => {
+    try {
+      setQuestionsData((prev) => {
+        const next = [...prev];
+        next[qIdx].audioFileName = "업로드 중...";
+        return next;
+      });
+      const url = await uploadFileToServer(file);
+      setQuestionsData((prev) => {
+        const next = [...prev];
+        next[qIdx].audioUrl = url;
+        next[qIdx].audioFileName = file.name;
+        return next;
+      });
+      triggerToast(`Q.${qIdx + 1} 문항 전용 음원이 성공적으로 업로드되었습니다.`);
+    } catch (e: any) {
+      alert(`음원 업로드 실패: ${e.message || e}`);
+      setQuestionsData((prev) => {
+        const next = [...prev];
+        next[qIdx].audioFileName = "";
+        return next;
+      });
+    }
   };
 
   const handleSaveExam = async (e: React.FormEvent) => {
@@ -550,7 +678,13 @@ export default function AdminPage() {
         mp3FileName: finalAudioTracks.length > 0 ? finalAudioTracks[0].name : (mp3FileName || "68th_topik_ii_listening_audio_track.mp3"),
         mp3DataUrl: finalMp3Url,
         audioTracks: finalAudioTracks,
-        answerKey: examAnswerKey
+        answerKey: questionsMode ? questionsData.map(q => q.correctAnswer) : examAnswerKey,
+        questions: questionsMode ? questionsData.map(q => ({
+          id: q.id,
+          imageUrl: q.imageUrl,
+          audioUrl: q.audioUrl,
+          correctAnswer: q.correctAnswer
+        })) : []
       };
 
       const res = await fetch("/api/exams", {
@@ -1383,40 +1517,186 @@ export default function AdminPage() {
                 📡 자체 로컬 서버 스위트 작동 중: 업로드된 기출 시험지 PDF, 해설 답안지 및 31문항 MP3 음원은 서버 디스크 및 DB에 안전하게 영구 저장됩니다.
               </span>
 
-              {/* OMR Answer Key sheet dynamic configurator */}
-              <div style={{ borderTop: "1px solid rgba(255,255,255,0.04)", paddingTop: "12px" }}>
-                <label className="calc-label" style={{ display: "block", marginBottom: "10px", fontWeight: "700" }}>
-                  🎯 문항별 정답 답안지 키(OMR Key) 설정
-                </label>
-                
-                <div style={{ maxHeight: "160px", overflowY: "auto", border: "1px solid var(--border-color)", padding: "12px", borderRadius: "8px", background: "rgba(0,0,0,0.15)" }}>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                    {examAnswerKey.map((ans, qIdx) => (
-                      <div key={qIdx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: "8px", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
-                        <span style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontWeight: "600" }}>
-                          Q.{qIdx + 1}
-                        </span>
-                        
-                        {/* Radio selection group for choices 1, 2, 3, 4 */}
-                        <div style={{ display: "flex", gap: "12px" }}>
-                          {[0, 1, 2, 3].map((optVal) => (
-                            <label key={optVal} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "0.78rem", color: ans === optVal ? "var(--gcu-sky)" : "var(--text-secondary)", cursor: "pointer", fontWeight: ans === optVal ? "700" : "400" }}>
-                              <input 
-                                type="radio" 
-                                name={`q-key-${qIdx}`}
-                                checked={ans === optVal}
-                                onChange={() => handleAnswerChange(qIdx, optVal)}
-                                style={{ accentColor: "var(--gcu-sky)", cursor: "pointer" }}
-                              />
-                              {optVal + 1}
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+              {/* Individual Question Mode Toggle */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(0,0,0,0.03)", padding: "10px 14px", borderRadius: "10px", border: "1px solid rgba(0,0,0,0.06)", marginTop: "4px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                  <label className="calc-label" style={{ fontWeight: "700", marginBottom: 0, cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <input 
+                      type="checkbox" 
+                      checked={questionsMode}
+                      onChange={(e) => setQuestionsMode(e.target.checked)}
+                      style={{ accentColor: "var(--gcu-navy)", cursor: "pointer", width: "16px", height: "16px" }}
+                    />
+                    🖼️ 개별 문항 출제 모드 활성화 (이미지/음원 개별 등록)
+                  </label>
+                  <span style={{ fontSize: "0.68rem", color: "var(--text-secondary)", marginLeft: "22px" }}>
+                    체크 시 각 문항의 캡처 이미지와 듣기 평가 음원을 개별적으로 매칭하여 등록할 수 있습니다.
+                  </span>
                 </div>
               </div>
+
+              {questionsMode ? (
+                <div style={{ borderTop: "1px solid rgba(255,255,255,0.04)", paddingTop: "12px" }}>
+                  <label className="calc-label" style={{ display: "block", marginBottom: "10px", fontWeight: "700" }}>
+                    🖼️ 문항별 이미지, 음원 및 정답 개별 설정
+                  </label>
+                  
+                  <div style={{ maxHeight: "280px", overflowY: "auto", border: "1px solid var(--border-color)", padding: "12px", borderRadius: "8px", background: "rgba(0,0,0,0.02)" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                      {questionsData.map((q, qIdx) => (
+                        <div key={qIdx} style={{ display: "flex", flexDirection: "column", gap: "8px", paddingBottom: "12px", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+                            <span style={{ fontSize: "0.85rem", color: "var(--gcu-navy)", fontWeight: "700" }}>
+                              문항 {qIdx + 1}
+                            </span>
+                            
+                            {/* Radio selection group for choices 1, 2, 3, 4 */}
+                            <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                              <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>정답:</span>
+                              {[0, 1, 2, 3].map((optVal) => (
+                                <label key={optVal} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "0.78rem", color: q.correctAnswer === optVal ? "var(--gcu-red)" : "var(--text-secondary)", cursor: "pointer", fontWeight: q.correctAnswer === optVal ? "700" : "400" }}>
+                                  <input 
+                                    type="radio" 
+                                    name={`q-key-spec-${qIdx}`}
+                                    checked={q.correctAnswer === optVal}
+                                    onChange={() => handleAnswerChange(qIdx, optVal)}
+                                    style={{ accentColor: "var(--gcu-red)", cursor: "pointer" }}
+                                  />
+                                  {optVal + 1}
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                            {/* Image upload button */}
+                            <div>
+                              <input 
+                                type="file" 
+                                accept="image/*"
+                                id={`q-img-upload-${qIdx}`}
+                                style={{ display: "none" }}
+                                onChange={(e) => {
+                                  if (e.target.files && e.target.files[0]) {
+                                    handleUploadQuestionImage(qIdx, e.target.files[0]);
+                                  }
+                                }}
+                              />
+                              <label 
+                                htmlFor={`q-img-upload-${qIdx}`}
+                                className="calc-select"
+                                style={{ 
+                                  display: "flex", 
+                                  alignItems: "center", 
+                                  justifyContent: "center", 
+                                  height: "30px", 
+                                  cursor: "pointer", 
+                                  fontSize: "0.75rem", 
+                                  background: q.imageUrl ? "rgba(18, 42, 77, 0.05)" : "rgba(198, 26, 43, 0.05)",
+                                  border: q.imageUrl ? "1px solid rgba(18, 42, 77, 0.15)" : "1px dashed rgba(198, 26, 43, 0.25)",
+                                  borderRadius: "6px",
+                                  gap: "4px"
+                                }}
+                              >
+                                {q.imageUrl ? (
+                                  <>
+                                    <img src={q.imageUrl} style={{ width: "16px", height: "16px", objectFit: "cover", borderRadius: "2px" }} />
+                                    <span>재업로드</span>
+                                  </>
+                                ) : (
+                                  <span>🖼️ 문항 이미지 선택</span>
+                                )}
+                              </label>
+                              {q.imageFileName && (
+                                <span style={{ fontSize: "0.65rem", color: "var(--text-muted)", display: "block", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                  {q.imageFileName}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Audio upload button */}
+                            <div>
+                              <input 
+                                type="file" 
+                                accept="audio/*"
+                                id={`q-aud-upload-${qIdx}`}
+                                style={{ display: "none" }}
+                                onChange={(e) => {
+                                  if (e.target.files && e.target.files[0]) {
+                                    handleUploadQuestionAudio(qIdx, e.target.files[0]);
+                                  }
+                                }}
+                              />
+                              <label 
+                                htmlFor={`q-aud-upload-${qIdx}`}
+                                className="calc-select"
+                                style={{ 
+                                  display: "flex", 
+                                  alignItems: "center", 
+                                  justifyContent: "center", 
+                                  height: "30px", 
+                                  cursor: "pointer", 
+                                  fontSize: "0.75rem", 
+                                  background: q.audioUrl ? "rgba(18, 42, 77, 0.05)" : "rgba(114, 191, 68, 0.05)",
+                                  border: q.audioUrl ? "1px solid rgba(18, 42, 77, 0.15)" : "1px dashed rgba(114, 191, 68, 0.25)",
+                                  borderRadius: "6px",
+                                  gap: "4px"
+                                }}
+                              >
+                                {q.audioUrl ? (
+                                  <span>✔️ 음원 완료</span>
+                                ) : (
+                                  <span>🎵 문항 음원 선택</span>
+                                )}
+                              </label>
+                              {q.audioFileName && (
+                                <span style={{ fontSize: "0.65rem", color: "var(--text-muted)", display: "block", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                  {q.audioFileName}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* OMR Answer Key sheet dynamic configurator */
+                <div style={{ borderTop: "1px solid rgba(255,255,255,0.04)", paddingTop: "12px" }}>
+                  <label className="calc-label" style={{ display: "block", marginBottom: "10px", fontWeight: "700" }}>
+                    🎯 문항별 정답 답안지 키(OMR Key) 설정
+                  </label>
+                  
+                  <div style={{ maxHeight: "160px", overflowY: "auto", border: "1px solid var(--border-color)", padding: "12px", borderRadius: "8px", background: "rgba(0,0,0,0.15)" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                      {examAnswerKey.map((ans, qIdx) => (
+                        <div key={qIdx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: "8px", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                          <span style={{ fontSize: "0.82rem", color: "var(--text-secondary)", fontWeight: "600" }}>
+                            Q.{qIdx + 1}
+                          </span>
+                          
+                          {/* Radio selection group for choices 1, 2, 3, 4 */}
+                          <div style={{ display: "flex", gap: "12px" }}>
+                            {[0, 1, 2, 3].map((optVal) => (
+                              <label key={optVal} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "0.78rem", color: ans === optVal ? "var(--gcu-sky)" : "var(--text-secondary)", cursor: "pointer", fontWeight: ans === optVal ? "700" : "400" }}>
+                                <input 
+                                  type="radio" 
+                                  name={`q-key-${qIdx}`}
+                                  checked={ans === optVal}
+                                  onChange={() => handleAnswerChange(qIdx, optVal)}
+                                  style={{ accentColor: "var(--gcu-sky)", cursor: "pointer" }}
+                                />
+                                {optVal + 1}
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Modal controls */}
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "10px" }}>
