@@ -2,11 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    // Next.js standard boundary checks
-    const reqInstance = new NextRequest(req);
-    const formData = await reqInstance.formData();
+    // Directly parse standard NextRequest stream without extra wraps to prevent dev server breaks
+    const formData = await req.formData();
     const file = formData.get("file") as File;
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -30,7 +29,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, url: fileUrl, fileName: file.name });
     } catch (writeError) {
       // 2. Serverless Read-only File System Fallback (Works in Vercel production environment)
-      console.warn("Local file system write is disabled/read-only. Falling back to Base64 Data URL:", writeError);
+      console.warn("Local file system write failed. Falling back to Base64 Data URL:", writeError);
       
       const base64 = buffer.toString("base64");
       const mimeType = file.type || "application/octet-stream";
