@@ -871,7 +871,7 @@ export default function LearningPage() {
         </button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: "32px", alignItems: "start" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 340px", gap: isMobile ? "24px" : "32px", alignItems: "start" }}>
         <div>
           {/* 1. Regular Courses Tab */}
           {activeTab === "courses" && (
