@@ -7,6 +7,8 @@ import { Lang } from "../translations";
 export default function Header() {
   const { lang, setLang, t } = useLanguage();
   const [activeUser, setActiveUser] = useState<any>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -187,8 +189,52 @@ export default function Header() {
               <span>{t("login")}</span>
             </a>
           )}
+
+          {/* Mobile Hamburger Menu Toggle Button */}
+          <button 
+            className="mobile-menu-toggle"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle navigation menu"
+            style={{ display: "flex", marginLeft: "4px" }}
+          >
+            {isMenuOpen ? "✕" : "☰"}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Dropdown Overlay Navigation Menu */}
+      {isMenuOpen && (
+        <div className="gcu-mobile-menu" style={{ display: "flex" }}>
+          <div className="gcu-mobile-menu-nav">
+            <a href="/intro" className="gcu-mobile-nav-item" onClick={() => setIsMenuOpen(false)}>{t("navIntro")}</a>
+            <a href="/learning" className="gcu-mobile-nav-item" onClick={() => setIsMenuOpen(false)}>{t("navLearning")}</a>
+            <a href="/life" className="gcu-mobile-nav-item" onClick={() => setIsMenuOpen(false)}>{t("navLife")}</a>
+            <a href="/community" className="gcu-mobile-nav-item" onClick={() => setIsMenuOpen(false)}>{t("navCommunity")}</a>
+            <a href="/qna" className="gcu-mobile-nav-item" onClick={() => setIsMenuOpen(false)}>{t("navQna")}</a>
+            {activeUser && (
+              <a 
+                href="/profile" 
+                className="gcu-mobile-nav-item" 
+                style={{ color: "var(--gcu-green)", fontWeight: "600" }}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                👤 {lang === "ko" ? "마이페이지" : "My Page"}
+              </a>
+            )}
+            {activeUser?.role === "admin" && (
+              <a 
+                href="/admin" 
+                className="gcu-mobile-nav-item" 
+                style={{ color: "var(--gcu-sky)", fontWeight: "600" }}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                🔑 {t("navAdmin")}
+              </a>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }
+
