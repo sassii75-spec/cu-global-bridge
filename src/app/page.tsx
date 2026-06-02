@@ -326,10 +326,10 @@ export default function Home() {
           display: "flex", 
           alignItems: "center", 
           gap: "12px", 
-          background: "linear-gradient(90deg, rgba(0, 185, 242, 0.12) 0%, rgba(179, 136, 255, 0.04) 100%)",
-          border: "1px solid rgba(0, 185, 242, 0.25)",
+          background: "linear-gradient(90deg, rgba(18, 42, 77, 0.04) 0%, rgba(198, 26, 43, 0.04) 100%)",
+          border: "1px solid rgba(198, 26, 43, 0.15)",
           borderRadius: "16px",
-          boxShadow: "0 4px 30px rgba(0, 0, 0, 0.15)",
+          boxShadow: "0 4px 15px rgba(18, 42, 77, 0.03)",
           flexDirection: "row",
           width: "100%"
         }}
@@ -340,17 +340,17 @@ export default function Home() {
             style={{ 
               width: "8px", 
               height: "8px", 
-              background: "#00E5FF", 
-              boxShadow: "0 0 12px #00E5FF", 
-              animation: "pulseSky 2.0s infinite" 
+              background: "var(--gcu-red)", 
+              boxShadow: "0 0 12px var(--gcu-red)", 
+              animation: "pulseRed 2.0s infinite" 
             }}
           ></span>
         </div>
         <p style={{ 
           margin: 0, 
           fontSize: "0.85rem", 
-          fontWeight: "600", 
-          color: "#E0F7FA", 
+          fontWeight: "700", 
+          color: "var(--gcu-navy)", 
           lineHeight: "1.5", 
           wordBreak: "keep-all"
         }}>
