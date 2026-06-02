@@ -1511,17 +1511,18 @@ export default function LearningPage() {
                             <div 
                               className="glass-panel" 
                               style={{ 
-                                margin: "20px 0", 
-                                padding: "24px", 
+                                margin: "12px 0", 
+                                padding: activeExam.questions?.[activeQuestionIndex]?.imageUrl ? "8px" : "24px", 
                                 background: "rgba(0, 0, 0, 0.015)", 
                                 borderRadius: "14px", 
                                 border: "1px solid rgba(0, 0, 0, 0.05)",
-                                minHeight: "260px",
+                                minHeight: activeExam.questions?.[activeQuestionIndex]?.imageUrl ? "auto" : "260px",
                                 display: "flex",
                                 flexDirection: "column",
                                 justifyContent: "center",
                                 alignItems: "center",
-                                gap: "14px"
+                                gap: "10px",
+                                width: "100%"
                               }}
                             >
                               {activeExam.questions?.[activeQuestionIndex]?.imageUrl ? (
@@ -1530,8 +1531,9 @@ export default function LearningPage() {
                                     src={activeExam.questions[activeQuestionIndex].imageUrl} 
                                     alt={`Question ${activeQuestionIndex + 1}`}
                                     style={{ 
+                                      width: "100%",
                                       maxWidth: "100%", 
-                                      maxHeight: "180px", 
+                                      maxHeight: "520px", 
                                       objectFit: "contain",
                                       borderRadius: "10px", 
                                       border: "1px solid rgba(0, 0, 0, 0.06)", 
