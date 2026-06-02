@@ -6,7 +6,7 @@ import { useLanguage } from "../context/LanguageContext";
 // Localized translations for the Login Screen
 const LOGIN_TRANSLATIONS = {
   ko: {
-    welcomeBack: "당신의 글로벌 꿈, GCU와 함께 시작하세요",
+    welcomeBack: "당신의 글로벌 꿈\nGCU와 함께 시작하세요",
     loginDesc: "GCU Global Bridge 통합 학사 및 취업 관리 계정 포털에 오신 것을 환영합니다.",
     emailLabel: "이메일 주소",
     emailPlaceholder: "학적 또는 근로 계약용 이메일을 입력하세요...",
@@ -21,7 +21,7 @@ const LOGIN_TRANSLATIONS = {
     testTip: "💡 테스트 관리자 계정: admin@global.ac.kr / 비밀번호: admin123"
   },
   en: {
-    welcomeBack: "Start Your Global Dream with GCU",
+    welcomeBack: "Start Your Global Dream\nwith GCU",
     loginDesc: "Welcome to GCU Global Bridge integrated academic and employment portal.",
     emailLabel: "Email Address",
     emailPlaceholder: "Enter your registered email...",
@@ -36,7 +36,7 @@ const LOGIN_TRANSLATIONS = {
     testTip: "💡 Demo Admin Account: admin@global.ac.kr / Password: admin123"
   },
   vn: {
-    welcomeBack: "Khởi đầu Ước mơ Toàn cầu cùng GCU",
+    welcomeBack: "Khởi đầu Ước mơ Toàn cầu\ncùng GCU",
     loginDesc: "Chào mừng đến với cổng quản lý học vụ & việc làm tích hợp GCU Global Bridge.",
     emailLabel: "Địa chỉ Email",
     emailPlaceholder: "Nhập email đăng ký học tập/làm việc...",
@@ -51,7 +51,7 @@ const LOGIN_TRANSLATIONS = {
     testTip: "💡 Tài khoản Admin thử nghiệm: admin@global.ac.kr / Mật khẩu: admin123"
   },
   mn: {
-    welcomeBack: "Глобал мөрөөдлөө GCU-тай хамт эхлүүлээрэй",
+    welcomeBack: "Глобал мөрөөдлөө\nGCU-тай хамт эхлүүлээрэй",
     loginDesc: "GCU Global Bridge нэгдсэн академик болон ажил эрхлэлтийн удирдлагын системд тавтай морил.",
     emailLabel: "Цахим шуудан",
     emailPlaceholder: "Сургуульд бүртгэлтэй цахим шуудангаа оруулна уу...",
@@ -189,25 +189,20 @@ export default function LoginPage() {
         }}
       >
         {/* Symbol */}
-        <div 
+        <img 
+          src="/gcu-university-logo.png" 
+          alt="Global Cyber University Logo" 
           style={{ 
-            width: "60px", 
-            height: "60px", 
-            background: "var(--brand-gradient)", 
-            border: "2px solid var(--gcu-sky)",
-            borderRadius: "50%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            width: "100%", 
+            maxWidth: "240px", 
+            height: "auto", 
+            objectFit: "contain",
             margin: "0 auto 24px auto",
-            fontSize: "1.75rem",
-            boxShadow: "var(--shadow-glow)"
-          }}
-        >
-          🔑
-        </div>
+            display: "block"
+          }} 
+        />
 
-        <h1 style={{ fontSize: "1.6rem", fontWeight: "800", color: "var(--text-primary)", fontFamily: "var(--font-brand)", letterSpacing: "-0.5px", marginBottom: "12px" }}>
+        <h1 style={{ fontSize: "1.6rem", fontWeight: "800", color: "var(--text-primary)", fontFamily: "var(--font-brand)", letterSpacing: "-0.5px", marginBottom: "12px", whiteSpace: "pre-line", lineHeight: "1.35" }}>
           {t.welcomeBack}
         </h1>
         
