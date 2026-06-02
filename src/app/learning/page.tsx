@@ -428,6 +428,7 @@ const LEARNING_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
   tabNotices: string;
   recommendTitle: string;
   applyFreeBtn: string;
+  appliedBtn: string;
   applyAlert: string;
   downloadAlert: string;
   downloadBtn: string;
@@ -466,6 +467,7 @@ const LEARNING_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
     tabNotices: "📢 학사 & 교육지원 공지",
     recommendTitle: "추천 교육 강좌 목록",
     applyFreeBtn: "무료 수강신청하기",
+    appliedBtn: "수강신청 완료 (수강중)",
     applyAlert: "정식 무료 수강 신청이 완료되었습니다.",
     downloadAlert: "파일이 안전하게 브라우저 다운로드 큐에 추가되었습니다.",
     downloadBtn: "학습자료 다운로드 ↗",
@@ -504,6 +506,7 @@ const LEARNING_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
     tabNotices: "📢 Academic & Support Notices",
     recommendTitle: "Recommended Courses",
     applyFreeBtn: "Apply for Free",
+    appliedBtn: "Enrolled (Study)",
     applyAlert: "Free course enrollment complete.",
     downloadAlert: "File successfully added to the download queue.",
     downloadBtn: "Download Material ↗",
@@ -542,6 +545,7 @@ const LEARNING_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
     tabNotices: "📢 Thông báo Học vụ",
     recommendTitle: "Danh sách khóa học gợi ý",
     applyFreeBtn: "Đăng ký học miễn phí",
+    appliedBtn: "Đã đăng ký (Học)",
     applyAlert: "Đăng ký khóa học miễn phí thành công.",
     downloadAlert: "Tài liệu đã được thêm vào hàng đợi tải xuống an toàn.",
     downloadBtn: "Tải tài liệu ↗",
@@ -580,6 +584,7 @@ const LEARNING_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
     tabNotices: "📢 Сургуулийн зарлал",
     recommendTitle: "Санал болгож буй сургалтууд",
     applyFreeBtn: "Үнэгүй суралцах хүсэлт",
+    appliedBtn: "Бүртгэгдсэн (Суралцах)",
     applyAlert: "Үнэгүй суралцах хүсэлт амжилттай бүртгэгдлээ.",
     downloadAlert: "Файлыг татах хэсэгт амжилттай нэмлээ.",
     downloadBtn: "Материал татах ↗",
@@ -648,6 +653,7 @@ export default function LearningPage() {
   const tLearn = LEARNING_TRANSLATIONS[lang as "ko" | "en" | "vn" | "mn"] || LEARNING_TRANSLATIONS.ko;
 
   const [activeTab, setActiveTab] = useState("courses");
+  const [appliedCourses, setAppliedCourses] = useState<number[]>([]);
 
   // Dynamic IBT States
   const [exams, setExams] = useState<any[]>([]);
@@ -734,6 +740,16 @@ export default function LearningPage() {
       const savedHistory = localStorage.getItem("gcu-exam-history");
       if (savedHistory) {
         setExamHistory(JSON.parse(savedHistory));
+      }
+
+      // 4. Load applied courses
+      const savedApplied = localStorage.getItem("gcu-applied-courses");
+      if (savedApplied) {
+        try {
+          setAppliedCourses(JSON.parse(savedApplied));
+        } catch (e) {
+          console.error("Failed to parse applied courses:", e);
+        }
       }
     }
   }, []);
@@ -888,6 +904,16 @@ export default function LearningPage() {
     alert(`"${filename}" ${tLearn.downloadAlert}`);
   };
 
+  const handleApplyCourse = (courseId: number) => {
+    if (appliedCourses.includes(courseId)) return;
+    const nextApplied = [...appliedCourses, courseId];
+    setAppliedCourses(nextApplied);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gcu-applied-courses", JSON.stringify(nextApplied));
+    }
+    alert(tLearn.applyAlert);
+  };
+
   // Format Time Left: MM:SS
   const formatTimeLeft = () => {
     const mins = Math.floor(timeLeft / 60);
@@ -984,13 +1010,32 @@ export default function LearningPage() {
                         </p>
                       </div>
 
-                      <button 
-                        onClick={() => alert(tLearn.applyAlert)}
-                        className="sim-start-btn" 
-                        style={{ width: "100%", padding: "10px 0", fontSize: "0.85rem" }}
-                      >
-                        {tLearn.applyFreeBtn}
-                      </button>
+                      {appliedCourses.includes(course.id) ? (
+                        <button 
+                          disabled
+                          className="sim-start-btn" 
+                          style={{ 
+                            width: "100%", 
+                            padding: "10px 0", 
+                            fontSize: "0.85rem", 
+                            background: "rgba(0, 0, 0, 0.05)", 
+                            border: "1px solid rgba(0, 0, 0, 0.08)", 
+                            color: "var(--text-muted)",
+                            cursor: "not-allowed",
+                            boxShadow: "none"
+                          }}
+                        >
+                          ✓ {tLearn.appliedBtn}
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => handleApplyCourse(course.id)}
+                          className="sim-start-btn" 
+                          style={{ width: "100%", padding: "10px 0", fontSize: "0.85rem" }}
+                        >
+                          {tLearn.applyFreeBtn}
+                        </button>
+                      )}
                     </div>
                   );
                 })}
