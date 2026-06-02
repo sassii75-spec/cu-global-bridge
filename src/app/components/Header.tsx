@@ -38,7 +38,18 @@ export default function Header() {
       <div className="gcu-header-inner">
         {/* Logo Brand Group */}
         <a href="/" className="gcu-logo-group">
-          <div className="gcu-logo-icon">G</div>
+          <img 
+            src="/gcu-logo.png" 
+            alt="GCU Logo" 
+            style={{ 
+              width: "30px", 
+              height: "30px", 
+              objectFit: "contain", 
+              mixBlendMode: "screen",
+              borderRadius: "50%",
+              boxShadow: "0 0 12px rgba(0, 185, 242, 0.4)"
+            }} 
+          />
           <div className="gcu-logo-text" style={{ whiteSpace: "nowrap" }}>GCU Global Bridge</div>
         </a>
 
