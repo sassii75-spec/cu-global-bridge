@@ -80,10 +80,12 @@ export default function Header() {
               className="gcu-nav-item" 
               style={{ 
                 whiteSpace: "nowrap", 
-                border: "1px solid var(--gcu-sky)", 
-                background: "rgba(0, 185, 242, 0.05)",
-                color: "var(--gcu-sky)",
-                fontWeight: "600"
+                border: "1px solid rgba(18, 42, 77, 0.15)", 
+                background: "rgba(18, 42, 77, 0.03)",
+                color: "var(--gcu-navy)",
+                fontWeight: "600",
+                borderRadius: "8px",
+                padding: "3px 8px"
               }}
             >
               🔑 {t("navAdmin")}
@@ -124,11 +126,11 @@ export default function Header() {
                 style={{ 
                   fontSize: "0.75rem", 
                   fontWeight: "700", 
-                  color: "var(--gcu-sky)", 
-                  background: "rgba(255,255,255,0.03)", 
+                  color: "var(--gcu-navy)", 
+                  background: "rgba(18, 42, 77, 0.03)", 
                   padding: "5px 10px", 
                   borderRadius: "20px", 
-                  border: "1px solid var(--border-color)",
+                  border: "1px solid rgba(18, 42, 77, 0.15)",
                   whiteSpace: "nowrap",
                   display: "flex",
                   alignItems: "center",
@@ -136,8 +138,8 @@ export default function Header() {
                   textDecoration: "none",
                   transition: "all 0.2s ease"
                 }}
-                onMouseOver={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.08)"}
-                onMouseOut={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.03)"}
+                onMouseOver={(e) => e.currentTarget.style.background = "rgba(18, 42, 77, 0.08)"}
+                onMouseOut={(e) => e.currentTarget.style.background = "rgba(18, 42, 77, 0.03)"}
               >
                 <span>👤</span>
                 <span>{activeUser.name}</span>
@@ -149,9 +151,9 @@ export default function Header() {
                 style={{ 
                   whiteSpace: "nowrap", 
                   flexShrink: 0, 
-                  background: "rgba(247,147,30,0.12)", 
-                  border: "1px solid var(--gcu-orange)", 
-                  color: "var(--gcu-orange)", 
+                  background: "rgba(0, 0, 0, 0.03)", 
+                  border: "1px solid rgba(0, 0, 0, 0.12)", 
+                  color: "var(--text-secondary)", 
                   padding: "5px 10px", 
                   cursor: "pointer", 
                   borderRadius: "8px", 
@@ -159,8 +161,8 @@ export default function Header() {
                   fontWeight: "700",
                   transition: "all 0.2s ease"
                 }}
-                onMouseOver={(e) => e.currentTarget.style.background = "rgba(247,147,30,0.2)"}
-                onMouseOut={(e) => e.currentTarget.style.background = "rgba(247,147,30,0.12)"}
+                onMouseOver={(e) => e.currentTarget.style.background = "rgba(0, 0, 0, 0.08)"}
+                onMouseOut={(e) => e.currentTarget.style.background = "rgba(0, 0, 0, 0.03)"}
               >
                 {t("logout")}
               </button>

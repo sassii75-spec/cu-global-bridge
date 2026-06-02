@@ -264,6 +264,8 @@ export default function AdminPage() {
     id: number;
     imageUrl: string;
     imageFileName?: string;
+    questionImageUrl?: string;
+    questionImageFileName?: string;
     audioUrl: string;
     audioFileName?: string;
     correctAnswer: number;
@@ -271,6 +273,8 @@ export default function AdminPage() {
     id: i + 1,
     imageUrl: "",
     imageFileName: "",
+    questionImageUrl: "",
+    questionImageFileName: "",
     audioUrl: "",
     audioFileName: "",
     correctAnswer: 0
@@ -446,6 +450,8 @@ export default function AdminPage() {
         id: i + 1,
         imageUrl: "",
         imageFileName: "",
+        questionImageUrl: "",
+        questionImageFileName: "",
         audioUrl: "",
         audioFileName: "",
         correctAnswer: 0
@@ -489,7 +495,9 @@ export default function AdminPage() {
         (exam as any).questions.map((q: any) => ({
           id: q.id,
           imageUrl: q.imageUrl || "",
-          imageFileName: q.imageUrl ? "이미지 등록 완료" : "",
+          imageFileName: q.imageUrl ? "보기/지문 등록 완료" : "",
+          questionImageUrl: q.questionImageUrl || "",
+          questionImageFileName: q.questionImageUrl ? "문항 등록 완료" : "",
           audioUrl: q.audioUrl || "",
           audioFileName: q.audioUrl ? "음원 등록 완료" : "",
           correctAnswer: q.correctAnswer || 0
@@ -501,6 +509,8 @@ export default function AdminPage() {
           id: i + 1,
           imageUrl: "",
           imageFileName: "",
+          questionImageUrl: "",
+          questionImageFileName: "",
           audioUrl: "",
           audioFileName: "",
           correctAnswer: exam.answerKey[i] || 0
@@ -530,6 +540,8 @@ export default function AdminPage() {
           id: next.length + i + 1,
           imageUrl: "",
           imageFileName: "",
+          questionImageUrl: "",
+          questionImageFileName: "",
           audioUrl: "",
           audioFileName: "",
           correctAnswer: 0
@@ -590,6 +602,31 @@ export default function AdminPage() {
       setQuestionsData((prev) => {
         const next = [...prev];
         next[qIdx].imageFileName = "";
+        return next;
+      });
+    }
+  };
+
+  const handleUploadDetailQuestionImage = async (qIdx: number, file: File) => {
+    try {
+      setQuestionsData((prev) => {
+        const next = [...prev];
+        next[qIdx].questionImageFileName = "업로드 중...";
+        return next;
+      });
+      const url = await uploadFileToServer(file);
+      setQuestionsData((prev) => {
+        const next = [...prev];
+        next[qIdx].questionImageUrl = url;
+        next[qIdx].questionImageFileName = file.name;
+        return next;
+      });
+      triggerToast(`Q.${qIdx + 1} 개별 문항 이미지가 성공적으로 업로드되었습니다.`);
+    } catch (e: any) {
+      alert(`이미지 업로드 실패: ${e.message || e}`);
+      setQuestionsData((prev) => {
+        const next = [...prev];
+        next[qIdx].questionImageFileName = "";
         return next;
       });
     }
@@ -682,6 +719,7 @@ export default function AdminPage() {
         questions: questionsMode ? questionsData.map(q => ({
           id: q.id,
           imageUrl: q.imageUrl,
+          questionImageUrl: q.questionImageUrl || "",
           audioUrl: q.audioUrl,
           correctAnswer: q.correctAnswer
         })) : []
@@ -1568,8 +1606,8 @@ export default function AdminPage() {
                             </div>
                           </div>
 
-                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                            {/* Image upload button */}
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }}>
+                            {/* 1. 공통 지문/보기 이미지 */}
                             <div>
                               <input 
                                 type="file" 
@@ -1591,30 +1629,71 @@ export default function AdminPage() {
                                   justifyContent: "center", 
                                   height: "30px", 
                                   cursor: "pointer", 
-                                  fontSize: "0.75rem", 
-                                  background: q.imageUrl ? "rgba(18, 42, 77, 0.05)" : "rgba(198, 26, 43, 0.05)",
-                                  border: q.imageUrl ? "1px solid rgba(18, 42, 77, 0.15)" : "1px dashed rgba(198, 26, 43, 0.25)",
+                                  fontSize: "0.7rem", 
+                                  background: q.imageUrl ? "rgba(18, 42, 77, 0.05)" : "rgba(198, 26, 43, 0.03)",
+                                  border: q.imageUrl ? "1px solid rgba(18, 42, 77, 0.15)" : "1px dashed rgba(198, 26, 43, 0.2)",
                                   borderRadius: "6px",
-                                  gap: "4px"
+                                  gap: "3px",
+                                  whiteSpace: "nowrap"
                                 }}
                               >
                                 {q.imageUrl ? (
-                                  <>
-                                    <img src={q.imageUrl} style={{ width: "16px", height: "16px", objectFit: "cover", borderRadius: "2px" }} />
-                                    <span>재업로드</span>
-                                  </>
+                                  <span>✔️ 보기/지문 완료</span>
                                 ) : (
-                                  <span>🖼️ 문항 이미지 선택</span>
+                                  <span>🖼️ 보기/지문 선택</span>
                                 )}
                               </label>
                               {q.imageFileName && (
-                                <span style={{ fontSize: "0.65rem", color: "var(--text-muted)", display: "block", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                <span style={{ fontSize: "0.6rem", color: "var(--text-muted)", display: "block", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                   {q.imageFileName}
                                 </span>
                               )}
                             </div>
 
-                            {/* Audio upload button */}
+                            {/* 2. 개별 문항 이미지 */}
+                            <div>
+                              <input 
+                                type="file" 
+                                accept="image/*"
+                                id={`q-detail-img-upload-${qIdx}`}
+                                style={{ display: "none" }}
+                                onChange={(e) => {
+                                  if (e.target.files && e.target.files[0]) {
+                                    handleUploadDetailQuestionImage(qIdx, e.target.files[0]);
+                                  }
+                                }}
+                              />
+                              <label 
+                                htmlFor={`q-detail-img-upload-${qIdx}`}
+                                className="calc-select"
+                                style={{ 
+                                  display: "flex", 
+                                  alignItems: "center", 
+                                  justifyContent: "center", 
+                                  height: "30px", 
+                                  cursor: "pointer", 
+                                  fontSize: "0.7rem", 
+                                  background: q.questionImageUrl ? "rgba(18, 42, 77, 0.05)" : "rgba(247, 147, 30, 0.03)",
+                                  border: q.questionImageUrl ? "1px solid rgba(18, 42, 77, 0.15)" : "1px dashed rgba(247, 147, 30, 0.2)",
+                                  borderRadius: "6px",
+                                  gap: "3px",
+                                  whiteSpace: "nowrap"
+                                }}
+                              >
+                                {q.questionImageUrl ? (
+                                  <span>✔️ 개별 문항 완료</span>
+                                ) : (
+                                  <span>🖼️ 개별 문항 선택</span>
+                                )}
+                              </label>
+                              {q.questionImageFileName && (
+                                <span style={{ fontSize: "0.6rem", color: "var(--text-muted)", display: "block", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                  {q.questionImageFileName}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* 3. 문항 전용 음원 */}
                             <div>
                               <input 
                                 type="file" 
@@ -1636,11 +1715,12 @@ export default function AdminPage() {
                                   justifyContent: "center", 
                                   height: "30px", 
                                   cursor: "pointer", 
-                                  fontSize: "0.75rem", 
-                                  background: q.audioUrl ? "rgba(18, 42, 77, 0.05)" : "rgba(114, 191, 68, 0.05)",
-                                  border: q.audioUrl ? "1px solid rgba(18, 42, 77, 0.15)" : "1px dashed rgba(114, 191, 68, 0.25)",
+                                  fontSize: "0.7rem", 
+                                  background: q.audioUrl ? "rgba(18, 42, 77, 0.05)" : "rgba(114, 191, 68, 0.03)",
+                                  border: q.audioUrl ? "1px solid rgba(18, 42, 77, 0.15)" : "1px dashed rgba(114, 191, 68, 0.2)",
                                   borderRadius: "6px",
-                                  gap: "4px"
+                                  gap: "3px",
+                                  whiteSpace: "nowrap"
                                 }}
                               >
                                 {q.audioUrl ? (
@@ -1650,7 +1730,7 @@ export default function AdminPage() {
                                 )}
                               </label>
                               {q.audioFileName && (
-                                <span style={{ fontSize: "0.65rem", color: "var(--text-muted)", display: "block", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                <span style={{ fontSize: "0.6rem", color: "var(--text-muted)", display: "block", marginTop: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                   {q.audioFileName}
                                 </span>
                               )}

@@ -1527,19 +1527,73 @@ export default function LearningPage() {
                             >
                               {activeExam.questions?.[activeQuestionIndex]?.imageUrl ? (
                                 <>
-                                  <img 
-                                    src={activeExam.questions[activeQuestionIndex].imageUrl} 
-                                    alt={`Question ${activeQuestionIndex + 1}`}
-                                    style={{ 
-                                      width: "100%",
-                                      maxWidth: "100%", 
-                                      maxHeight: "520px", 
-                                      objectFit: "contain",
-                                      borderRadius: "10px", 
-                                      border: "1px solid rgba(0, 0, 0, 0.06)", 
-                                      boxShadow: "0 4px 15px rgba(0, 0, 0, 0.03)" 
-                                    }} 
-                                  />
+                                  {activeExam.questions[activeQuestionIndex].questionImageUrl ? (
+                                    /* 분할 모드: 보기영역(상단) + 문항영역(하단) */
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "16px", width: "100%" }}>
+                                      {/* 상단 보기 영역 */}
+                                      <div style={{ display: "flex", flexDirection: "column", gap: "6px", width: "100%" }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                          <span style={{ fontSize: "0.68rem", fontWeight: "800", color: "var(--gcu-navy)", background: "rgba(18, 42, 77, 0.06)", padding: "2px 8px", borderRadius: "4px" }}>
+                                            💡 {lang === "ko" ? "공통 보기 / 지문" : "Common Example"}
+                                          </span>
+                                        </div>
+                                        <img 
+                                          src={activeExam.questions[activeQuestionIndex].imageUrl} 
+                                          alt={`Example ${activeQuestionIndex + 1}`}
+                                          style={{ 
+                                            width: "100%",
+                                            maxWidth: "100%", 
+                                            maxHeight: "340px", 
+                                            objectFit: "contain",
+                                            borderRadius: "10px", 
+                                            border: "1px solid rgba(0, 0, 0, 0.06)", 
+                                            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02)" 
+                                          }} 
+                                        />
+                                      </div>
+
+                                      {/* 중간 구분 점선 */}
+                                      <div style={{ width: "100%", borderTop: "1px dashed rgba(0, 0, 0, 0.08)", margin: "4px 0" }} />
+
+                                      {/* 하단 문항 영역 */}
+                                      <div style={{ display: "flex", flexDirection: "column", gap: "6px", width: "100%" }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                          <span style={{ fontSize: "0.68rem", fontWeight: "800", color: "var(--gcu-red)", background: "rgba(198, 26, 43, 0.06)", padding: "2px 8px", borderRadius: "4px" }}>
+                                            ✏️ {lang === "ko" ? "개별 문항 / 선택지" : "Question & Options"}
+                                          </span>
+                                        </div>
+                                        <img 
+                                          src={activeExam.questions[activeQuestionIndex].questionImageUrl} 
+                                          alt={`Question ${activeQuestionIndex + 1}`}
+                                          style={{ 
+                                            width: "100%",
+                                            maxWidth: "100%", 
+                                            maxHeight: "380px", 
+                                            objectFit: "contain",
+                                            borderRadius: "10px", 
+                                            border: "1px solid rgba(0, 0, 0, 0.06)", 
+                                            boxShadow: "0 4px 15px rgba(0, 0, 0, 0.03)" 
+                                          }} 
+                                        />
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    /* 기존 단일 이미지 모드 (하위 호환) */
+                                    <img 
+                                      src={activeExam.questions[activeQuestionIndex].imageUrl} 
+                                      alt={`Question ${activeQuestionIndex + 1}`}
+                                      style={{ 
+                                        width: "100%",
+                                        maxWidth: "100%", 
+                                        maxHeight: "520px", 
+                                        objectFit: "contain",
+                                        borderRadius: "10px", 
+                                        border: "1px solid rgba(0, 0, 0, 0.06)", 
+                                        boxShadow: "0 4px 15px rgba(0, 0, 0, 0.03)" 
+                                      }} 
+                                    />
+                                  )}
+                                  
                                   <div style={{ textAlign: "center", fontSize: "0.76rem", color: "var(--text-secondary)", lineHeight: "1.4" }}>
                                     {activeExam.audioTracks && activeExam.audioTracks[activeTrackIndex] ? (
                                       <>
