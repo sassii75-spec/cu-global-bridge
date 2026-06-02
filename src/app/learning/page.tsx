@@ -1231,29 +1231,29 @@ export default function LearningPage() {
                       display: "flex", 
                       justifyContent: "space-between", 
                       alignItems: "center",
-                      border: "1px solid rgba(0, 229, 255, 0.25)",
-                      background: "linear-gradient(90deg, rgba(0, 185, 242, 0.1) 0%, rgba(0,0,0,0.3) 100%)",
+                      border: "1px solid rgba(198, 26, 43, 0.15)",
+                      background: "linear-gradient(90deg, rgba(18, 42, 77, 0.06) 0%, rgba(198, 26, 43, 0.06) 100%)",
                       flexWrap: "wrap",
                       gap: "12px"
                     }}
                   >
                     <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                      <span style={{ fontSize: "0.72rem", color: "var(--gcu-sky)", fontWeight: "800" }}>COMPUTER BASED TOPIK IBT SIMULATOR</span>
-                      <h3 style={{ fontSize: "1.05rem", fontWeight: "700", color: "#fff", margin: 0 }}>
+                      <span style={{ fontSize: "0.72rem", color: "var(--gcu-red)", fontWeight: "800" }}>COMPUTER BASED TOPIK IBT SIMULATOR</span>
+                      <h3 style={{ fontSize: "1.05rem", fontWeight: "700", color: "var(--text-primary)", margin: 0 }}>
                         {activeExam.title[lang as "ko" | "en" | "vn" | "mn"] || activeExam.title.ko}
                       </h3>
                     </div>
 
                     {/* Countdown Timer */}
                     <div 
-                      style={{ 
+                       style={{ 
                         display: "flex", 
                         alignItems: "center", 
                         gap: "10px", 
-                        background: "rgba(0,0,0,0.4)", 
+                        background: "rgba(255,255,255,0.8)", 
                         padding: "8px 16px", 
                         borderRadius: "12px", 
-                        border: "1px solid rgba(255, 255, 255, 0.05)" 
+                        border: "1px solid rgba(0, 0, 0, 0.06)" 
                       }}
                     >
                       <span style={{ fontSize: "1.2rem" }}>⏱️</span>
@@ -1262,8 +1262,7 @@ export default function LearningPage() {
                           fontSize: "1.35rem", 
                           fontWeight: "800", 
                           fontFamily: "monospace", 
-                          color: timeLeft <= 300 ? "var(--gcu-orange)" : "var(--gcu-sky)",
-                          textShadow: timeLeft <= 300 ? "0 0 10px rgba(247,147,30,0.5)" : "0 0 10px rgba(0,185,242,0.5)"
+                          color: timeLeft <= 300 ? "var(--gcu-red)" : "var(--gcu-navy)",
                         }}
                       >
                         {formatTimeLeft()}
@@ -1282,10 +1281,10 @@ export default function LearningPage() {
                     <div 
                       style={{ 
                         display: "inline-flex", 
-                        background: "rgba(255, 255, 255, 0.03)", 
+                        background: "rgba(0, 0, 0, 0.03)", 
                         padding: "4px", 
                         borderRadius: "10px", 
-                        border: "1px solid rgba(255, 255, 255, 0.05)",
+                        border: "1px solid rgba(0, 0, 0, 0.06)",
                         gap: "4px"
                       }}
                     >
@@ -1388,9 +1387,9 @@ export default function LearningPage() {
                           className="glass-panel" 
                           style={{ 
                             padding: isMobile ? "24px 16px" : "40px", 
-                            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.005) 100%)", 
+                            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.45) 100%)", 
                             borderRadius: "16px",
-                            border: "1px solid rgba(255, 255, 255, 0.05)",
+                            border: "1px solid rgba(0, 0, 0, 0.06)",
                             display: "flex",
                             flexDirection: "column",
                             justifyContent: "center",
@@ -1399,7 +1398,7 @@ export default function LearningPage() {
                             minHeight: isMobile ? "400px" : "550px",
                             transition: "all 0.3s ease",
                             position: "relative",
-                            boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.37)",
+                            boxShadow: "0 8px 32px 0 rgba(18, 42, 77, 0.05)",
                             backdropFilter: "blur(20px)"
                           }}
                         >
@@ -1412,7 +1411,7 @@ export default function LearningPage() {
                               transform: "translateX(-50%)",
                               width: "250px",
                               height: "250px",
-                              background: "radial-gradient(circle, rgba(0, 185, 242, 0.08) 0%, rgba(0,0,0,0) 70%)",
+                              background: "radial-gradient(circle, rgba(198, 26, 43, 0.03) 0%, rgba(0,0,0,0) 70%)",
                               pointerEvents: "none",
                               zIndex: 0
                             }}
@@ -1422,7 +1421,7 @@ export default function LearningPage() {
                             <span 
                               style={{ 
                                 fontSize: "0.72rem", 
-                                color: "var(--gcu-sky)", 
+                                color: "var(--gcu-red)", 
                                 fontWeight: "800", 
                                 letterSpacing: "1.5px", 
                                 textTransform: "uppercase",
@@ -1438,10 +1437,9 @@ export default function LearningPage() {
                               style={{ 
                                 fontSize: isMobile ? "1.45rem" : "1.85rem", 
                                 fontWeight: "800", 
-                                color: "#fff", 
+                                color: "var(--text-primary)", 
                                 margin: "0 0 10px 0",
-                                fontFamily: "var(--font-brand)",
-                                textShadow: "0 2px 10px rgba(0,0,0,0.5)"
+                                fontFamily: "var(--font-brand)"
                               }}
                             >
                               {lang === "ko" ? `제 ${activeQuestionIndex + 1} 문항` : `Question ${activeQuestionIndex + 1}`}
@@ -1452,8 +1450,8 @@ export default function LearningPage() {
                                 <p 
                                   style={{ 
                                     fontSize: "0.85rem", 
-                                    color: "var(--gcu-sky)", 
-                                    background: "rgba(0, 185, 242, 0.08)", 
+                                    color: "var(--gcu-red)", 
+                                    background: "rgba(198, 26, 43, 0.06)", 
                                     padding: "8px 12px", 
                                     borderRadius: "8px",
                                     display: "inline-block",
@@ -1467,7 +1465,7 @@ export default function LearningPage() {
                                   style={{ 
                                     fontSize: isMobile ? "1.05rem" : "1.2rem", 
                                     fontWeight: "700", 
-                                    color: "#fff", 
+                                    color: "var(--text-primary)", 
                                     lineHeight: "1.6",
                                     margin: "0 auto",
                                     maxWidth: "600px"
@@ -1477,7 +1475,7 @@ export default function LearningPage() {
                                 </h4>
                               </div>
                             ) : (
-                              <div style={{ margin: "20px 0", padding: "16px", background: "rgba(255,255,255,0.01)", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.03)" }}>
+                              <div style={{ margin: "20px 0", padding: "16px", background: "rgba(0, 0, 0, 0.01)", borderRadius: "12px", border: "1px solid rgba(0, 0, 0, 0.04)" }}>
                                 <p style={{ fontSize: "0.88rem", color: "var(--text-secondary)", lineHeight: "1.6", margin: 0 }}>
                                   {activeExam.audioTracks && activeExam.audioTracks[activeTrackIndex] ? (
                                     <>
@@ -1534,17 +1532,17 @@ export default function LearningPage() {
                                     gap: "16px",
                                     width: "100%",
                                     padding: isMobile ? "14px 18px" : "18px 24px",
-                                    background: isMarked ? "rgba(0, 185, 242, 0.15)" : "rgba(255,255,255,0.02)",
+                                    background: isMarked ? "rgba(198, 26, 43, 0.08)" : "rgba(255, 255, 255, 0.65)",
                                     border: "2px solid",
-                                    borderColor: isMarked ? "var(--gcu-sky)" : "rgba(255, 255, 255, 0.08)",
+                                    borderColor: isMarked ? "var(--gcu-red)" : "rgba(0, 0, 0, 0.06)",
                                     borderRadius: "12px",
-                                    color: isMarked ? "#fff" : "var(--text-secondary)",
+                                    color: isMarked ? "var(--gcu-red)" : "var(--text-secondary)",
                                     fontSize: isMobile ? "0.9rem" : "1.05rem",
                                     fontWeight: isMarked ? "800" : "500",
                                     textAlign: "left",
                                     cursor: "pointer",
                                     transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-                                    boxShadow: isMarked ? "0 4px 15px rgba(0, 185, 242, 0.2)" : "none"
+                                    boxShadow: isMarked ? "0 4px 12px rgba(198, 26, 43, 0.1)" : "none"
                                   }}
                                 >
                                   {/* 마킹 동그라미 심볼 */}
@@ -1554,9 +1552,9 @@ export default function LearningPage() {
                                       height: "24px",
                                       borderRadius: "50%",
                                       border: "2px solid",
-                                      borderColor: isMarked ? "var(--gcu-sky)" : "var(--text-muted)",
-                                      background: isMarked ? "var(--gcu-sky)" : "transparent",
-                                      color: isMarked ? "#060A1A" : "var(--text-secondary)",
+                                      borderColor: isMarked ? "var(--gcu-red)" : "var(--text-muted)",
+                                      background: isMarked ? "var(--gcu-red)" : "transparent",
+                                      color: isMarked ? "#fff" : "var(--text-secondary)",
                                       display: "flex",
                                       alignItems: "center",
                                       justifyContent: "center",
@@ -1595,8 +1593,8 @@ export default function LearningPage() {
                                 padding: "10px 14px", 
                                 fontSize: "0.8rem", 
                                 fontWeight: "700",
-                                background: activeQuestionIndex === 0 ? "rgba(255,255,255,0.01)" : "rgba(255,255,255,0.04)",
-                                border: "1px solid rgba(255,255,255,0.05)",
+                                background: activeQuestionIndex === 0 ? "rgba(0, 0, 0, 0.01)" : "rgba(0, 0, 0, 0.03)",
+                                border: "1px solid rgba(0, 0, 0, 0.06)",
                                 opacity: activeQuestionIndex === 0 ? 0.25 : 1,
                                 cursor: activeQuestionIndex === 0 ? "default" : "pointer"
                               }}
@@ -1607,13 +1605,13 @@ export default function LearningPage() {
                             <span 
                               style={{ 
                                 fontSize: "0.95rem", 
-                                color: "#fff", 
+                                color: "var(--text-primary)", 
                                 fontWeight: "800", 
                                 fontFamily: "monospace",
-                                background: "rgba(0,0,0,0.2)",
+                                background: "rgba(0, 0, 0, 0.02)",
                                 padding: "6px 14px",
                                 borderRadius: "8px",
-                                border: "1px solid rgba(255,255,255,0.03)"
+                                border: "1px solid rgba(0, 0, 0, 0.04)"
                               }}
                             >
                               {activeQuestionIndex + 1} / {activeExam.questionCount}
@@ -1629,8 +1627,8 @@ export default function LearningPage() {
                                 padding: "10px 14px", 
                                 fontSize: "0.8rem", 
                                 fontWeight: "700",
-                                background: activeQuestionIndex === activeExam.questionCount - 1 ? "rgba(255,255,255,0.01)" : "rgba(255,255,255,0.04)",
-                                border: "1px solid rgba(255,255,255,0.05)",
+                                background: activeQuestionIndex === activeExam.questionCount - 1 ? "rgba(0, 0, 0, 0.01)" : "rgba(0, 0, 0, 0.03)",
+                                border: "1px solid rgba(0, 0, 0, 0.06)",
                                 opacity: activeQuestionIndex === activeExam.questionCount - 1 ? 0.25 : 1,
                                 cursor: activeQuestionIndex === activeExam.questionCount - 1 ? "default" : "pointer"
                               }}
@@ -1642,7 +1640,7 @@ export default function LearningPage() {
                         </div>
                       ) : (
                         /* 통째 PDF split-screen 뷰 */
-                        <div className="glass-panel" style={{ padding: "4px", background: "#0c101a", borderRadius: "12px" }}>
+                        <div className="glass-panel" style={{ padding: "4px", background: "#e9ecef", borderRadius: "12px" }}>
                           <iframe 
                             src={activeExam.pdfDataUrl || "https://pdfobject.com/pdf/sample.pdf"} 
                             style={{ 

@@ -1265,13 +1265,13 @@ export default function AdminPage() {
 
                   {/* Staging/Pending Upload Files List */}
                   {mp3Files.length > 0 && (
-                    <div style={{ marginTop: "8px", background: "rgba(255,255,255,0.03)", padding: "10px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.05)" }}>
+                    <div style={{ marginTop: "8px", background: "rgba(0,0,0,0.02)", padding: "10px", borderRadius: "6px", border: "1px solid rgba(0,0,0,0.08)" }}>
                       <span style={{ fontSize: "0.72rem", color: "var(--gcu-green)", fontWeight: "700", display: "block", marginBottom: "6px" }}>
                         ⏳ 업로드 대기 중 ({mp3Files.length}개):
                       </span>
                       <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "160px", overflowY: "auto" }}>
                         {mp3Files.map((item, idx) => (
-                          <div key={idx} style={{ display: "flex", flexDirection: "column", gap: "4px", padding: "6px", background: "rgba(255,255,255,0.01)", border: "1px solid rgba(255,255,255,0.03)", borderRadius: "4px" }}>
+                          <div key={idx} style={{ display: "flex", flexDirection: "column", gap: "4px", padding: "6px", background: "rgba(255,255,255,0.6)", border: "1px solid rgba(0,0,0,0.06)", borderRadius: "4px" }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.74rem", color: "var(--text-secondary)" }}>
                               <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "75%" }} title={item.file.name}>
                                 🎵 {item.file.name}
@@ -1333,13 +1333,13 @@ export default function AdminPage() {
 
                   {/* Stored/Existing Audio Tracks List */}
                   {audioTracks.length > 0 && (
-                    <div style={{ marginTop: "8px", background: "rgba(0,0,0,0.2)", padding: "10px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.05)" }}>
-                      <span style={{ fontSize: "0.72rem", color: "var(--gcu-sky)", fontWeight: "700", display: "block", marginBottom: "6px" }}>
+                    <div style={{ marginTop: "8px", background: "rgba(0,0,0,0.02)", padding: "10px", borderRadius: "6px", border: "1px solid rgba(0,0,0,0.08)" }}>
+                      <span style={{ fontSize: "0.72rem", color: "var(--gcu-red)", fontWeight: "700", display: "block", marginBottom: "6px" }}>
                         🎧 현재 등록된 트랙 플레이리스트 ({audioTracks.length}개):
                       </span>
                       <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "160px", overflowY: "auto" }}>
                         {audioTracks.map((track, idx) => (
-                          <div key={idx} style={{ display: "flex", flexDirection: "column", gap: "4px", padding: "6px", background: "rgba(255,255,255,0.02)", borderRadius: "4px" }}>
+                          <div key={idx} style={{ display: "flex", flexDirection: "column", gap: "4px", padding: "6px", background: "rgba(255,255,255,0.6)", border: "1px solid rgba(0,0,0,0.06)", borderRadius: "4px" }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.74rem", color: "var(--text-secondary)" }}>
                               <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "85%" }} title={track.name}>
                                 {idx + 1}. 📻 {track.name}

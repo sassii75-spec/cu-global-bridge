@@ -5,32 +5,39 @@
    ========================================================================== */
 
 :root {
-  /* Brand Primary Colors */
-  --gcu-blue: #21409A;
-  --gcu-blue-rgb: 33, 64, 154;
-  --gcu-sky: #00B9F2;
-  --gcu-sky-rgb: 0, 185, 242;
+  /* Brand Primary Colors - GCU CI Brand matching */
+  --gcu-red: #c61a2b;       /* 크림슨 레드 (핵심 강조색) */
+  --gcu-red-rgb: 198, 26, 43;
+  --gcu-navy: #122a4d;      /* 딥 네이비 (메인 정체성색) */
+  --gcu-navy-rgb: 18, 42, 77;
+  --gcu-slate: #3b4257;     /* 중간 슬레이트 블루 */
+  --gcu-cool-gray: #e9ecef;  /* 쿨그레이 실버 */
+  
+  --gcu-blue: #122a4d;      /* 메인 파랑을 네이비로 매핑 */
+  --gcu-blue-rgb: 18, 42, 77;
+  --gcu-sky: #c61a2b;       /* 스카이블루를 레드로 통합 매핑 */
+  --gcu-sky-rgb: 198, 26, 43;
   --gcu-yellow: #FFDE00;
   --gcu-yellow-rgb: 255, 222, 0;
   --gcu-green: #72BF44;
   --gcu-green-rgb: 114, 191, 68;
-  --gcu-orange: #F7931E;
-  --gcu-orange-rgb: 247, 147, 30;
+  --gcu-orange: #c61a2b;
+  --gcu-orange-rgb: 198, 26, 43;
   --gcu-gray: #647883;
 
-  /* Premium UI Theme Palette */
-  --bg-primary: #0A0F24; /* Sleek rich navy dark mode theme */
-  --bg-secondary: #111A3E; /* Lighter glass base */
-  --bg-card: rgba(17, 26, 62, 0.7);
-  --bg-input: rgba(8, 14, 38, 0.8);
+  /* Premium White UI Theme Palette */
+  --bg-primary: #f8f9fa;    /* 맑고 은은한 연그레이 화이트 배경 */
+  --bg-secondary: #ffffff;  /* 순백색 카드/인풋 배경 */
+  --bg-card: rgba(255, 255, 255, 0.75); /* 화이트 글래스모피즘 카드 배경 */
+  --bg-input: #ffffff;
   
-  --text-primary: #FFFFFF;
-  --text-secondary: #90A0D0;
-  --text-muted: #6272A4;
+  --text-primary: #121824;  /* 진한 차콜 차분한 텍스트 */
+  --text-secondary: #495057;/* 본문 및 레이블 텍스트 */
+  --text-muted: #868e96;    /* 보조 설명용 연회색 */
   
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-glow: rgba(0, 185, 242, 0.25);
-  --border-focus: #00B9F2;
+  --border-color: rgba(0, 0, 0, 0.08); /* 맑고 얇은 경계선 */
+  --border-glow: rgba(198, 26, 43, 0.12); /* 레드 글로우 보더 */
+  --border-focus: #c61a2b;
   
   /* System Fonts */
   --font-brand: 'Outfit', 'Inter', 'Noto Sans KR', sans-serif;
@@ -43,14 +50,14 @@
   --border-radius-md: 16px;
   --border-radius-lg: 24px;
   
-  /* Shadows & Glassmorphic Highlights */
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.35);
-  --shadow-glow: 0 0 20px rgba(0, 185, 242, 0.15);
-  --glass-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
-  --brand-gradient: linear-gradient(135deg, var(--gcu-blue) 0%, #152A6E 50%, #0A1130 100%);
-  --sky-gradient: linear-gradient(135deg, var(--gcu-sky) 0%, #0087B3 100%);
+  /* Shadows & Light Glows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.09);
+  --shadow-glow: 0 0 15px rgba(198, 26, 43, 0.06);
+  --glass-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.45) 100%);
+  --brand-gradient: linear-gradient(135deg, var(--gcu-navy) 0%, #1c3d6b 50%, #2a528a 100%);
+  --sky-gradient: linear-gradient(135deg, var(--gcu-red) 0%, #a51221 100%);
 }
 
 /* ==========================================================================
@@ -81,8 +88,8 @@ body {
   display: flex;
   flex-direction: column;
   background-image: 
-    radial-gradient(circle at 10% 20%, rgba(33, 64, 154, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(0, 185, 242, 0.12) 0%, transparent 40%);
+    radial-gradient(circle at 10% 20%, rgba(198, 26, 43, 0.03) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(18, 42, 77, 0.03) 0%, transparent 40%);
   background-attachment: fixed;
 }
 
@@ -94,12 +101,12 @@ body {
   background: var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.12);
   border-radius: 5px;
   border: 2px solid var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 185, 242, 0.4);
+  background: rgba(198, 26, 43, 0.45);
 }
 
 /* Link Aesthetics */
@@ -138,7 +145,7 @@ a {
   z-index: 100;
   width: 100%;
   height: var(--header-height);
-  background: rgba(10, 15, 36, 0.85);
+  background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   border-bottom: 1px solid var(--border-color);
