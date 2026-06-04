@@ -320,6 +320,27 @@ function InlineUserForm({ editingUser, onSubmit, onCancel }: InlineUserFormProps
   );
 }
 
+const cleanSearchQuery = (text: string): string => {
+  let cleaned = text.toLowerCase().trim();
+  const stopWords = [
+    "유저", "사용자", "학생", "근로자", "회원", "계정", 
+    "보여줘", "보여주세요", "보여줘라", "보여줌", "알려줘", "알려주세요", 
+    "조회해줘", "조회해주세요", "출력해줘", "출력해주세요", "뿌려줘", "불러와줘",
+    "검색해줘", "검색해주세요", "찾아줘", "찾아주세요",
+    "검색", "조회", "리스트", "목록", "현황", "전체", "모든", "모두", "전부", "줘"
+  ];
+  
+  stopWords.forEach(word => {
+    cleaned = cleaned.replaceAll(word, " ");
+  });
+  
+  cleaned = cleaned.replace(/[:?.,\/#!$%\^&\*;:{}=\-_`~()]/g, " ");
+  cleaned = cleaned.replace(/\s+/g, " ").trim();
+  
+  return cleaned;
+};
+
+
 export default function AdminPage() {
   const { lang } = useLanguage();
   const t = ADMIN_TRANSLATIONS[lang as "ko" | "en" | "vn" | "mn"] || ADMIN_TRANSLATIONS.ko;
@@ -502,24 +523,7 @@ export default function AdminPage() {
           replyText = "새로운 사용자 계정을 등록할 수 있는 카드 양식입니다. 정보를 기입하거나 대형 팝업 모달을 통해 등록을 진행할 수 있습니다.";
           actionType = "user_create";
         } else {
-          let searchQ = "";
-          const searchKeywords = ["검색", "찾아", "조회"];
-          for (const keyword of searchKeywords) {
-            if (normalized.includes(keyword)) {
-              const parts = queryText.split(keyword);
-              if (parts[0]) {
-                searchQ = parts[0].replace(/유저|사용자|학생|근로자|회원|계정|:/g, "").trim();
-              }
-              break;
-            }
-          }
-          if (!searchQ && normalized.match(/(?:유저|사용자|학생|근로자|회원|계정)\s+(\S+)/)) {
-            const match = queryText.match(/(?:유저|사용자|학생|근로자|회원|계정)\s+(\S+)/);
-            if (match && !["목록", "리스트", "검색", "조회"].includes(match[1])) {
-              searchQ = match[1];
-            }
-          }
-
+          const searchQ = cleanSearchQuery(queryText);
           if (searchQ) {
             replyText = `"${searchQ}" 키워드로 검색된 글로벌 사용자 계정 리스트입니다.`;
             actionType = "user_list";
@@ -543,9 +547,15 @@ export default function AdminPage() {
         actionType = "help" as any;
       } else {
         // Default to search in users
-        replyText = `"${queryText}"(으)로 사용자 데이터베이스를 검색한 결과입니다.`;
-        actionType = "user_list";
-        actionData = { query: queryText };
+        const searchQ = cleanSearchQuery(queryText);
+        if (searchQ) {
+          replyText = `"${searchQ}"(으)로 사용자 데이터베이스를 검색한 결과입니다.`;
+          actionType = "user_list";
+          actionData = { query: searchQ };
+        } else {
+          replyText = "GCU Post School 최고 관리자 대화형 AI 모드 가이드입니다. 아래 명령 키워드를 입력하시거나 제안 카드를 클릭해보세요.";
+          actionType = "help" as any;
+        }
       }
 
       const assistantMsg = {
@@ -1296,14 +1306,21 @@ export default function AdminPage() {
       {/* Admin Panel Tab Selector */}
       <div style={{ display: "flex", gap: "10px", borderBottom: "1px solid var(--border-color)", paddingBottom: "10px" }}>
         <button 
-          onClick={() => setAdminActiveTab("users")}
+          onClick={() => setAdminViewMode("ai")}
+          className="comm-tab-btn"
+          style={{ padding: "10px 20px", fontSize: "0.9rem", fontWeight: "700", whiteSpace: "nowrap" }}
+        >
+          🤖 AI 모드
+        </button>
+        <button 
+          onClick={() => { setAdminViewMode("classic"); setAdminActiveTab("users"); }}
           className={`comm-tab-btn ${adminActiveTab === "users" ? "active" : ""}`}
           style={{ padding: "10px 20px", fontSize: "0.9rem", fontWeight: "700", whiteSpace: "nowrap" }}
         >
           👥 계정 권한 관리
         </button>
         <button 
-          onClick={() => setAdminActiveTab("exams")}
+          onClick={() => { setAdminViewMode("classic"); setAdminActiveTab("exams"); }}
           className={`comm-tab-btn ${adminActiveTab === "exams" ? "active" : ""}`}
           style={{ padding: "10px 20px", fontSize: "0.9rem", fontWeight: "700", whiteSpace: "nowrap" }}
         >
@@ -1723,7 +1740,21 @@ export default function AdminPage() {
               }} 
               onClick={() => { setAdminViewMode("classic"); setAdminActiveTab("users"); }}
             >
-              전체
+              👥 계정 권한 관리
+            </span>
+            <span 
+              style={{ 
+                fontSize: "0.85rem", 
+                fontWeight: "700", 
+                color: "#888d96", 
+                borderBottom: "none", 
+                paddingBottom: "12px", 
+                cursor: "pointer", 
+                transition: "all 0.2s" 
+              }} 
+              onClick={() => { setAdminViewMode("classic"); setAdminActiveTab("exams"); }}
+            >
+              ✏️ 모의고사 출제 제어
             </span>
             <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "#4d5156", paddingBottom: "12px", cursor: "not-allowed" }}>이미지</span>
             <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "#4d5156", paddingBottom: "12px", cursor: "not-allowed" }}>동영상</span>
@@ -1764,7 +1795,7 @@ export default function AdminPage() {
                   placeholder="무엇이든 물어보세요"
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") handleSendMessage(); }}
+                  onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) handleSendMessage(); }}
                   style={{ width: "100%", background: "transparent", border: "none", color: "#ffffff", fontSize: "1.05rem", padding: "8px 0 40px 0", outline: "none" }}
                 />
                 
@@ -2019,7 +2050,7 @@ export default function AdminPage() {
                     placeholder="AI 어드민에게 명령을 입력하세요 (예: 유저 검색, 모의고사 출제...)"
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") handleSendMessage(); }}
+                    onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) handleSendMessage(); }}
                     style={{ flex: 1, background: "transparent", border: "none", color: "#ffffff", fontSize: "0.9rem", outline: "none" }}
                   />
                   <button 
