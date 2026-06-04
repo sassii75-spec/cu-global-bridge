@@ -320,24 +320,176 @@ function InlineUserForm({ editingUser, onSubmit, onCancel }: InlineUserFormProps
   );
 }
 
-const cleanSearchQuery = (text: string): string => {
-  let cleaned = text.toLowerCase().trim();
-  const stopWords = [
-    "유저", "사용자", "학생", "근로자", "회원", "계정", 
-    "보여줘", "보여주세요", "보여줘라", "보여줌", "알려줘", "알려주세요", 
-    "조회해줘", "조회해주세요", "출력해줘", "출력해주세요", "뿌려줘", "불러와줘",
-    "검색해줘", "검색해주세요", "찾아줘", "찾아주세요",
-    "검색", "조회", "리스트", "목록", "현황", "전체", "모든", "모두", "전부", "줘"
-  ];
+interface NLUResult {
+  intent: "help" | "exam_create" | "exam_list" | "user_create" | "user_list";
+  replyText: string;
+  actionData?: {
+    query?: string;
+    role?: "student" | "worker" | "admin";
+    nationality?: string;
+    provider?: "credentials" | "google" | "kakao" | "naver";
+  };
+}
+
+const parseNLUQuery = (queryText: string): NLUResult => {
+  const normalized = queryText.toLowerCase().trim();
   
-  stopWords.forEach(word => {
-    cleaned = cleaned.replaceAll(word, " ");
-  });
+  if (normalized.includes("도움") || normalized.includes("help") || normalized.includes("가이드") || normalized.includes("사용법") || normalized.includes("기능")) {
+    return {
+      intent: "help",
+      replyText: "GCU Post School 최고 관리자 대화형 AI 모드 가이드입니다. 아래 명령 키워드를 입력하시거나 제안 카드를 클릭해보세요."
+    };
+  }
   
-  cleaned = cleaned.replace(/[:?.,\/#!$%\^&\*;:{}=\-_`~()]/g, " ");
-  cleaned = cleaned.replace(/\s+/g, " ").trim();
+  const userKeywords = ["유저", "사용자", "학생", "근로자", "근로", "회원", "계정", "사람", "멤버", "인원", "명단", "학적"];
+  const examKeywords = ["모의고사", "시험", "기출", "ibt", "topik"];
+  const createKeywords = ["추가", "등록", "생성", "가입", "만들기", "신규", "새로운"];
   
-  return cleaned;
+  const isUserQuery = userKeywords.some(kw => normalized.includes(kw));
+  const isExamQuery = examKeywords.some(kw => normalized.includes(kw));
+  const isCreateQuery = createKeywords.some(kw => normalized.includes(kw));
+
+  if (isExamQuery) {
+    if (isCreateQuery) {
+      return {
+        intent: "exam_create",
+        replyText: "신규 IBT 모의고사를 등록할 수 있는 제어 패널입니다. 아래 버튼을 클릭하여 기출 PDF, MP3 및 정답 정보를 출제해 주세요."
+      };
+    } else {
+      return {
+        intent: "exam_list",
+        replyText: "글로벌 학생들을 위해 출제 완료된 TOPIK IBT 모의고사 목록입니다. 시험 시간 및 정답지를 조회하거나 관리할 수 있습니다."
+      };
+    }
+  }
+
+  if (isUserQuery && isCreateQuery) {
+    return {
+      intent: "user_create",
+      replyText: "새로운 사용자 계정을 등록할 수 있는 카드 양식입니다. 정보를 기입하거나 대형 팝업 모달을 통해 등록을 진행할 수 있습니다."
+    };
+  }
+
+  // user_list is the default intent
+  let roleFilter: "student" | "worker" | "admin" | undefined = undefined;
+  let nationalityFilter: string | undefined = undefined;
+  let providerFilter: "credentials" | "google" | "kakao" | "naver" | undefined = undefined;
+  let searchWord = "";
+
+  // Check Role
+  if (normalized.includes("학생") || normalized.includes("학적")) {
+    if (normalized.includes("근로")) {
+      roleFilter = "worker";
+    } else {
+      roleFilter = "student";
+    }
+  } else if (normalized.includes("근로") || normalized.includes("근로자")) {
+    roleFilter = "worker";
+  } else if (normalized.includes("관리자") || normalized.includes("어드민") || normalized.includes("교직원")) {
+    roleFilter = "admin";
+  }
+
+  // Check Nationality
+  if (normalized.includes("몽골") || normalized.includes("mongol")) {
+    nationalityFilter = "몽골";
+  } else if (normalized.includes("우즈벡") || normalized.includes("uzbek") || normalized.includes("우즈베키스탄")) {
+    nationalityFilter = "우즈베키스탄";
+  } else if (normalized.includes("네팔") || normalized.includes("nepal")) {
+    nationalityFilter = "네팔";
+  } else if (normalized.includes("베트남") || normalized.includes("vietnam")) {
+    nationalityFilter = "베트남";
+  } else if (normalized.includes("한국") || normalized.includes("대한민국") || normalized.includes("korea")) {
+    nationalityFilter = "대한민국";
+  }
+
+  // Check Provider
+  if (normalized.includes("구글") || normalized.includes("google")) {
+    providerFilter = "google";
+  } else if (normalized.includes("네이버") || normalized.includes("naver")) {
+    providerFilter = "naver";
+  } else if (normalized.includes("카카오") || normalized.includes("kakao")) {
+    providerFilter = "kakao";
+  } else if (normalized.includes("일반") || normalized.includes("이메일") || normalized.includes("자체") || normalized.includes("인증")) {
+    providerFilter = "credentials";
+  }
+
+  // Extract search word by tokenizing and filtering out particles/stop-words
+  const stopWords = new Set([
+    "유저", "사용자", "학생", "근로자", "근로", "근로학생", "회원", "계정", "계정들", "사람", "멤버", "인원", "명단", "학적",
+    "보여줘", "보여주세요", "보여줘라", "보여줌", "알려줘", "알려주세요", "조회해줘", "조회해주세요", "출력해줘", "출력해주세요",
+    "뿌려줘", "불러와줘", "검색해줘", "검색해주세요", "찾아줘", "찾아주세요", "조회", "검색", "리스트", "목록", "현황", "전체",
+    "모든", "모두", "전부", "줘", "보여", "찾아", "출력", "불러와", "사용중인", "사용중", "가입한", "가입된", "등록된", "등록한",
+    "로그인한", "로그인된", "로그인", "접속한", "접속된", "상태", "데이터", "데이터베이스", "디비", "db", "정보", "중에", "중에서", "중"
+  ]);
+
+  const nationalityWords = new Set(["몽골", "우즈벡", "우즈베키스탄", "네팔", "베트남", "한국", "대한민국", "mongol", "uzbek", "nepal", "vietnam", "korea"]);
+  const providerWords = new Set(["구글", "google", "네이버", "naver", "카카오", "kakao", "일반", "이메일", "자체", "credentials"]);
+  const roleWords = new Set(["학생", "근로자", "근로", "근로학생", "관리자", "어드민", "교직원", "admin", "worker", "student"]);
+
+  const cleanWord = (w: string) => {
+    let prev = "";
+    let curr = w;
+    while (curr !== prev) {
+      prev = curr;
+      curr = curr.replace(/(들|을|를|은|는|이|가|의|으로|로|에서|님|에|와|과|랑|하고|중|중에|중에서|에대한|대한|들중|들중에)$/, "");
+    }
+    return curr;
+  };
+
+  const tokens = normalized.split(/\s+/);
+  const candidates: string[] = [];
+  for (const tok of tokens) {
+    const cleaned = cleanWord(tok);
+    if (!cleaned) continue;
+    if (stopWords.has(cleaned)) continue;
+    if (nationalityWords.has(cleaned)) continue;
+    if (providerWords.has(cleaned)) continue;
+    if (roleWords.has(cleaned)) continue;
+    
+    candidates.push(cleaned);
+  }
+
+  if (candidates.length > 0) {
+    searchWord = candidates[0];
+  }
+
+  // Construct Reply Text
+  let replyText = "";
+  const filterDesc: string[] = [];
+  if (nationalityFilter) filterDesc.push(`${nationalityFilter} 국적`);
+  if (roleFilter) {
+    const roleMap = { student: "학생", worker: "근로자", admin: "관리자" };
+    filterDesc.push(roleMap[roleFilter]);
+  }
+  if (providerFilter) {
+    const provMap = { google: "구글 로그인", naver: "네이버 로그인", kakao: "카카오 로그인", credentials: "일반 이메일 로그인" };
+    filterDesc.push(provMap[providerFilter]);
+  }
+
+  if (searchWord) {
+    if (filterDesc.length > 0) {
+      replyText = `"${filterDesc.join(" ")}" 조건 하에, "${searchWord}" 키워드로 검색된 사용자 계정 리스트입니다.`;
+    } else {
+      replyText = `"${searchWord}" 키워드로 검색된 글로벌 사용자 계정 리스트입니다.`;
+    }
+  } else {
+    if (filterDesc.length > 0) {
+      replyText = `"${filterDesc.join(" ")}" 조건에 해당하는 사용자 계정 목록입니다.`;
+    } else {
+      replyText = "현재 데이터베이스에 등록된 전체 사용자 계정 리스트입니다. 역할 및 국적별로 필터링하여 관리할 수 있습니다.";
+    }
+  }
+
+  return {
+    intent: "user_list",
+    replyText,
+    actionData: {
+      query: searchWord,
+      role: roleFilter,
+      nationality: nationalityFilter,
+      provider: providerFilter
+    }
+  };
 };
 
 
@@ -513,58 +665,14 @@ export default function AdminPage() {
 
     // Process intent
     setTimeout(() => {
-      const normalized = queryText.toLowerCase().trim();
-      let replyText = "";
-      let actionType: "user_list" | "user_create" | "user_edit" | "exam_list" | "exam_create" | undefined = undefined;
-      let actionData: any = null;
-
-      if (normalized.includes("유저") || normalized.includes("사용자") || normalized.includes("학생") || normalized.includes("근로자") || normalized.includes("회원") || normalized.includes("계정")) {
-        if (normalized.includes("추가") || normalized.includes("등록") || normalized.includes("생성")) {
-          replyText = "새로운 사용자 계정을 등록할 수 있는 카드 양식입니다. 정보를 기입하거나 대형 팝업 모달을 통해 등록을 진행할 수 있습니다.";
-          actionType = "user_create";
-        } else {
-          const searchQ = cleanSearchQuery(queryText);
-          if (searchQ) {
-            replyText = `"${searchQ}" 키워드로 검색된 글로벌 사용자 계정 리스트입니다.`;
-            actionType = "user_list";
-            actionData = { query: searchQ };
-          } else {
-            replyText = "현재 데이터베이스에 등록된 전체 사용자 계정 리스트입니다. 역할 및 국적별로 필터링하여 관리할 수 있습니다.";
-            actionType = "user_list";
-            actionData = { query: "" };
-          }
-        }
-      } else if (normalized.includes("모의고사") || normalized.includes("시험") || normalized.includes("기출") || normalized.includes("ibt") || normalized.includes("topik")) {
-        if (normalized.includes("출제") || normalized.includes("추가") || normalized.includes("등록") || normalized.includes("생성")) {
-          replyText = "신규 IBT 모의고사를 등록할 수 있는 제어 패널입니다. 아래 버튼을 클릭하여 기출 PDF, MP3 및 정답 정보를 출제해 주세요.";
-          actionType = "exam_create";
-        } else {
-          replyText = "글로벌 학생들을 위해 출제 완료된 TOPIK IBT 모의고사 목록입니다. 시험 시간 및 정답지를 조회하거나 관리할 수 있습니다.";
-          actionType = "exam_list";
-        }
-      } else if (normalized.includes("도움") || normalized.includes("help") || normalized.includes("가이드") || normalized.includes("사용법") || normalized.includes("기능")) {
-        replyText = "GCU Post School 최고 관리자 대화형 AI 모드 가이드입니다. 아래 명령 키워드를 입력하시거나 제안 카드를 클릭해보세요.";
-        actionType = "help" as any;
-      } else {
-        // Default to search in users
-        const searchQ = cleanSearchQuery(queryText);
-        if (searchQ) {
-          replyText = `"${searchQ}"(으)로 사용자 데이터베이스를 검색한 결과입니다.`;
-          actionType = "user_list";
-          actionData = { query: searchQ };
-        } else {
-          replyText = "GCU Post School 최고 관리자 대화형 AI 모드 가이드입니다. 아래 명령 키워드를 입력하시거나 제안 카드를 클릭해보세요.";
-          actionType = "help" as any;
-        }
-      }
-
+      const parsed = parseNLUQuery(queryText);
       const assistantMsg = {
         id: "msg-" + Date.now() + "-reply",
         sender: "assistant" as const,
-        text: replyText,
+        text: parsed.replyText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        actionType,
-        actionData
+        actionType: parsed.intent,
+        actionData: parsed.actionData || null
       };
       
       setChatMessages(prev => [...prev, assistantMsg]);
@@ -579,12 +687,23 @@ export default function AdminPage() {
     }, 600);
   };
 
-  const renderInlineUserList = (query?: string) => {
-    const q = query || "";
-    const filtered = users.filter(u => 
-      u.name.toLowerCase().includes(q.toLowerCase()) || 
-      u.email.toLowerCase().includes(q.toLowerCase())
-    );
+  const renderInlineUserList = (actionData?: any) => {
+    const q = actionData?.query || "";
+    const roleFilter = actionData?.role;
+    const nationalityFilter = actionData?.nationality;
+    const providerFilter = actionData?.provider;
+
+    const filtered = users.filter(u => {
+      if (q) {
+        const matchQuery = u.name.toLowerCase().includes(q.toLowerCase()) || 
+                           u.email.toLowerCase().includes(q.toLowerCase());
+        if (!matchQuery) return false;
+      }
+      if (roleFilter && u.role !== roleFilter) return false;
+      if (nationalityFilter && !u.nationality.includes(nationalityFilter)) return false;
+      if (providerFilter && u.provider !== providerFilter) return false;
+      return true;
+    });
 
     return (
       <div style={{ overflowX: "auto" }}>
@@ -1897,7 +2016,7 @@ export default function AdminPage() {
                                 + 신규 유저 등록
                               </button>
                             </div>
-                            {renderInlineUserList(msg.actionData?.query)}
+                            {renderInlineUserList(msg.actionData)}
                           </div>
                         )}
                         
