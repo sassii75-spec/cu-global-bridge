@@ -218,6 +218,108 @@ const DEFAULT_USERS: User[] = [
   { id: "credentials-thu", name: "Nguyen Thu", email: "thu@vietnam.com", nationality: "🇻🇳 베트남", role: "student", provider: "credentials", joinedDate: "2025-09-01" }
 ];
 
+interface InlineUserFormProps {
+  editingUser?: User;
+  onSubmit: (user: User) => void;
+  onCancel: () => void;
+}
+
+function InlineUserForm({ editingUser, onSubmit, onCancel }: InlineUserFormProps) {
+  const [name, setName] = useState(editingUser?.name || "");
+  const [email, setEmail] = useState(editingUser?.email || "");
+  const [nationality, setNationality] = useState(editingUser?.nationality || "🇻🇳 베트남");
+  const [role, setRole] = useState<"student" | "worker" | "admin">(editingUser?.role || "student");
+  const [provider, setProvider] = useState<"credentials" | "google" | "kakao" | "naver">(editingUser?.provider || "credentials");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !email.trim()) return;
+
+    onSubmit({
+      id: editingUser?.id || "user-" + Date.now(),
+      name: name.trim(),
+      email: email.trim(),
+      nationality,
+      role,
+      provider,
+      joinedDate: editingUser?.joinedDate || new Date().toISOString().split("T")[0]
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px", textAlign: "left" }}>
+      <div className="ai-form-group">
+        <label className="ai-form-label">사용자 성명</label>
+        <input 
+          type="text" 
+          value={name} 
+          onChange={(e) => setName(e.target.value)}
+          className="ai-form-input"
+          required
+        />
+      </div>
+      <div className="ai-form-group">
+        <label className="ai-form-label">이메일 주소</label>
+        <input 
+          type="email" 
+          value={email} 
+          onChange={(e) => setEmail(e.target.value)}
+          className="ai-form-input"
+          required
+        />
+      </div>
+      
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+        <div className="ai-form-group">
+          <label className="ai-form-label">국적</label>
+          <select 
+            value={nationality} 
+            onChange={(e) => setNationality(e.target.value)}
+            className="ai-form-input"
+          >
+            <option value="🇰🇷 대한민국">🇰🇷 대한민국</option>
+            <option value="🇲🇳 몽골">🇲🇳 몽골</option>
+            <option value="🇻🇳 베트남">🇻🇳 베트남</option>
+            <option value="🇳🇵 네팔">🇳🇵 네팔</option>
+            <option value="🇺🇿 우즈베키스탄">🇺🇿 우즈베키스탄</option>
+          </select>
+        </div>
+        <div className="ai-form-group">
+          <label className="ai-form-label">권한</label>
+          <select 
+            value={role} 
+            onChange={(e) => setRole(e.target.value as any)}
+            className="ai-form-input"
+          >
+            <option value="student">학생</option>
+            <option value="worker">근로자</option>
+            <option value="admin">관리자</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="ai-form-group">
+        <label className="ai-form-label">인증 채널</label>
+        <select 
+          value={provider} 
+          onChange={(e) => setProvider(e.target.value as any)}
+          className="ai-form-input"
+        >
+          <option value="credentials">Credentials</option>
+          <option value="google">Google</option>
+          <option value="kakao">Kakao</option>
+          <option value="naver">Naver</option>
+        </select>
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "8px" }}>
+        <button type="button" onClick={onCancel} className="ai-btn-danger" style={{ padding: "6px 14px" }}>취소</button>
+        <button type="submit" className="ai-btn-action" style={{ padding: "6px 16px" }}>저장</button>
+      </div>
+    </form>
+  );
+}
+
 export default function AdminPage() {
   const { lang } = useLanguage();
   const t = ADMIN_TRANSLATIONS[lang as "ko" | "en" | "vn" | "mn"] || ADMIN_TRANSLATIONS.ko;
@@ -225,6 +327,19 @@ export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [toast, setToast] = useState<string | null>(null);
+
+  // AI Chat Mode States
+  const [adminViewMode, setAdminViewMode] = useState<"ai" | "classic">("ai");
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<Array<{
+    id: string;
+    sender: "user" | "assistant";
+    text: string;
+    timestamp: string;
+    actionType?: "user_list" | "user_create" | "user_edit" | "exam_list" | "exam_create" | "help";
+    actionData?: any;
+  }>>([]);
+  const [adminName, setAdminName] = useState("S");
 
   // Tab State
   const [adminActiveTab, setAdminActiveTab] = useState<"users" | "exams">("users");
@@ -299,6 +414,11 @@ export default function AdminPage() {
           const user = JSON.parse(activeSession);
           if (user.role === "admin") {
             setIsAdmin(true);
+            if (user.name) {
+              const namePart = user.name.match(/\(([^)]+)\)/);
+              const nameToUse = namePart ? namePart[1] : user.name.split(" ")[0];
+              setAdminName(nameToUse || "S");
+            }
           } else {
             setIsAdmin(false);
           }
@@ -346,6 +466,232 @@ export default function AdminPage() {
     setTimeout(() => {
       setToast(null);
     }, 2500);
+  };
+
+  const handleSendMessage = (inputText?: string) => {
+    const queryText = inputText !== undefined ? inputText : chatInput;
+    if (!queryText.trim()) return;
+
+    const newUserMsg = {
+      id: "msg-" + Date.now(),
+      sender: "user" as const,
+      text: queryText,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setChatMessages(prev => [...prev, newUserMsg]);
+    setChatInput("");
+
+    // Auto scroll chat
+    setTimeout(() => {
+      const container = document.getElementById("admin-chat-history");
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }, 100);
+
+    // Process intent
+    setTimeout(() => {
+      const normalized = queryText.toLowerCase().trim();
+      let replyText = "";
+      let actionType: "user_list" | "user_create" | "user_edit" | "exam_list" | "exam_create" | undefined = undefined;
+      let actionData: any = null;
+
+      if (normalized.includes("유저") || normalized.includes("사용자") || normalized.includes("학생") || normalized.includes("근로자") || normalized.includes("회원") || normalized.includes("계정")) {
+        if (normalized.includes("추가") || normalized.includes("등록") || normalized.includes("생성")) {
+          replyText = "새로운 사용자 계정을 등록할 수 있는 카드 양식입니다. 정보를 기입하거나 대형 팝업 모달을 통해 등록을 진행할 수 있습니다.";
+          actionType = "user_create";
+        } else {
+          let searchQ = "";
+          const searchKeywords = ["검색", "찾아", "조회"];
+          for (const keyword of searchKeywords) {
+            if (normalized.includes(keyword)) {
+              const parts = queryText.split(keyword);
+              if (parts[0]) {
+                searchQ = parts[0].replace(/유저|사용자|학생|근로자|회원|계정|:/g, "").trim();
+              }
+              break;
+            }
+          }
+          if (!searchQ && normalized.match(/(?:유저|사용자|학생|근로자|회원|계정)\s+(\S+)/)) {
+            const match = queryText.match(/(?:유저|사용자|학생|근로자|회원|계정)\s+(\S+)/);
+            if (match && !["목록", "리스트", "검색", "조회"].includes(match[1])) {
+              searchQ = match[1];
+            }
+          }
+
+          if (searchQ) {
+            replyText = `"${searchQ}" 키워드로 검색된 글로벌 사용자 계정 리스트입니다.`;
+            actionType = "user_list";
+            actionData = { query: searchQ };
+          } else {
+            replyText = "현재 데이터베이스에 등록된 전체 사용자 계정 리스트입니다. 역할 및 국적별로 필터링하여 관리할 수 있습니다.";
+            actionType = "user_list";
+            actionData = { query: "" };
+          }
+        }
+      } else if (normalized.includes("모의고사") || normalized.includes("시험") || normalized.includes("기출") || normalized.includes("ibt") || normalized.includes("topik")) {
+        if (normalized.includes("출제") || normalized.includes("추가") || normalized.includes("등록") || normalized.includes("생성")) {
+          replyText = "신규 IBT 모의고사를 등록할 수 있는 제어 패널입니다. 아래 버튼을 클릭하여 기출 PDF, MP3 및 정답 정보를 출제해 주세요.";
+          actionType = "exam_create";
+        } else {
+          replyText = "글로벌 학생들을 위해 출제 완료된 TOPIK IBT 모의고사 목록입니다. 시험 시간 및 정답지를 조회하거나 관리할 수 있습니다.";
+          actionType = "exam_list";
+        }
+      } else if (normalized.includes("도움") || normalized.includes("help") || normalized.includes("가이드") || normalized.includes("사용법") || normalized.includes("기능")) {
+        replyText = "GCU Post School 최고 관리자 대화형 AI 모드 가이드입니다. 아래 명령 키워드를 입력하시거나 제안 카드를 클릭해보세요.";
+        actionType = "help" as any;
+      } else {
+        // Default to search in users
+        replyText = `"${queryText}"(으)로 사용자 데이터베이스를 검색한 결과입니다.`;
+        actionType = "user_list";
+        actionData = { query: queryText };
+      }
+
+      const assistantMsg = {
+        id: "msg-" + Date.now() + "-reply",
+        sender: "assistant" as const,
+        text: replyText,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        actionType,
+        actionData
+      };
+      
+      setChatMessages(prev => [...prev, assistantMsg]);
+
+      // Auto scroll chat
+      setTimeout(() => {
+        const container = document.getElementById("admin-chat-history");
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+        }
+      }, 100);
+    }, 600);
+  };
+
+  const renderInlineUserList = (query?: string) => {
+    const q = query || "";
+    const filtered = users.filter(u => 
+      u.name.toLowerCase().includes(q.toLowerCase()) || 
+      u.email.toLowerCase().includes(q.toLowerCase())
+    );
+
+    return (
+      <div style={{ overflowX: "auto" }}>
+        <table className="ai-table">
+          <thead>
+            <tr>
+              <th>성명</th>
+              <th>이메일</th>
+              <th>국적</th>
+              <th>권한</th>
+              <th>작업</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length > 0 ? (
+              filtered.map(user => (
+                <tr key={user.id}>
+                  <td style={{ fontWeight: "700" }}>{user.name}</td>
+                  <td style={{ color: "#9aa0a6", fontSize: "0.78rem" }}>{user.email}</td>
+                  <td style={{ fontSize: "0.78rem" }}>{user.nationality}</td>
+                  <td>
+                    <span style={{ fontSize: "0.7rem", padding: "1px 6px", borderRadius: "4px", background: user.role === "admin" ? "rgba(242,139,130,0.15)" : user.role === "worker" ? "rgba(251,188,4,0.15)" : "rgba(138,180,248,0.15)", color: user.role === "admin" ? "#f28b82" : user.role === "worker" ? "#fbbc04" : "#8ab4f8", border: "1px solid rgba(255,255,255,0.05)" }}>
+                      {user.role === "admin" ? "관리자" : user.role === "worker" ? "근로자" : "학생"}
+                    </span>
+                  </td>
+                  <td>
+                    <div style={{ display: "flex", gap: "6px" }}>
+                      <button 
+                        onClick={() => {
+                          setChatMessages(prev => [...prev, {
+                            id: "msg-" + Date.now(),
+                            sender: "assistant",
+                            text: `✏️ 사용자 "${user.name}" 정보를 수정합니다.`,
+                            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                            actionType: "user_edit",
+                            actionData: { user }
+                          }]);
+                        }} 
+                        className="ai-btn-action" 
+                        style={{ padding: "2px 6px", fontSize: "0.72rem" }}
+                      >
+                        수정
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteUser(user.id)} 
+                        className="ai-btn-danger" 
+                        style={{ padding: "2px 6px", fontSize: "0.72rem" }}
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} style={{ textAlign: "center", color: "#9aa0a6", padding: "20px 0" }}>검색 결과가 없습니다.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  const renderInlineExamList = () => {
+    return (
+      <div style={{ overflowX: "auto" }}>
+        <table className="ai-table">
+          <thead>
+            <tr>
+              <th>시험 타이틀 (KO)</th>
+              <th>제한시간</th>
+              <th>문항수</th>
+              <th>작업</th>
+            </tr>
+          </thead>
+          <tbody>
+            {exams.length > 0 ? (
+              exams.map(exam => (
+                <tr key={exam.id}>
+                  <td style={{ fontWeight: "700" }}>{exam.title.ko}</td>
+                  <td>{exam.duration}분</td>
+                  <td>
+                    <span style={{ fontSize: "0.7rem", padding: "1px 6px", borderRadius: "4px", background: "rgba(114, 191, 68, 0.15)", color: "#72BF44" }}>
+                      {exam.questionCount}문항
+                    </span>
+                  </td>
+                  <td>
+                    <div style={{ display: "flex", gap: "6px" }}>
+                      <button 
+                        onClick={() => handleOpenEditExamModal(exam)} 
+                        className="ai-btn-action" 
+                        style={{ padding: "2px 6px", fontSize: "0.72rem" }}
+                      >
+                        수정
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteExam(exam.id)} 
+                        className="ai-btn-danger" 
+                        style={{ padding: "2px 6px", fontSize: "0.72rem" }}
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} style={{ textAlign: "center", color: "#9aa0a6", padding: "20px 0" }}>등록된 모의고사가 없습니다.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
   };
 
   const handleOpenAddModal = () => {
@@ -804,9 +1150,141 @@ export default function AdminPage() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "40px" }}>
-      {/* 1. Page Header */}
-      <section className="glass-panel" style={{ padding: "40px", background: "linear-gradient(135deg, rgba(33, 64, 154, 0.25) 0%, rgba(114, 191, 68, 0.05) 100%)" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
+      {/* 0. AI Mode Local Style Rules */}
+      <style>{`
+        .ai-suggestion-item {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid #1f2229;
+          transition: all 0.2s;
+        }
+        .ai-suggestion-item:hover {
+          background: rgba(255, 255, 255, 0.06);
+          border-color: #3c4043;
+        }
+        .chat-message-bubble {
+          border-radius: 18px;
+          padding: 16px 20px;
+          max-width: 80%;
+          font-size: 0.95rem;
+          line-height: 1.6;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .chat-message-user {
+          background: #303134;
+          color: #ffffff;
+          border-top-right-radius: 4px;
+        }
+        .chat-message-assistant {
+          background: #1e2025;
+          color: #e8eaed;
+          border-top-left-radius: 4px;
+          border: 1px solid #2b2d35;
+          width: 100%;
+        }
+        .ai-theme-input:focus-within {
+          border-color: #8ab4f8 !important;
+          box-shadow: 0 0 12px rgba(138, 180, 248, 0.2) !important;
+        }
+        .ai-btn-action {
+          background: rgba(138, 180, 248, 0.1);
+          border: 1px solid rgba(138, 180, 248, 0.3);
+          color: #8ab4f8;
+          padding: 6px 12px;
+          border-radius: 8px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .ai-btn-action:hover {
+          background: rgba(138, 180, 248, 0.2);
+          border-color: #8ab4f8;
+          box-shadow: 0 2px 8px rgba(138, 180, 248, 0.25);
+        }
+        .ai-btn-danger {
+          background: rgba(242, 139, 130, 0.1);
+          border: 1px solid rgba(242, 139, 130, 0.3);
+          color: #f28b82;
+          padding: 6px 12px;
+          border-radius: 8px;
+          font-size: 0.8rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .ai-btn-danger:hover {
+          background: rgba(242, 139, 130, 0.2);
+          border-color: #f28b82;
+          box-shadow: 0 2px 8px rgba(242, 139, 130, 0.25);
+        }
+        .ai-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 14px;
+        }
+        .ai-table th {
+          border-bottom: 2px solid #2b2d35;
+          padding: 10px 8px;
+          text-align: left;
+          color: #9aa0a6;
+          font-size: 0.8rem;
+          font-weight: 700;
+        }
+        .ai-table td {
+          border-bottom: 1px solid #1f2229;
+          padding: 12px 8px;
+          color: #e8eaed;
+          font-size: 0.85rem;
+        }
+        .ai-form-group {
+          margin-bottom: 14px;
+        }
+        .ai-form-label {
+          display: block;
+          margin-bottom: 6px;
+          color: #9aa0a6;
+          font-size: 0.8rem;
+          font-weight: 600;
+        }
+        .ai-form-input {
+          width: 100%;
+          background: #25272c;
+          border: 1px solid #3c4043;
+          color: #ffffff;
+          padding: 8px 12px;
+          border-radius: 8px;
+          font-size: 0.85rem;
+          outline: none;
+          transition: border-color 0.2s;
+        }
+        .ai-form-input:focus {
+          border-color: #8ab4f8;
+        }
+      `}</style>
+
+      {adminViewMode === "classic" ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: "40px" }}>
+          {/* Top Mode Banner */}
+          <div className="glass-panel" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 28px", background: "linear-gradient(90deg, rgba(18, 42, 77, 0.15) 0%, rgba(198, 26, 43, 0.05) 100%)", border: "1px solid var(--border-color)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <span style={{ fontSize: "1.5rem" }}>🤖</span>
+              <div>
+                <h4 style={{ fontSize: "0.95rem", fontWeight: "700", color: "var(--text-primary)", margin: 0 }}>글로벌 통합 관리자 대화형 AI 모드 지원</h4>
+                <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", margin: "2px 0 0 0" }}>자연어 텍스트 명령을 통해 사용자 권한 관리 및 모의고사 관리를 보다 효율적으로 제어할 수 있습니다.</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setAdminViewMode("ai")} 
+              className="btn-primary" 
+              style={{ padding: "8px 18px", fontSize: "0.82rem", borderRadius: "8px", color: "#ffffff", fontWeight: "700", whiteSpace: "nowrap" }}
+            >
+              🤖 AI 모드로 전환
+            </button>
+          </div>
+
+          {/* 1. Page Header */}
+          <section className="glass-panel" style={{ padding: "40px", background: "linear-gradient(135deg, rgba(33, 64, 154, 0.25) 0%, rgba(114, 191, 68, 0.05) 100%)" }}>
         <h1 className="hero-title" style={{ fontSize: "2.25rem", marginBottom: "16px", fontFamily: "var(--font-brand)", letterSpacing: "-0.5px" }}>
           {t.adminTitle}
         </h1>
@@ -1211,6 +1689,350 @@ export default function AdminPage() {
             </table>
           </div>
         </>
+      )}
+        </div>
+      ) : (
+        /* 2. Conversational AI Chat Console Layout */
+        <div style={{ background: "#0c0e12", borderRadius: "16px", border: "1px solid #1f2229", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 24px 80px rgba(0,0,0,0.55)", transition: "all 0.3s" }}>
+          
+          {/* Top Search-Engine Navigation Header Tabs */}
+          <div style={{ display: "flex", gap: "24px", borderBottom: "1px solid #1f2229", padding: "16px 32px", background: "#0b0d10", alignItems: "center" }}>
+            <span 
+              style={{ 
+                fontSize: "0.85rem", 
+                fontWeight: "700", 
+                color: "#ffffff", 
+                borderBottom: "2px solid #8ab4f8", 
+                paddingBottom: "12px", 
+                cursor: "pointer", 
+                transition: "all 0.2s" 
+              }} 
+              onClick={() => setAdminViewMode("ai")}
+            >
+              AI 모드
+            </span>
+            <span 
+              style={{ 
+                fontSize: "0.85rem", 
+                fontWeight: "700", 
+                color: "#888d96", 
+                borderBottom: "none", 
+                paddingBottom: "12px", 
+                cursor: "pointer", 
+                transition: "all 0.2s" 
+              }} 
+              onClick={() => { setAdminViewMode("classic"); setAdminActiveTab("users"); }}
+            >
+              전체
+            </span>
+            <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "#4d5156", paddingBottom: "12px", cursor: "not-allowed" }}>이미지</span>
+            <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "#4d5156", paddingBottom: "12px", cursor: "not-allowed" }}>동영상</span>
+            <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "#4d5156", paddingBottom: "12px", cursor: "not-allowed" }}>뉴스</span>
+            <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "#4d5156", paddingBottom: "12px", display: "flex", alignItems: "center", gap: "4px", cursor: "not-allowed" }}>
+              더보기 <span style={{ fontSize: "0.6rem" }}>▼</span>
+            </span>
+          </div>
+
+          {chatMessages.length === 0 ? (
+            /* Welcome / Init View Mode */
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "480px", background: "#0e1117", padding: "60px 24px" }}>
+              <h2 style={{ fontSize: "1.9rem", color: "#ffffff", fontWeight: "600", marginBottom: "32px", textAlign: "center", fontFamily: "var(--font-brand)", letterSpacing: "-0.5px" }}>
+                {adminName}님, 안녕하세요. 어떤 생각을 하고 계시나요?
+              </h2>
+              
+              {/* Glowing Search Box Pill */}
+              <div 
+                className="ai-theme-input" 
+                style={{ 
+                  width: "100%", 
+                  maxWidth: "650px", 
+                  background: "#202124", 
+                  border: "1px solid #3c4043", 
+                  borderRadius: "28px", 
+                  padding: "8px 24px", 
+                  display: "flex", 
+                  flexDirection: "column", 
+                  gap: "10px", 
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.35)", 
+                  position: "relative", 
+                  marginBottom: "32px", 
+                  transition: "all 0.2s" 
+                }}
+              >
+                <input 
+                  type="text"
+                  placeholder="무엇이든 물어보세요"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleSendMessage(); }}
+                  style={{ width: "100%", background: "transparent", border: "none", color: "#ffffff", fontSize: "1.05rem", padding: "8px 0 40px 0", outline: "none" }}
+                />
+                
+                {/* Search Box Action Handles */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "absolute", bottom: "12px", left: "24px", right: "24px" }}>
+                  <button 
+                    onClick={() => handleSendMessage("새 계정 추가해줘")}
+                    style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#303134", color: "#ffffff", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: "1.1rem", fontWeight: "bold" }}
+                    title="유저 추가 바로가기"
+                  >
+                    +
+                  </button>
+                  <button 
+                    onClick={() => { triggerToast("🎙️ 마이크 음성 입력 기능은 데모 상태입니다."); }}
+                    style={{ background: "transparent", color: "#9aa0a6", border: "none", cursor: "pointer", fontSize: "1.15rem" }}
+                    title="음성 인식 입력"
+                  >
+                    🎤
+                  </button>
+                </div>
+              </div>
+              
+              {/* Suggester Commands List */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", maxWidth: "650px" }}>
+                <div 
+                  onClick={() => handleSendMessage("학생 및 근로자 계정 전체 목록 보여줘")}
+                  className="ai-suggestion-item"
+                  style={{ display: "flex", alignItems: "center", gap: "12px", color: "#e8eaed", fontSize: "0.9rem", cursor: "pointer", padding: "12px 18px", borderRadius: "20px" }}
+                >
+                  <span style={{ color: "#8ab4f8", fontSize: "1.1rem" }}>🔍</span>
+                  <span>학생 및 근로자 계정 전체 목록 보여줘</span>
+                </div>
+                <div 
+                  onClick={() => handleSendMessage("새 글로벌 사용자 계정 등록")}
+                  className="ai-suggestion-item"
+                  style={{ display: "flex", alignItems: "center", gap: "12px", color: "#e8eaed", fontSize: "0.9rem", cursor: "pointer", padding: "12px 18px", borderRadius: "20px" }}
+                >
+                  <span style={{ color: "#8ab4f8", fontSize: "1.1rem" }}>🔍</span>
+                  <span>새 글로벌 사용자 계정 등록 양식 열어줘</span>
+                </div>
+                <div 
+                  onClick={() => handleSendMessage("TOPIK 모의고사 목록")}
+                  className="ai-suggestion-item"
+                  style={{ display: "flex", alignItems: "center", gap: "12px", color: "#e8eaed", fontSize: "0.9rem", cursor: "pointer", padding: "12px 18px", borderRadius: "20px" }}
+                >
+                  <span style={{ color: "#8ab4f8", fontSize: "1.1rem" }}>🔍</span>
+                  <span>출제 완료된 TOPIK 모의고사 목록 보여줘</span>
+                </div>
+                <div 
+                  onClick={() => handleSendMessage("신규 모의고사 출제")}
+                  className="ai-suggestion-item"
+                  style={{ display: "flex", alignItems: "center", gap: "12px", color: "#e8eaed", fontSize: "0.9rem", cursor: "pointer", padding: "12px 18px", borderRadius: "20px" }}
+                >
+                  <span style={{ color: "#8ab4f8", fontSize: "1.1rem" }}>🔍</span>
+                  <span>신규 IBT 모의고사 출제 제어창 열어줘</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Active Dialogue stream */
+            <div style={{ display: "flex", flexDirection: "column", height: "650px", background: "#0e1117" }}>
+              {/* Message scroll container */}
+              <div 
+                style={{ flex: 1, overflowY: "auto", padding: "24px 32px", display: "flex", flexDirection: "column", gap: "24px" }} 
+                id="admin-chat-history"
+              >
+                {chatMessages.map((msg) => (
+                  <div key={msg.id} style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%" }}>
+                    <div style={{ display: "flex", justifyContent: msg.sender === "user" ? "flex-end" : "flex-start", alignItems: "center", gap: "8px" }}>
+                      {msg.sender === "assistant" && (
+                        <span style={{ fontSize: "1.1rem", width: "28px", height: "28px", borderRadius: "50%", background: "linear-gradient(135deg, #122a4d 0%, #c61a2b 100%)", display: "flex", alignItems: "center", justifyContent: "center", color: "#ffffff", fontWeight: "bold" }}>🤖</span>
+                      )}
+                      <span style={{ fontSize: "0.72rem", color: "#9aa0a6", fontWeight: "600" }}>
+                        {msg.sender === "user" ? "나" : "AI 어드민 매니저"} • {msg.timestamp}
+                      </span>
+                    </div>
+                    
+                    <div style={{ display: "flex", justifyContent: msg.sender === "user" ? "flex-end" : "flex-start" }}>
+                      <div className={`chat-message-bubble chat-message-${msg.sender}`}>
+                        <div style={{ whiteSpace: "pre-line" }}>{msg.text}</div>
+                        
+                        {/* Dynamic Interactive Cards based on actionType */}
+                        {msg.actionType === "user_list" && (
+                          <div style={{ marginTop: "12px", background: "#15181f", padding: "16px", borderRadius: "12px", border: "1px solid #2b2d35" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                              <span style={{ fontSize: "0.85rem", color: "#8ab4f8", fontWeight: "700" }}>👤 사용자 데이터 결과</span>
+                              <button 
+                                onClick={() => {
+                                  setChatMessages(prev => [...prev, {
+                                    id: "msg-" + Date.now(),
+                                    sender: "assistant",
+                                    text: "새로운 사용자 계정을 등록하는 폼입니다.",
+                                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                                    actionType: "user_create"
+                                  }]);
+                                }}
+                                className="ai-btn-action"
+                              >
+                                + 신규 유저 등록
+                              </button>
+                            </div>
+                            {renderInlineUserList(msg.actionData?.query)}
+                          </div>
+                        )}
+                        
+                        {msg.actionType === "user_create" && (
+                          <div style={{ marginTop: "12px", background: "#15181f", padding: "16px", borderRadius: "12px", border: "1px solid #2b2d35" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                              <span style={{ fontSize: "0.85rem", color: "#8ab4f8", fontWeight: "700" }}>👤 새 글로벌 계정 등록</span>
+                              <button 
+                                onClick={handleOpenAddModal}
+                                className="ai-btn-action"
+                              >
+                                대형 팝업창으로 열기
+                              </button>
+                            </div>
+                            <InlineUserForm onSubmit={(newUser) => {
+                              const updatedUsers = [newUser, ...users];
+                              setUsers(updatedUsers);
+                              localStorage.setItem("gcu-users-db", JSON.stringify(updatedUsers));
+                              triggerToast("📡 계정이 성공적으로 등록되었습니다!");
+                              
+                              setChatMessages(prev => [...prev, {
+                                id: "msg-" + Date.now(),
+                                sender: "assistant",
+                                text: `📡 사용자 "${newUser.name}" 계정(${newUser.email})이 데이터베이스에 등록 완료되었습니다.`,
+                                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                              }]);
+                            }} onCancel={() => {
+                              setChatMessages(prev => [...prev, {
+                                id: "msg-" + Date.now(),
+                                sender: "assistant",
+                                text: "계정 등록 작업을 취소했습니다.",
+                                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                              }]);
+                            }} />
+                          </div>
+                        )}
+
+                        {msg.actionType === "user_edit" && (
+                          <div style={{ marginTop: "12px", background: "#15181f", padding: "16px", borderRadius: "12px", border: "1px solid #2b2d35" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                              <span style={{ fontSize: "0.85rem", color: "#8ab4f8", fontWeight: "700" }}>✏️ 계정 세부 정보 수정</span>
+                              <button 
+                                onClick={() => {
+                                  setIsModalOpen(false);
+                                  handleOpenEditModal(msg.actionData?.user);
+                                }}
+                                className="ai-btn-action"
+                              >
+                                대형 팝업창으로 열기
+                              </button>
+                            </div>
+                            <InlineUserForm 
+                              editingUser={msg.actionData?.user}
+                              onSubmit={(updatedUser) => {
+                                const updatedUsers = users.map(u => u.id === updatedUser.id ? updatedUser : u);
+                                setUsers(updatedUsers);
+                                localStorage.setItem("gcu-users-db", JSON.stringify(updatedUsers));
+                                triggerToast("🔄 계정 정보가 성공적으로 업데이트되었습니다!");
+                                
+                                setChatMessages(prev => [...prev, {
+                                  id: "msg-" + Date.now(),
+                                  sender: "assistant",
+                                  text: `🔄 사용자 "${updatedUser.name}" 계정 정보가 성공적으로 수정되었습니다.`,
+                                  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                }]);
+                              }} 
+                              onCancel={() => {
+                                setChatMessages(prev => [...prev, {
+                                  id: "msg-" + Date.now(),
+                                  sender: "assistant",
+                                  text: "계정 정보 수정 작업을 취소했습니다.",
+                                  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                }]);
+                              }} 
+                            />
+                          </div>
+                        )}
+
+                        {msg.actionType === "exam_list" && (
+                          <div style={{ marginTop: "12px", background: "#15181f", padding: "16px", borderRadius: "12px", border: "1px solid #2b2d35" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                              <span style={{ fontSize: "0.85rem", color: "#8ab4f8", fontWeight: "700" }}>📄 출제 완료된 IBT 모의고사</span>
+                              <button 
+                                onClick={handleOpenAddExamModal}
+                                className="ai-btn-action"
+                              >
+                                + 신규 모의고사 출제
+                              </button>
+                            </div>
+                            {renderInlineExamList()}
+                          </div>
+                        )}
+
+                        {msg.actionType === "exam_create" && (
+                          <div style={{ marginTop: "12px", background: "#15181f", padding: "16px", borderRadius: "12px", border: "1px solid #2b2d35", display: "flex", flexDirection: "column", gap: "10px" }}>
+                            <span style={{ fontSize: "0.85rem", color: "#8ab4f8", fontWeight: "700" }}>➕ 신규 IBT 모의고사 출제</span>
+                            <p style={{ fontSize: "0.8rem", color: "#9aa0a6", margin: 0, lineHeight: "1.5" }}>
+                              PDF 기출지, 듣기 음원 MP3 업로드 및 OMR 정답 카드 설정을 지원하는 출제 마스터 모달 제어판을 엽니다.
+                            </p>
+                            <button 
+                              onClick={handleOpenAddExamModal}
+                              className="ai-btn-action"
+                              style={{ alignSelf: "flex-start", marginTop: "4px" }}
+                            >
+                              ➕ 모의고사 출제 제어창 실행
+                            </button>
+                          </div>
+                        )}
+
+                        {msg.actionType === ("help" as any) && (
+                          <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                            <span style={{ fontSize: "0.8rem", color: "#9aa0a6", fontWeight: "600" }}>💡 단축 명령어 추천:</span>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                              <button onClick={() => handleSendMessage("사용자 리스트 보여줘")} className="ai-btn-action">👤 전체 유저 조회</button>
+                              <button onClick={() => handleSendMessage("유저 등록해줘")} className="ai-btn-action">👤 신규 유저 등록</button>
+                              <button onClick={() => handleSendMessage("모의고사 리스트")} className="ai-btn-action">📄 모의고사 목록</button>
+                              <button onClick={() => handleSendMessage("모의고사 출제")} className="ai-btn-action">➕ 모의고사 출제</button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Bottom Sticky Chat input console */}
+              <div style={{ padding: "20px 32px", borderTop: "1px solid #1f2229", background: "#0b0d10", display: "flex", alignItems: "center", gap: "12px" }}>
+                <button 
+                  onClick={() => {
+                    setChatMessages([]);
+                    setChatInput("");
+                  }}
+                  className="ai-btn-danger"
+                  style={{ padding: "10px 14px", height: "44px", whiteSpace: "nowrap" }}
+                  title="대화 내역 비우기"
+                >
+                  초기화
+                </button>
+                
+                <div className="ai-theme-input" style={{ flex: 1, background: "#202124", border: "1px solid #3c4043", borderRadius: "24px", padding: "4px 16px", display: "flex", alignItems: "center", height: "44px" }}>
+                  <button 
+                    onClick={() => handleSendMessage("새 계정 추가해줘")}
+                    style={{ width: "26px", height: "26px", borderRadius: "50%", background: "#303134", color: "#ffffff", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: "1rem", fontWeight: "bold", marginRight: "10px" }}
+                  >
+                    +
+                  </button>
+                  <input 
+                    type="text"
+                    placeholder="AI 어드민에게 명령을 입력하세요 (예: 유저 검색, 모의고사 출제...)"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleSendMessage(); }}
+                    style={{ flex: 1, background: "transparent", border: "none", color: "#ffffff", fontSize: "0.9rem", outline: "none" }}
+                  />
+                  <button 
+                    onClick={() => handleSendMessage()}
+                    style={{ background: "transparent", color: "#8ab4f8", border: "none", cursor: "pointer", fontSize: "0.9rem", fontWeight: "700", marginLeft: "10px" }}
+                  >
+                    전송
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       {/* 4.5. CRUD Edit/Create MockExam Modal Popup */}
