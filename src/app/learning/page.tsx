@@ -457,6 +457,8 @@ const LEARNING_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
   tutorDesc: string;
   tutorBtn: string;
   tutorAlert: string;
+  resourceSearchPlaceholder: string;
+  noResourcesFound: string;
 }> = {
   ko: {
     pageTitle: "학습 지원 센터",
@@ -495,7 +497,9 @@ const LEARNING_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
     tutorTitle: "1:1 온라인 튜터링 스피킹",
     tutorDesc: "한국어 발음, 억양 및 자연스러운 표현력을 개선하기 위해 GCU 전문 한국어 교육 튜터와 주 1회 화상 멘토링 매칭을 제공합니다.",
     tutorBtn: "상담 신청하기",
-    tutorAlert: "1:1 화상 튜터 상담이 정식 접수되었습니다. 개별 문자로 일정을 송부합니다."
+    tutorAlert: "1:1 화상 튜터 상담이 정식 접수되었습니다. 개별 문자로 일정을 송부합니다.",
+    resourceSearchPlaceholder: "자료명, 초성(예: ㄱㅊ) 또는 국가별 언어로 검색...",
+    noResourcesFound: "조건에 맞는 학습 자료가 없습니다. 다른 키워드로 검색해 보세요."
   },
   en: {
     pageTitle: "Learning Support Center",
@@ -534,7 +538,9 @@ const LEARNING_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
     tutorTitle: "1:1 Online Speaking Tutoring",
     tutorDesc: "We provide weekly video speak-coaching with professional GCU tutors to polish pronunciation and accent.",
     tutorBtn: "Apply Tutoring",
-    tutorAlert: "1:1 video tutoring application submitted. Schedule will be sent to your phone shortly."
+    tutorAlert: "1:1 video tutoring application submitted. Schedule will be sent to your phone shortly.",
+    resourceSearchPlaceholder: "Search by material name, Choseong (initials), or translation...",
+    noResourcesFound: "No study materials found matching your search. Try another keyword."
   },
   vn: {
     pageTitle: "Trung tâm Hỗ trợ Học tập",
@@ -573,7 +579,9 @@ const LEARNING_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
     tutorTitle: "Tư vấn Tiếng Hàn 1:1 trực tuyến",
     tutorDesc: "Chúng tôi cung cấp lớp học video trực tuyến 1:1 với gia sư GCU chuyên nghiệp để chỉnh sửa phát âm và luyện nói giao tiếp.",
     tutorBtn: "Đăng ký tư vấn",
-    tutorAlert: "Đã gửi yêu cầu tư vấn 1:1 thành công. Chúng tôi sẽ nhắn tin báo lịch học cụ thể cho bạn."
+    tutorAlert: "Đã gửi yêu cầu tư vấn 1:1 thành công. Chúng tôi sẽ nhắn tin báo lịch học cụ thể cho bạn.",
+    resourceSearchPlaceholder: "Tìm kiếm bằng tên tài liệu, Choseong hoặc ngôn ngữ khác...",
+    noResourcesFound: "Không tìm thấy tài liệu phù hợp. Vui lòng thử từ khóa khác."
   },
   mn: {
     pageTitle: "Сургалтын дэмжлэг үзүүлэх төв",
@@ -612,7 +620,9 @@ const LEARNING_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
     tutorTitle: "1:1 Онлайн ярианы сургалт",
     tutorDesc: "Солонгос хэлний дуудлага, ярих чадварыг сайжруулахад зориулж GCU-ийн багш нартай долоо хоногт 1 удаа цахим хичээл орох боломжийг олгоно.",
     tutorBtn: "Сургалтад бүртгүүлэх",
-    tutorAlert: "1:1 видео ярианы сургалтын хүсэлт илгээгдлээ. Цагийн хуваарийг утсаар мэдэгдэх болно."
+    tutorAlert: "1:1 видео ярианы сургалтын хүсэлт илгээгдлээ. Цагийн хуваарийг утсаар мэдэгдэх болно.",
+    resourceSearchPlaceholder: "Материалын нэр, Choseong эсвэл бусад хэлээр хайх...",
+    noResourcesFound: "Тохирох хичээлийн материал олдсонгүй. Өөр үгээр хайна уу."
   }
 };
 
@@ -648,12 +658,62 @@ function findTrackForQuestion(qNum: number, tracks: any[]): number {
   return -1;
 }
 
+// Choseong (Korean initial consonant) extraction helper
+function getChoseong(str: string): string {
+  const choseongs = [
+    'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ',
+    'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'
+  ];
+  let result = "";
+  for (let i = 0; i < str.length; i++) {
+    const code = str.charCodeAt(i);
+    if (code >= 0xAC00 && code <= 0xD7A3) {
+      const choseongIndex = Math.floor((code - 0xAC00) / 28 / 21);
+      result += choseongs[choseongIndex];
+    } else {
+      result += str[i];
+    }
+  }
+  return result;
+}
+
+// Choseong-aware string matching helper
+function matchChoseong(target: string, query: string): boolean {
+  const cleanQuery = query.toLowerCase().trim();
+  if (!cleanQuery) return false;
+  
+  const targetChoseong = getChoseong(target).toLowerCase();
+  const queryChoseong = getChoseong(cleanQuery).toLowerCase();
+  
+  return targetChoseong.includes(queryChoseong) || target.toLowerCase().includes(cleanQuery);
+}
+
+// Multilingual resource matching helper
+function matchesResource(res: any, query: string): boolean {
+  if (!query) return true;
+  const cleanQuery = query.toLowerCase().trim();
+  
+  const nameMatch = Object.values(res.name).some((nameVal: any) => 
+    matchChoseong(nameVal, cleanQuery)
+  );
+  
+  const typeMatch = Object.values(res.type).some((typeVal: any) => 
+    matchChoseong(typeVal, cleanQuery)
+  );
+  
+  return nameMatch || typeMatch;
+}
+
 export default function LearningPage() {
   const { lang, t } = useLanguage();
   const tLearn = LEARNING_TRANSLATIONS[lang as "ko" | "en" | "vn" | "mn"] || LEARNING_TRANSLATIONS.ko;
 
   const [activeTab, setActiveTab] = useState("courses");
   const [appliedCourses, setAppliedCourses] = useState<number[]>([]);
+
+  // TOPIK Resource Search & Autocomplete states
+  const [resourceSearch, setResourceSearch] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   // Dynamic IBT States
   const [exams, setExams] = useState<any[]>([]);
@@ -1115,46 +1175,164 @@ export default function LearningPage() {
               {/* Study Resources Download Hub Grid */}
               <div>
                 <h3 style={{ fontSize: "1.1rem", fontWeight: "700", color: "var(--gcu-navy)", marginBottom: "16px" }}>📚 TOPIK 학습 자료 다운로드</h3>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px" }}>
-                  {RESOURCES.map((res) => {
-                    const resName = res.name[lang as "ko" | "en" | "vn" | "mn"] || res.name.ko;
-                    const resType = res.type[lang as "ko" | "en" | "vn" | "mn"] || res.type.ko;
-
-                    return (
-                      <div 
-                        key={res.id} 
-                        className="glass-panel" 
-                        style={{ 
-                          padding: "20px", 
-                          display: "flex", 
-                          flexDirection: "column", 
-                          justifyContent: "space-between", 
-                          gap: "16px",
-                          background: "#ffffff",
-                          border: "1px solid rgba(0, 0, 0, 0.06)"
+                
+                {/* Search Input and Autocomplete Suggestions */}
+                <div style={{ position: "relative", marginBottom: "24px", maxWidth: "600px" }}>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type="text"
+                      value={resourceSearch}
+                      onChange={(e) => {
+                        setResourceSearch(e.target.value);
+                        setShowSuggestions(true);
+                      }}
+                      onFocus={() => setShowSuggestions(true)}
+                      onBlur={() => {
+                        // Delay hiding so dropdown clicks register
+                        setTimeout(() => setShowSuggestions(false), 200);
+                      }}
+                      placeholder={tLearn.resourceSearchPlaceholder}
+                      style={{
+                        width: "100%",
+                        padding: "12px 40px 12px 16px",
+                        fontSize: "0.9rem",
+                        border: "1px solid rgba(0, 0, 0, 0.12)",
+                        borderRadius: "10px",
+                        background: "#ffffff",
+                        color: "var(--text-primary)",
+                        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
+                        outline: "none",
+                        transition: "all 0.2s ease"
+                      }}
+                    />
+                    {resourceSearch && (
+                      <button
+                        onClick={() => {
+                          setResourceSearch("");
+                          setShowSuggestions(false);
+                        }}
+                        style={{
+                          position: "absolute",
+                          right: "12px",
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          fontSize: "0.95rem",
+                          color: "var(--text-muted)"
                         }}
                       >
-                        <div>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                            <span className="feed-tag guide" style={{ padding: "2px 8px", fontSize: "0.72rem" }}>{resType}</span>
-                            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{res.size}</span>
-                          </div>
-                          <h4 style={{ fontSize: "0.92rem", fontWeight: "700", color: "var(--gcu-navy)", margin: 0, lineHeight: "1.4" }}>
-                            {resName}
-                          </h4>
-                        </div>
+                        ✕
+                      </button>
+                    )}
+                  </div>
 
-                        <button 
-                          onClick={() => handleDownload(resName)}
-                          className="sim-start-btn" 
-                          style={{ width: "100%", padding: "8px 0", fontSize: "0.8rem", borderRadius: "8px" }}
-                        >
-                          {tLearn.downloadBtn}
-                        </button>
-                      </div>
-                    );
-                  })}
+                  {/* Autocomplete Dropdown */}
+                  {showSuggestions && resourceSearch.trim() !== "" && (
+                    <div style={{
+                      position: "absolute",
+                      top: "calc(100% + 4px)",
+                      left: 0,
+                      right: 0,
+                      background: "#ffffff",
+                      border: "1px solid rgba(0, 0, 0, 0.08)",
+                      borderRadius: "10px",
+                      boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+                      zIndex: 1000,
+                      maxHeight: "240px",
+                      overflowY: "auto"
+                    }}>
+                      {RESOURCES.filter((res) => matchesResource(res, resourceSearch)).length > 0 ? (
+                        RESOURCES.filter((res) => matchesResource(res, resourceSearch)).map((res) => {
+                          const resName = res.name[lang as "ko" | "en" | "vn" | "mn"] || res.name.ko;
+                          const resType = res.type[lang as "ko" | "en" | "vn" | "mn"] || res.type.ko;
+                          return (
+                            <div
+                              key={res.id}
+                              onMouseDown={() => {
+                                setResourceSearch(resName);
+                                setShowSuggestions(false);
+                              }}
+                              style={{
+                                padding: "10px 16px",
+                                cursor: "pointer",
+                                borderBottom: "1px solid rgba(0, 0, 0, 0.04)",
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                transition: "background 0.2s ease"
+                              }}
+                              className="suggestion-item"
+                            >
+                              <span style={{ fontSize: "0.85rem", fontWeight: "600", color: "var(--gcu-navy)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: "12px" }}>
+                                {resName}
+                              </span>
+                              <span className="feed-tag guide" style={{ padding: "1px 6px", fontSize: "0.65rem", flexShrink: 0 }}>
+                                {resType}
+                              </span>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div style={{ padding: "12px 16px", fontSize: "0.85rem", color: "var(--text-muted)", textAlign: "center" }}>
+                          {lang === "ko" ? "검색 결과가 없습니다." :
+                           lang === "en" ? "No matches found." :
+                           lang === "vn" ? "Không tìm thấy kết quả." :
+                           "Илэрц олдсонгүй."}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
+
+                {/* Resources Grid */}
+                {RESOURCES.filter((res) => matchesResource(res, resourceSearch)).length > 0 ? (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px" }}>
+                    {RESOURCES.filter((res) => matchesResource(res, resourceSearch)).map((res) => {
+                      const resName = res.name[lang as "ko" | "en" | "vn" | "mn"] || res.name.ko;
+                      const resType = res.type[lang as "ko" | "en" | "vn" | "mn"] || res.type.ko;
+
+                      return (
+                        <div 
+                          key={res.id} 
+                          className="glass-panel" 
+                          style={{ 
+                            padding: "20px", 
+                            display: "flex", 
+                            flexDirection: "column", 
+                            justifyContent: "space-between", 
+                            gap: "16px",
+                            background: "#ffffff",
+                            border: "1px solid rgba(0, 0, 0, 0.06)"
+                          }}
+                        >
+                          <div>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                              <span className="feed-tag guide" style={{ padding: "2px 8px", fontSize: "0.72rem" }}>{resType}</span>
+                              <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{res.size}</span>
+                            </div>
+                            <h4 style={{ fontSize: "0.92rem", fontWeight: "700", color: "var(--gcu-navy)", margin: 0, lineHeight: "1.4" }}>
+                              {resName}
+                            </h4>
+                          </div>
+
+                          <button 
+                            onClick={() => handleDownload(resName)}
+                            className="sim-start-btn" 
+                            style={{ width: "100%", padding: "8px 0", fontSize: "0.8rem", borderRadius: "8px" }}
+                          >
+                            {tLearn.downloadBtn}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="glass-panel" style={{ padding: "40px", textAlign: "center", color: "var(--text-secondary)" }}>
+                    {tLearn.noResourcesFound}
+                  </div>
+                )}
               </div>
 
             </div>
