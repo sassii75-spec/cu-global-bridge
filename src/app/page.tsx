@@ -1,7 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useLanguage } from "./context/LanguageContext";
+import { 
+  DASHBOARD_TRANSLATIONS, 
+  DAILY_PHRASES, 
+  VISA_INFO, 
+  JOBS_DATA, 
+  SCHOLARSHIPS_DATA 
+} from "./dashboardData";
 
 // NOTICE_ITEMS with full multilingual translations
 const NOTICE_ITEMS = [
@@ -236,11 +243,23 @@ export default function Home() {
   const { lang, t } = useLanguage();
   const tHome = HOME_TRANSLATIONS[lang as "ko" | "en" | "vn" | "mn"] || HOME_TRANSLATIONS.ko;
 
+  // Standard landing page states
   const [activeFeedTab, setActiveFeedTab] = useState("all");
   const [feedItems, setFeedItems] = useState<any[]>(NOTICE_ITEMS);
   const [isSyncing, setIsSyncing] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [syncedCount, setSyncedCount] = useState(0);
+
+  // Personalized Foreigner Dashboard states
+  const [activeUser, setActiveUser] = useState<any | null>(null);
+  const [attendanceLogs, setAttendanceLogs] = useState<string[]>([]);
+  const [eligibilityScore, setEligibilityScore] = useState<number>(75);
+  const [applications, setApplications] = useState<string[]>([]);
+  const [selectedVisaStep, setSelectedVisaStep] = useState<string | null>(null);
+  const [isTtsPlaying, setIsTtsPlaying] = useState<boolean>(false);
+  const [selectedCard, setSelectedCard] = useState<any | null>(null);
+  const [applyForm, setApplyForm] = useState({ name: "", email: "", phone: "", topik: "Level 3", intro: "" });
+  const [applySuccessMsg, setApplySuccessMsg] = useState<string | null>(null);
 
   const handleSyncPortals = () => {
     if (isSyncing) return;
@@ -299,10 +318,64 @@ export default function Home() {
   };
 
   useEffect(() => {
+    // Initial sync
     const timer = setTimeout(() => {
       handleSyncPortals();
     }, 1200);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const session = localStorage.getItem("gcu-active-session");
+      if (session) {
+        const parsed = JSON.parse(session);
+        setActiveUser(parsed);
+        
+        // Load attendance logs
+        const savedLogs = localStorage.getItem("gcu-attendance-logs");
+        if (savedLogs) {
+          setAttendanceLogs(JSON.parse(savedLogs));
+        } else {
+          // Setup mock check-ins for the preceding days
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yestStr = yesterday.toISOString().split("T")[0];
+          
+          const twoDaysAgo = new Date();
+          twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+          const twoDaysStr = twoDaysAgo.toISOString().split("T")[0];
+          
+          const initialLogs = [twoDaysStr, yestStr];
+          setAttendanceLogs(initialLogs);
+          localStorage.setItem("gcu-attendance-logs", JSON.stringify(initialLogs));
+        }
+        
+        // Load eligibility score
+        const savedScore = localStorage.getItem("gcu-eligibility-score");
+        if (savedScore) {
+          setEligibilityScore(Number(savedScore));
+        } else {
+          setEligibilityScore(75);
+          localStorage.setItem("gcu-eligibility-score", "75");
+        }
+        
+        // Load applications list
+        const savedApp = localStorage.getItem("gcu-applications");
+        if (savedApp) {
+          setApplications(JSON.parse(savedApp));
+        }
+        
+        // Pre-fill application form with user details
+        setApplyForm({
+          name: parsed.name || "",
+          email: parsed.email || "",
+          phone: "",
+          topik: "Level 3",
+          intro: ""
+        });
+      }
+    }
   }, []);
 
   const handlePartnerClick = (e: React.MouseEvent<HTMLAnchorElement>, name: string) => {
@@ -315,6 +388,1050 @@ export default function Home() {
     if (activeFeedTab === "all") return true;
     return item.category === activeFeedTab;
   });
+
+  // Confetti trigger
+  const triggerConfetti = () => {
+    const container = document.getElementById("confetti-container");
+    if (!container) return;
+    
+    const colors = ["#c61a2b", "#122a4d", "#FFDE00", "#72BF44", "#00B9F2", "#F7931E"];
+    for (let i = 0; i < 60; i++) {
+      const particle = document.createElement("div");
+      particle.className = "confetti-piece";
+      
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const left = Math.random() * 100;
+      const size = Math.random() * 8 + 6;
+      const delay = Math.random() * 0.4;
+      const duration = Math.random() * 1.5 + 1.2;
+      
+      particle.style.background = color;
+      particle.style.left = `${left}%`;
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size * 0.4}px`;
+      particle.style.borderRadius = "2px";
+      particle.style.position = "absolute";
+      particle.style.top = "-10px";
+      particle.style.opacity = "1";
+      particle.style.transform = `rotate(${Math.random() * 360}deg)`;
+      particle.style.animation = `confetti-fall ${duration}s ease-out ${delay}s forwards`;
+      
+      container.appendChild(particle);
+      
+      setTimeout(() => {
+        particle.remove();
+      }, (duration + delay) * 1000);
+    }
+  };
+
+  // Check-In Handler
+  const handleCheckIn = () => {
+    if (!activeUser) return;
+    const tDash = DASHBOARD_TRANSLATIONS[lang as "ko" | "en" | "vn" | "mn"] || DASHBOARD_TRANSLATIONS.ko;
+    const todayStr = new Date().toISOString().split("T")[0];
+    
+    if (attendanceLogs.includes(todayStr)) {
+      alert(lang === "ko" ? "이미 오늘의 출석체크가 완료되었습니다." : "You have already checked in today.");
+      return;
+    }
+    
+    const newLogs = [...attendanceLogs, todayStr];
+    setAttendanceLogs(newLogs);
+    localStorage.setItem("gcu-attendance-logs", JSON.stringify(newLogs));
+    
+    const newScore = Math.min(eligibilityScore + 5, 100);
+    setEligibilityScore(newScore);
+    localStorage.setItem("gcu-eligibility-score", String(newScore));
+    
+    triggerConfetti();
+    alert(tDash.checkInSuccess);
+  };
+
+  // Week Dates Generator
+  const getWeekDates = () => {
+    const current = new Date();
+    const week = [];
+    const day = current.getDay();
+    const diff = current.getDate() - day + (day === 0 ? -6 : 1); // Monday adjustment
+    const monday = new Date(current.setDate(diff));
+    
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + i);
+      week.push(date);
+    }
+    return week;
+  };
+
+  const isChecked = (date: Date) => {
+    const dateStr = date.toISOString().split("T")[0];
+    return attendanceLogs.includes(dateStr);
+  };
+
+  // TTS play mock
+  const handlePlayTts = () => {
+    if (isTtsPlaying) return;
+    setIsTtsPlaying(true);
+    setTimeout(() => {
+      setIsTtsPlaying(false);
+    }, 3000);
+  };
+
+  // Open apply form modal
+  const handleOpenApplyModal = (card: any) => {
+    setSelectedCard(card);
+    setApplySuccessMsg(null);
+    if (activeUser) {
+      setApplyForm({
+        name: activeUser.name || "",
+        email: activeUser.email || "",
+        phone: "",
+        topik: "Level 3",
+        intro: ""
+      });
+    }
+  };
+
+  // Submit application
+  const handleApplySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCard) return;
+    
+    const tDash = DASHBOARD_TRANSLATIONS[lang as "ko" | "en" | "vn" | "mn"] || DASHBOARD_TRANSLATIONS.ko;
+    const newApps = [...applications, selectedCard.id];
+    setApplications(newApps);
+    localStorage.setItem("gcu-applications", JSON.stringify(newApps));
+    
+    const newScore = Math.min(eligibilityScore + 3, 100);
+    setEligibilityScore(newScore);
+    localStorage.setItem("gcu-eligibility-score", String(newScore));
+    
+    setApplySuccessMsg(tDash.applySuccess);
+    setTimeout(() => {
+      setSelectedCard(null);
+      setApplySuccessMsg(null);
+    }, 2000);
+  };
+
+  // RENDER DYNAMIC FOREIGNER DASHBOARD
+  const renderForeignerDashboard = () => {
+    const tDash = DASHBOARD_TRANSLATIONS[lang as "ko" | "en" | "vn" | "mn"] || DASHBOARD_TRANSLATIONS.ko;
+    const welcomeMsg = lang === "ko" ? `${activeUser.name}${tDash.welcome}` : `${tDash.welcome}${activeUser.name}`;
+    
+    // Choose Daily Phrase based on date
+    const phraseIdx = typeof window !== "undefined" ? (new Date().getDate() % DAILY_PHRASES.length) : 0;
+    const phraseObj = DAILY_PHRASES[phraseIdx];
+    const displayPhrase = phraseObj[lang as "ko" | "en" | "vn" | "mn"] || phraseObj.ko;
+
+    // Week days
+    const weekDays = lang === "ko" 
+      ? ["월", "화", "수", "목", "금", "토", "일"] 
+      : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const weekDates = getWeekDates();
+    const todayStr = new Date().toISOString().split("T")[0];
+    const isTodayChecked = attendanceLogs.includes(todayStr);
+
+    // Radial Progress Calculation
+    const radius = 45;
+    const circ = 2 * Math.PI * radius;
+    const offset = circ - (circ * eligibilityScore) / 100;
+
+    // Visa Steps based on student vs worker
+    const isStudent = activeUser.role === "student";
+    const steps = isStudent 
+      ? [
+          { key: "D-2", label: tDash.visaD2, status: tDash.visaStatusActive },
+          { key: "D-10", label: tDash.visaD10, status: tDash.visaStatusPending },
+          { key: "F-2-R", label: tDash.visaF2R, status: tDash.visaStatusGoal }
+        ]
+      : [
+          { key: "E-9", label: tDash.visaE9, status: tDash.visaStatusActive },
+          { key: "E-7-4", label: tDash.visaE74, status: tDash.visaStatusPending },
+          { key: "F-2-R", label: tDash.visaF2R, status: tDash.visaStatusGoal }
+        ];
+
+    // Current translated visa requirements
+    const displayVisaInfo = selectedVisaStep 
+      ? (VISA_INFO[lang as "ko" | "en" | "vn" | "mn"]?.[selectedVisaStep as "D-2" | "D-10" | "F-2-R" | "E-9" | "E-7-4"] || selectedVisaStep)
+      : (lang === "ko" ? "지도 단계를 탭하여 이수 조건 및 매칭 기준을 확인하세요." : "Tap a roadmap node to view requirements and matching criteria.");
+
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: "32px", position: "relative" }}>
+        {/* Confetti Container Overlay */}
+        <div id="confetti-container" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", overflow: "hidden", pointerEvents: "none", zIndex: 999 }}></div>
+
+        {/* Dynamic Keyframes injected locally */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes confetti-fall {
+            0% { top: -10px; transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { top: 100%; transform: translateY(800px) rotate(720deg); opacity: 0; }
+          }
+          @keyframes bounce-wave {
+            0% { height: 4px; }
+            100% { height: 22px; }
+          }
+          @keyframes stamp-pop {
+            0% { transform: scale(0.2); opacity: 0; }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); opacity: 1; }
+          }
+          .visa-step-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(18, 42, 77, 0.1);
+          }
+          .phrase-play-btn:hover {
+            background: rgba(18, 42, 77, 0.08) !important;
+          }
+          .attendance-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(198, 26, 43, 0.25);
+          }
+          .card-news-item:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+          }
+          .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+          }
+          .modal-box {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 540px;
+            padding: 32px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            animation: stamp-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+          }
+          .audio-wave {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 22px;
+            margin-left: 10px;
+          }
+          .audio-wave .bar {
+            width: 3px;
+            height: 6px;
+            background-color: var(--gcu-navy);
+            border-radius: 2px;
+            animation: bounce-wave 0.8s ease-in-out infinite alternate;
+          }
+          .audio-wave .bar:nth-child(2) { animation-delay: 0.15s; }
+          .audio-wave .bar:nth-child(3) { animation-delay: 0.3s; }
+          .audio-wave .bar:nth-child(4) { animation-delay: 0.45s; }
+          .audio-wave .bar:nth-child(5) { animation-delay: 0.6s; }
+        `}} />
+
+        {/* 1. Welcoming Profile Banner */}
+        <div 
+          className="glass-panel" 
+          style={{ 
+            padding: "30px", 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "space-between", 
+            flexWrap: "wrap", 
+            gap: "20px", 
+            background: "linear-gradient(135deg, rgba(18, 42, 77, 0.02) 0%, rgba(198, 26, 43, 0.02) 100%)", 
+            border: "1px solid rgba(198, 26, 43, 0.18)", 
+            borderRadius: "20px" 
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+            <div 
+              style={{ 
+                width: "64px", 
+                height: "64px", 
+                borderRadius: "50%", 
+                background: "linear-gradient(135deg, var(--gcu-navy) 0%, var(--gcu-red) 100%)", 
+                display: "flex", 
+                alignItems: "center", 
+                justifyContent: "center", 
+                fontSize: "1.8rem", 
+                color: "#ffffff", 
+                fontWeight: "800" 
+              }}
+            >
+              {activeUser.name.charAt(0)}
+            </div>
+            <div>
+              <h2 style={{ fontSize: "1.4rem", fontWeight: "800", color: "var(--gcu-navy)", margin: "0 0 6px 0" }}>
+                {welcomeMsg}
+              </h2>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                <span style={{ fontSize: "0.78rem", padding: "4px 12px", background: "rgba(18, 42, 77, 0.06)", color: "var(--gcu-navy)", borderRadius: "20px", fontWeight: "700", border: "1px solid rgba(18, 42, 77, 0.1)" }}>
+                  🌎 {tDash.nationality}: {activeUser.nationality}
+                </span>
+                <span style={{ fontSize: "0.78rem", padding: "4px 12px", background: "rgba(198, 26, 43, 0.06)", color: "var(--gcu-red)", borderRadius: "20px", fontWeight: "700", border: "1px solid rgba(198, 26, 43, 0.1)" }}>
+                  💼 {tDash.role}: {isStudent ? tDash.student : tDash.worker}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: "32px", alignItems: "center" }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: "600", marginBottom: "4px" }}>{tDash.daysChecked}</div>
+              <div style={{ fontSize: "1.7rem", fontWeight: "800", color: "var(--gcu-red)", display: "flex", alignItems: "center", gap: "4px" }}>
+                📅 {attendanceLogs.length}
+              </div>
+            </div>
+            <div style={{ width: "1px", height: "40px", background: "rgba(0,0,0,0.08)" }}></div>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: "600", marginBottom: "4px" }}>{tDash.scholarshipGauge}</div>
+              <div style={{ fontSize: "1.7rem", fontWeight: "800", color: "var(--gcu-navy)", display: "flex", alignItems: "center", gap: "4px" }}>
+                🏆 {eligibilityScore}%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 2. Interactive SVG/CSS Infographics Dashboard */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px" }}>
+          
+          {/* Card A: Visa Roadmap */}
+          <div className="glass-panel" style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: "800", color: "var(--gcu-navy)", margin: "0 0 4px 0", display: "flex", alignItems: "center", gap: "8px" }}>
+                <span>🎯</span> {tDash.visaRoadmap}
+              </h3>
+              <p style={{ fontSize: "0.75rem", color: "var(--text-secondary)", margin: 0 }}>
+                {tDash.visaRoadmapDesc}
+              </p>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 8px", background: "rgba(0,0,0,0.02)", borderRadius: "12px", border: "1px dashed rgba(0,0,0,0.08)" }}>
+              {steps.map((step, idx) => {
+                const isStepActive = selectedVisaStep === step.key;
+                const isCurrentVisa = idx === 0;
+                
+                return (
+                  <React.Fragment key={step.key}>
+                    <button
+                      onClick={() => setSelectedVisaStep(step.key)}
+                      className="visa-step-btn"
+                      style={{
+                        flex: 1,
+                        padding: "10px 4px",
+                        borderRadius: "10px",
+                        border: isStepActive 
+                          ? "2px solid var(--gcu-red)" 
+                          : isCurrentVisa 
+                            ? "1px solid var(--gcu-navy)" 
+                            : "1px solid var(--border-color)",
+                        background: isStepActive 
+                          ? "rgba(198, 26, 43, 0.05)" 
+                          : isCurrentVisa 
+                            ? "rgba(18, 42, 77, 0.04)" 
+                            : "#ffffff",
+                        cursor: "pointer",
+                        transition: "all 0.25s ease",
+                        textAlign: "center"
+                      }}
+                    >
+                      <div style={{ fontSize: "0.8rem", fontWeight: "800", color: isStepActive ? "var(--gcu-red)" : "var(--gcu-navy)", marginBottom: "4px" }}>
+                        {step.key}
+                      </div>
+                      <div style={{ fontSize: "0.65rem", color: "var(--text-secondary)", fontWeight: "500" }}>
+                        {step.label.split(" ")[0]}
+                      </div>
+                      <span style={{ 
+                        fontSize: "0.6rem", 
+                        padding: "1.5px 5px", 
+                        borderRadius: "10px", 
+                        background: idx === 0 ? "var(--gcu-navy)" : idx === 1 ? "rgba(0,0,0,0.08)" : "var(--gcu-red)", 
+                        color: "#ffffff", 
+                        fontWeight: "700",
+                        marginTop: "6px",
+                        display: "inline-block"
+                      }}>
+                        {step.status}
+                      </span>
+                    </button>
+                    {idx < steps.length - 1 && (
+                      <span style={{ padding: "0 4px", fontSize: "0.85rem", color: "var(--text-muted)", fontWeight: "bold" }}>➔</span>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+
+            {/* Selected Visa requirement info box */}
+            <div 
+              style={{ 
+                padding: "12px 16px", 
+                background: "rgba(18, 42, 77, 0.03)", 
+                borderLeft: "4px solid var(--gcu-navy)", 
+                borderRadius: "0 12px 12px 0",
+                fontSize: "0.78rem",
+                lineHeight: "1.5",
+                color: "var(--text-primary)",
+                fontWeight: "500",
+                minHeight: "56px"
+              }}
+            >
+              {displayVisaInfo}
+            </div>
+          </div>
+
+          {/* Card B: Scholarship Gauge Dial */}
+          <div className="glass-panel" style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "16px", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: "100%", alignSelf: "flex-start" }}>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: "800", color: "var(--gcu-navy)", margin: "0 0 4px 0", display: "flex", alignItems: "center", gap: "8px" }}>
+                <span>🏆</span> {tDash.scholarshipGauge}
+              </h3>
+              <p style={{ fontSize: "0.75rem", color: "var(--text-secondary)", margin: 0 }}>
+                {tDash.scholarshipGaugeDesc}
+              </p>
+            </div>
+
+            {/* SVG Circular Progress Gauge */}
+            <div style={{ position: "relative", width: "110px", height: "110px", margin: "10px 0" }}>
+              <svg width="110" height="110" viewBox="0 0 110 110" style={{ transform: "rotate(-90deg)" }}>
+                {/* Track circle */}
+                <circle
+                  cx="55"
+                  cy="55"
+                  r={radius}
+                  fill="transparent"
+                  stroke="rgba(0,0,0,0.06)"
+                  strokeWidth="8"
+                />
+                {/* Animated progress circle */}
+                <circle
+                  cx="55"
+                  cy="55"
+                  r={radius}
+                  fill="transparent"
+                  stroke="url(#progressGrad)"
+                  strokeWidth="8"
+                  strokeDasharray={circ}
+                  strokeDashoffset={offset}
+                  strokeLinecap="round"
+                  style={{ transition: "stroke-dashoffset 1s ease-out" }}
+                />
+                <defs>
+                  <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="var(--gcu-red)" />
+                    <stop offset="100%" stopColor="var(--gcu-navy)" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              {/* Inner score label */}
+              <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center" }}>
+                <span style={{ fontSize: "1.45rem", fontWeight: "900", color: "var(--gcu-navy)" }}>{eligibilityScore}%</span>
+                <div style={{ fontSize: "0.6rem", fontWeight: "700", color: "var(--gcu-red)", textTransform: "uppercase", marginTop: "-2px" }}>
+                  {eligibilityScore >= 90 ? "Excellent" : eligibilityScore >= 80 ? "Good" : "Normal"}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ fontSize: "0.72rem", color: "var(--text-secondary)", fontWeight: "600", textAlign: "center" }}>
+              📢 {lang === "ko" ? "출석체크(+5%) 및 모의 지원서 제출 시 적합도가 점진적으로 가산됩니다." : "Check-in (+5%) or submit mock applications to boost eligibility score."}
+            </div>
+          </div>
+
+          {/* Card C: TOPIK Tracker */}
+          <div className="glass-panel" style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: "800", color: "var(--gcu-navy)", margin: "0 0 4px 0", display: "flex", alignItems: "center", gap: "8px" }}>
+                <span>📚</span> {tDash.topikProgress}
+              </h3>
+              <p style={{ fontSize: "0.75rem", color: "var(--text-secondary)", margin: 0 }}>
+                {tDash.topikProgressDesc}
+              </p>
+            </div>
+
+            <div style={{ marginTop: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", fontWeight: "700", marginBottom: "6px" }}>
+                <span style={{ color: "var(--gcu-navy)" }}>Current: TOPIK Level 3</span>
+                <span style={{ color: "var(--gcu-red)" }}>Target: Level 4</span>
+              </div>
+              
+              {/* Progress Bar Container */}
+              <div style={{ width: "100%", height: "12px", background: "rgba(0,0,0,0.06)", borderRadius: "6px", overflow: "hidden", position: "relative" }}>
+                <div 
+                  style={{ 
+                    width: "80%", 
+                    height: "100%", 
+                    background: "linear-gradient(90deg, var(--gcu-navy) 0%, var(--gcu-red) 100%)", 
+                    borderRadius: "6px",
+                    transition: "width 0.8s ease"
+                  }}
+                ></div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.68rem", color: "var(--text-muted)", marginTop: "6px" }}>
+                <span>120 pts obtained</span>
+                <span>30 pts needed for Level 4</span>
+              </div>
+            </div>
+
+            <a 
+              href="/learning" 
+              className="btn-secondary"
+              style={{
+                padding: "8px 12px",
+                borderRadius: "10px",
+                fontSize: "0.75rem",
+                fontWeight: "700",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "6px",
+                marginTop: "auto",
+                border: "1px solid rgba(18, 42, 77, 0.15)",
+                color: "var(--gcu-navy)"
+              }}
+            >
+              📝 {lang === "ko" ? "무료 TOPIK 모의고사 응시하러 가기" : "Take Free TOPIK Mock Exam"} ➔
+            </a>
+          </div>
+        </div>
+
+        {/* 3. Daily Activity Area (Phrase & Attendance calendar) */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))", gap: "24px" }}>
+          
+          {/* Card A: Daily Korean Phrase */}
+          <div className="glass-panel" style={{ padding: "28px", display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: "800", color: "var(--gcu-navy)", margin: "0 0 4px 0", display: "flex", alignItems: "center", gap: "8px" }}>
+                <span>🗣️</span> {tDash.phraseOfTheDay}
+              </h3>
+              <p style={{ fontSize: "0.75rem", color: "var(--text-secondary)", margin: 0 }}>
+                {tDash.phraseDesc}
+              </p>
+            </div>
+
+            {/* Bubble Layout phrase block */}
+            <div 
+              style={{ 
+                background: "linear-gradient(135deg, rgba(18, 42, 77, 0.03) 0%, rgba(198, 26, 43, 0.03) 100%)", 
+                border: "1px solid rgba(18, 42, 77, 0.08)",
+                borderRadius: "16px",
+                padding: "20px",
+                position: "relative",
+                display: "flex",
+                flexDirection: "column",
+                gap: "12px"
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                <span style={{ fontSize: "1.6rem", lineHeight: "1" }}>💡</span>
+                <div>
+                  <div style={{ fontSize: "1.05rem", fontWeight: "800", color: "var(--text-primary)", lineHeight: "1.4" }}>
+                    "{phraseObj.ko}"
+                  </div>
+                  <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: "500", marginTop: "8px", fontStyle: "italic" }}>
+                    {displayPhrase}
+                  </div>
+                </div>
+              </div>
+
+              {/* TTS Action */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid rgba(0,0,0,0.05)", paddingTop: "12px", marginTop: "4px" }}>
+                <button
+                  onClick={handlePlayTts}
+                  className="phrase-play-btn"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    background: "rgba(18, 42, 77, 0.04)",
+                    border: "none",
+                    padding: "6px 12px",
+                    borderRadius: "20px",
+                    cursor: "pointer",
+                    fontSize: "0.75rem",
+                    fontWeight: "700",
+                    color: "var(--gcu-navy)",
+                    transition: "all 0.2s"
+                  }}
+                >
+                  🔊 {isTtsPlaying ? (lang === "ko" ? "발음 재생 중" : "Playing TTS...") : (lang === "ko" ? "음성 안내 듣기" : "Listen TTS Guidance")}
+                </button>
+
+                {isTtsPlaying && (
+                  <div className="audio-wave">
+                    <div className="bar"></div>
+                    <div className="bar"></div>
+                    <div className="bar"></div>
+                    <div className="bar"></div>
+                    <div className="bar"></div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Card B: Attendance Stamp calendar */}
+          <div className="glass-panel" style={{ padding: "28px", display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: "800", color: "var(--gcu-navy)", margin: "0 0 4px 0", display: "flex", alignItems: "center", gap: "8px" }}>
+                <span>📅</span> {tDash.attendanceTitle}
+              </h3>
+              <p style={{ fontSize: "0.75rem", color: "var(--text-secondary)", margin: 0 }}>
+                {tDash.attendanceDesc}
+              </p>
+            </div>
+
+            {/* Stamp Row */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "8px", margin: "12px 0" }}>
+              {weekDates.map((date, idx) => {
+                const checked = isChecked(date);
+                const dateNum = date.getDate();
+                const dayLabel = weekDays[idx];
+                const isToday = date.toISOString().split("T")[0] === todayStr;
+                
+                return (
+                  <div 
+                    key={idx} 
+                    className="glass-panel"
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      padding: "10px 4px",
+                      border: isToday ? "2px solid var(--gcu-red)" : checked ? "1px solid var(--gcu-green)" : "1px solid var(--border-color)",
+                      background: checked ? "rgba(114, 191, 68, 0.06)" : isToday ? "rgba(198, 26, 43, 0.03)" : "rgba(255, 255, 255, 0.4)",
+                      borderRadius: "10px",
+                      position: "relative",
+                      boxShadow: isToday ? "0 0 8px rgba(198, 26, 43, 0.12)" : "none"
+                    }}
+                  >
+                    <span style={{ fontSize: "0.65rem", fontWeight: "700", color: isToday ? "var(--gcu-red)" : "var(--text-secondary)" }}>
+                      {dayLabel}
+                    </span>
+                    <span style={{ fontSize: "0.95rem", fontWeight: "800", margin: "4px 0", color: "var(--text-primary)" }}>
+                      {dateNum}
+                    </span>
+                    <div style={{ width: "22px", height: "22px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {checked ? (
+                        <span style={{ 
+                          fontSize: "0.95rem", 
+                          color: "var(--gcu-green)",
+                          animation: "stamp-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards" 
+                        }}>
+                          ✔
+                        </span>
+                      ) : (
+                        <span style={{ width: "12px", height: "12px", borderRadius: "50%", border: "2px dashed var(--text-muted)", opacity: 0.3 }}></span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Attendance Check-in Button */}
+            <button
+              onClick={handleCheckIn}
+              disabled={isTodayChecked}
+              className="attendance-submit-btn"
+              style={{
+                width: "100%",
+                height: "44px",
+                background: isTodayChecked ? "var(--gcu-navy)" : "var(--gcu-red)",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "10px",
+                fontWeight: "800",
+                fontSize: "0.9rem",
+                cursor: isTodayChecked ? "not-allowed" : "pointer",
+                transition: "all 0.25s ease",
+                opacity: isTodayChecked ? 0.75 : 1
+              }}
+            >
+              {isTodayChecked ? `👍 ${tDash.checkedIn}` : `✨ ${tDash.checkInBtn}`}
+            </button>
+          </div>
+        </div>
+
+        {/* 4. Card News feeds: Jobs */}
+        <div>
+          <div className="section-header" style={{ marginBottom: "16px" }}>
+            <div className="section-title">
+              <span className="section-title-dot"></span>
+              <h2 style={{ fontSize: "1.25rem" }}>💼 {tDash.jobFeedTitle}</h2>
+            </div>
+          </div>
+          <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "20px", marginTop: "-8px" }}>
+            {tDash.jobFeedDesc}
+          </p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
+            {JOBS_DATA.map((job) => {
+              const applied = applications.includes(job.id);
+              const title = job.title[lang as "ko" | "en" | "vn" | "mn"] || job.title.ko;
+              const category = job.category[lang as "ko" | "en" | "vn" | "mn"] || job.category.ko;
+              const salary = job.salary[lang as "ko" | "en" | "vn" | "mn"] || job.salary.ko;
+              const location = job.location[lang as "ko" | "en" | "vn" | "mn"] || job.location.ko;
+              const visa = job.visaSupport[lang as "ko" | "en" | "vn" | "mn"] || job.visaSupport.ko;
+
+              return (
+                <div 
+                  key={job.id} 
+                  className="card-news-item glass-panel"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    padding: "24px",
+                    borderRadius: "16px",
+                    border: `1px solid ${job.borderColor}`,
+                    background: job.color,
+                    transition: "all 0.3s ease",
+                    position: "relative",
+                    minHeight: "280px"
+                  }}
+                >
+                  <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "0.65rem", fontWeight: "700", padding: "2.5px 8px", borderRadius: "4px", background: job.badgeColor, color: job.badgeTextColor }}>
+                      {category}
+                    </span>
+                    <span style={{ fontSize: "0.65rem", fontWeight: "700", padding: "2.5px 8px", borderRadius: "4px", background: "rgba(0,0,0,0.06)", color: "var(--text-primary)" }}>
+                      Visa Match
+                    </span>
+                  </div>
+
+                  <h4 style={{ fontSize: "0.98rem", fontWeight: "800", color: "var(--gcu-navy)", margin: "0 0 16px 0", lineHeight: "1.45" }}>
+                    {title}
+                  </h4>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.78rem", color: "var(--text-secondary)", marginBottom: "24px" }}>
+                    <div>💰 <strong>{salary}</strong></div>
+                    <div>📍 {location}</div>
+                    <div>⚖️ {visa}</div>
+                  </div>
+
+                  <button
+                    onClick={() => handleOpenApplyModal(job)}
+                    style={{
+                      marginTop: "auto",
+                      width: "100%",
+                      height: "38px",
+                      border: "none",
+                      borderRadius: "8px",
+                      background: applied ? "var(--gcu-navy)" : "var(--gcu-red)",
+                      color: "#ffffff",
+                      fontWeight: "700",
+                      fontSize: "0.78rem",
+                      cursor: "pointer",
+                      transition: "all 0.2s"
+                    }}
+                  >
+                    {applied ? `✓ ${tDash.appliedBtn}` : tDash.viewDetailBtn}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 5. Card News feeds: Scholarships */}
+        <div style={{ marginBottom: "40px" }}>
+          <div className="section-header" style={{ marginBottom: "16px" }}>
+            <div className="section-title">
+              <span className="section-title-dot"></span>
+              <h2 style={{ fontSize: "1.25rem" }}>🎁 {tDash.scholarshipFeedTitle}</h2>
+            </div>
+          </div>
+          <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "20px", marginTop: "-8px" }}>
+            {tDash.scholarshipFeedDesc}
+          </p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
+            {SCHOLARSHIPS_DATA.map((sch) => {
+              const applied = applications.includes(sch.id);
+              const title = sch.title[lang as "ko" | "en" | "vn" | "mn"] || sch.title.ko;
+              const reward = sch.reward[lang as "ko" | "en" | "vn" | "mn"] || sch.reward.ko;
+              const criteria = sch.criteria[lang as "ko" | "en" | "vn" | "mn"] || sch.criteria.ko;
+
+              return (
+                <div 
+                  key={sch.id} 
+                  className="card-news-item glass-panel"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    padding: "24px",
+                    borderRadius: "16px",
+                    border: `1px solid ${sch.borderColor}`,
+                    background: sch.color,
+                    transition: "all 0.3s ease",
+                    position: "relative",
+                    minHeight: "280px"
+                  }}
+                >
+                  <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "0.65rem", fontWeight: "700", padding: "2.5px 8px", borderRadius: "4px", background: sch.badgeColor, color: sch.badgeTextColor }}>
+                      Scholarship
+                    </span>
+                    <span style={{ fontSize: "0.65rem", fontWeight: "700", padding: "2.5px 8px", borderRadius: "4px", background: "rgba(198,26,43,0.06)", color: "var(--gcu-red)" }}>
+                      Tuition Match
+                    </span>
+                  </div>
+
+                  <h4 style={{ fontSize: "0.98rem", fontWeight: "800", color: "var(--gcu-navy)", margin: "0 0 16px 0", lineHeight: "1.45" }}>
+                    {title}
+                  </h4>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.78rem", color: "var(--text-secondary)", marginBottom: "24px" }}>
+                    <div>🎁 <strong>{reward}</strong></div>
+                    <div>🎓 {criteria}</div>
+                  </div>
+
+                  <button
+                    onClick={() => handleOpenApplyModal(sch)}
+                    style={{
+                      marginTop: "auto",
+                      width: "100%",
+                      height: "38px",
+                      border: "none",
+                      borderRadius: "8px",
+                      background: applied ? "var(--gcu-navy)" : "var(--gcu-red)",
+                      color: "#ffffff",
+                      fontWeight: "700",
+                      fontSize: "0.78rem",
+                      cursor: "pointer",
+                      transition: "all 0.2s"
+                    }}
+                  >
+                    {applied ? `✓ ${tDash.appliedBtn}` : tDash.viewDetailBtn}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 6. Cooperation Partners List (Footer of Dashboard) */}
+        <section className="glass-panel" style={{ padding: "32px", background: "rgba(255, 255, 255, 0.02)", border: "1px solid var(--border-color)", borderRadius: "24px" }}>
+          <div className="section-header" style={{ marginBottom: "20px" }}>
+            <div className="section-title">
+              <span className="section-title-dot"></span>
+              <h2 style={{ fontSize: "clamp(1.15rem, 3.5vw, 1.45rem)", whiteSpace: "nowrap" }}>{tHome.partnerTitle}</h2>
+            </div>
+          </div>
+          <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "24px", lineHeight: "1.6" }}>
+            {tHome.partnerDesc}
+          </p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px" }}>
+            {PARTNERS.map((partner, index) => {
+              const partnerName = partner.name[lang as "ko" | "en" | "vn" | "mn"] || partner.name.ko;
+              const partnerDesc = partner.description[lang as "ko" | "en" | "vn" | "mn"] || partner.description.ko;
+
+              return (
+                <a 
+                  key={index}
+                  href={partner.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => handlePartnerClick(e, partnerName)}
+                  className="shortcut-card glass-panel"
+                  style={{ 
+                    position: "relative",
+                    display: "flex", 
+                    flexDirection: "column", 
+                    padding: "20px", 
+                    textDecoration: "none", 
+                    transition: "all 0.3s ease",
+                    overflow: "hidden",
+                    border: "1px solid rgba(0, 0, 0, 0.06)",
+                    background: "#ffffff"
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = "translateY(-4px)";
+                    e.currentTarget.style.borderColor = partner.color;
+                    e.currentTarget.style.boxShadow = `0 8px 30px ${partner.color}1c`;
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = "none";
+                    e.currentTarget.style.borderColor = "rgba(0, 0, 0, 0.06)";
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
+                >
+                  <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "3.5px", background: partner.color }}></div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                    <span style={{ fontSize: "1.75rem" }}>{partner.icon}</span>
+                    <h4 style={{ fontSize: "0.95rem", fontWeight: "700", color: "var(--gcu-navy)", margin: 0, letterSpacing: "-0.3px", wordBreak: "keep-all" }}>
+                      {partnerName}
+                    </h4>
+                  </div>
+                  <p style={{ fontSize: "0.78rem", color: "var(--text-secondary)", margin: 0, lineHeight: "1.4" }}>
+                    {partnerDesc}
+                  </p>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* 7. POPUP MODAL FOR APPLYING */}
+        {selectedCard && (
+          <div className="modal-overlay">
+            <div className="modal-box">
+              <button 
+                onClick={() => setSelectedCard(null)}
+                style={{
+                  position: "absolute",
+                  top: "20px",
+                  right: "20px",
+                  background: "none",
+                  border: "none",
+                  fontSize: "1.3rem",
+                  cursor: "pointer",
+                  color: "var(--text-muted)"
+                }}
+              >
+                ✕
+              </button>
+
+              <h3 style={{ fontSize: "1.2rem", fontWeight: "800", color: "var(--gcu-navy)", marginBottom: "8px" }}>
+                {selectedCard.title[lang as "ko" | "en" | "vn" | "mn"] || selectedCard.title.ko}
+              </h3>
+              <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", lineHeight: "1.5", marginBottom: "20px" }}>
+                {selectedCard.detailText[lang as "ko" | "en" | "vn" | "mn"] || selectedCard.detailText.ko}
+              </p>
+
+              <div style={{ height: "1px", background: "rgba(0,0,0,0.08)", marginBottom: "20px" }}></div>
+
+              <h4 style={{ fontSize: "0.9rem", fontWeight: "700", color: "var(--gcu-navy)", marginBottom: "4px" }}>
+                {tDash.modalApplyTitle}
+              </h4>
+              <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginBottom: "16px" }}>
+                {tDash.modalApplyDesc}
+              </p>
+
+              {applySuccessMsg ? (
+                <div style={{ padding: "16px", background: "rgba(114, 191, 68, 0.08)", border: "1px solid rgba(114, 191, 68, 0.3)", borderRadius: "10px", color: "#438e1a", fontSize: "0.85rem", fontWeight: "700", textAlign: "center" }}>
+                  {applySuccessMsg}
+                </div>
+              ) : (
+                <form onSubmit={handleApplySubmit} style={{ display: "flex", flexDirection: "column", gap: "12px", textAlign: "left" }}>
+                  <div>
+                    <label style={{ fontSize: "0.75rem", fontWeight: "700", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>
+                      {tDash.formName}
+                    </label>
+                    <input
+                      type="text"
+                      className="search-input"
+                      value={applyForm.name}
+                      onChange={(e) => setApplyForm({ ...applyForm, name: e.target.value })}
+                      style={{ padding: "8px 12px", height: "38px", fontSize: "0.85rem" }}
+                      required
+                    />
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                    <div>
+                      <label style={{ fontSize: "0.75rem", fontWeight: "700", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>
+                        {tDash.formEmail}
+                      </label>
+                      <input
+                        type="email"
+                        className="search-input"
+                        value={applyForm.email}
+                        onChange={(e) => setApplyForm({ ...applyForm, email: e.target.value })}
+                        style={{ padding: "8px 12px", height: "38px", fontSize: "0.85rem" }}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: "0.75rem", fontWeight: "700", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>
+                        {tDash.formPhone}
+                      </label>
+                      <input
+                        type="tel"
+                        className="search-input"
+                        placeholder="010-XXXX-XXXX"
+                        value={applyForm.phone}
+                        onChange={(e) => setApplyForm({ ...applyForm, phone: e.target.value })}
+                        style={{ padding: "8px 12px", height: "38px", fontSize: "0.85rem" }}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: "0.75rem", fontWeight: "700", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>
+                      {tDash.formTopik}
+                    </label>
+                    <select
+                      className="search-input"
+                      value={applyForm.topik}
+                      onChange={(e) => setApplyForm({ ...applyForm, topik: e.target.value })}
+                      style={{ padding: "8px 12px", height: "38px", fontSize: "0.85rem", background: "#ffffff" }}
+                    >
+                      <option value="No TOPIK">No TOPIK</option>
+                      <option value="Level 1">Level 1</option>
+                      <option value="Level 2">Level 2</option>
+                      <option value="Level 3">Level 3</option>
+                      <option value="Level 4">Level 4</option>
+                      <option value="Level 5">Level 5</option>
+                      <option value="Level 6">Level 6</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: "0.75rem", fontWeight: "700", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>
+                      {tDash.formIntro}
+                    </label>
+                    <textarea
+                      className="search-input"
+                      value={applyForm.intro}
+                      onChange={(e) => setApplyForm({ ...applyForm, intro: e.target.value })}
+                      style={{ padding: "10px 12px", height: "80px", fontSize: "0.85rem", resize: "none" }}
+                      required
+                    ></textarea>
+                  </div>
+
+                  <button
+                    type="submit"
+                    style={{
+                      height: "42px",
+                      background: "var(--gcu-red)",
+                      color: "#ffffff",
+                      border: "none",
+                      borderRadius: "10px",
+                      fontWeight: "800",
+                      fontSize: "0.85rem",
+                      cursor: "pointer",
+                      marginTop: "10px"
+                    }}
+                  >
+                    🚀 {tDash.submitApply}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // If foreigner is logged in, show personalized student/worker dashboard instead
+  if (activeUser && activeUser.role !== "admin") {
+    return renderForeignerDashboard();
+  }
+
+  const handlePartnerClickOld = (e: React.MouseEvent<HTMLAnchorElement>, name: string) => {
+    if (!confirm(`${tHome.confirmPrefix}${name}${tHome.confirmSuffix}`)) {
+      e.preventDefault();
+    }
+  };
+
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "40px" }}>

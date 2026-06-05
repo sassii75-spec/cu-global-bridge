@@ -15,6 +15,7 @@ const LOGIN_TRANSLATIONS = {
     loginBtn: "GCU 계정으로 로그인",
     snsHeader: "또는 공식 연동 SNS 계정으로 로그인",
     googleBtn: "Google 계정으로 로그인",
+    appleBtn: "Apple 계정으로 로그인",
     kakaoBtn: "Kakao 계정으로 로그인",
     naverBtn: "Naver 계정으로 로그인",
     validationError: "이메일과 비밀번호를 성실히 기입해 주십시오.",
@@ -30,6 +31,7 @@ const LOGIN_TRANSLATIONS = {
     loginBtn: "Sign in with GCU Account",
     snsHeader: "Or sign in with linked SNS accounts",
     googleBtn: "Sign in with Google",
+    appleBtn: "Sign in with Apple",
     kakaoBtn: "Sign in with Kakao",
     naverBtn: "Sign in with Naver",
     validationError: "Please enter a valid email and password.",
@@ -45,6 +47,7 @@ const LOGIN_TRANSLATIONS = {
     loginBtn: "Đăng nhập bằng tài khoản GCU",
     snsHeader: "Hoặc đăng nhập bằng liên kết mạng xã hội",
     googleBtn: "Đăng nhập bằng Google",
+    appleBtn: "Đăng nhập bằng Apple",
     kakaoBtn: "Đăng nhập bằng Kakao",
     naverBtn: "Đăng nhập bằng Naver",
     validationError: "Vui lòng điền đầy đủ email và mật khẩu.",
@@ -60,6 +63,7 @@ const LOGIN_TRANSLATIONS = {
     loginBtn: "GCU хаягаар нэвтрэх",
     snsHeader: "Эсвэл холбосон SNS хаягаар нэвтрэх",
     googleBtn: "Google хаягаар нэвтрэх",
+    appleBtn: "Apple хаягаар нэвтрэх",
     kakaoBtn: "Kakao хаягаар нэвтрэх",
     naverBtn: "Naver хаягаар нэвтрэх",
     validationError: "Цахим шуудан болон нууц үгээ оруулна уу.",
@@ -68,7 +72,7 @@ const LOGIN_TRANSLATIONS = {
 };
 
 export default function LoginPage() {
-  const { lang } = useLanguage();
+  const { lang, setLang } = useLanguage();
   const t = LOGIN_TRANSLATIONS[lang as "ko" | "en" | "vn" | "mn"] || LOGIN_TRANSLATIONS.ko;
 
   const [email, setEmail] = useState("");
@@ -80,6 +84,15 @@ export default function LoginPage() {
     if (typeof window !== "undefined") {
       localStorage.setItem("gcu-active-session", JSON.stringify(userObj));
       
+      // Auto set language context based on user nationality
+      if (userObj.nationality.includes("몽골")) {
+        setLang("mn");
+      } else if (userObj.nationality.includes("베트남")) {
+        setLang("vn");
+      } else {
+        setLang("en"); // Default for other international users
+      }
+      
       // Also prepopulate user database in localStorage if empty, to ensure CRUD works instantly
       const savedDb = localStorage.getItem("gcu-users-db");
       if (!savedDb) {
@@ -88,7 +101,8 @@ export default function LoginPage() {
           { id: "google-altan", name: "Altantsetseg", email: "altan@mongol.net", nationality: "🇲🇳 몽골", role: "student", provider: "google", joinedDate: "2025-03-12" },
           { id: "naver-sherzod", name: "Sherzod", email: "sherzod@uzbek.net", nationality: "🇺🇿 우즈베키스탄", role: "student", provider: "naver", joinedDate: "2026-02-15" },
           { id: "kakao-rajesh", name: "Rajesh Kumar", email: "rajesh@nepal.org", nationality: "🇳🇵 네팔", role: "worker", provider: "kakao", joinedDate: "2024-08-20" },
-          { id: "credentials-thu", name: "Nguyen Thu", email: "thu@vietnam.com", nationality: "🇻🇳 베트남", role: "student", provider: "credentials", joinedDate: "2025-09-01" }
+          { id: "credentials-thu", name: "Nguyen Thu", email: "thu@vietnam.com", nationality: "🇻🇳 베트남", role: "student", provider: "credentials", joinedDate: "2025-09-01" },
+          { id: "apple-thu", name: "Nguyen Thu", email: "thu@vietnam.com", nationality: "🇻🇳 베트남", role: "student", provider: "apple", joinedDate: "2025-09-01" }
         ];
         localStorage.setItem("gcu-users-db", JSON.stringify(defaultUsers));
       }
@@ -136,7 +150,7 @@ export default function LoginPage() {
     }, 1000);
   };
 
-  const handleSnsLogin = (provider: "google" | "kakao" | "naver") => {
+  const handleSnsLogin = (provider: "google" | "kakao" | "naver" | "apple") => {
     setErrorMessage("");
     setLoadingProvider(provider);
 
@@ -170,6 +184,15 @@ export default function LoginPage() {
           nationality: "🇺🇿 우즈베키스탄",
           role: "student",
           provider: "naver"
+        });
+      } else if (provider === "apple") {
+        handleLoginSuccess({
+          id: "apple-thu",
+          name: "Nguyen Thu",
+          email: "thu@vietnam.com",
+          nationality: "🇻🇳 베트남",
+          role: "student",
+          provider: "apple"
         });
       }
     }, 1200);
@@ -321,6 +344,34 @@ export default function LoginPage() {
               fontFamily: "var(--font-brand)"
             }}>G</span>
             <span>{loadingProvider === "google" ? "Syncing..." : t.googleBtn}</span>
+          </button>
+
+          {/* Apple Button */}
+          <button 
+            onClick={() => handleSnsLogin("apple")}
+            disabled={loadingProvider !== null}
+            style={{ 
+              height: "44px", 
+              borderRadius: "8px", 
+              border: "none", 
+              background: "#000000", 
+              color: "#ffffff", 
+              fontSize: "0.85rem", 
+              fontWeight: "600",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "10px",
+              transition: "all 0.25s ease",
+              width: "100%",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = "#1a1a1a"}
+            onMouseOut={(e) => e.currentTarget.style.background = "#000000"}
+          >
+            <span style={{ fontSize: "1.15rem", fontWeight: "700" }}></span>
+            <span>{loadingProvider === "apple" ? "Verifying..." : t.appleBtn}</span>
           </button>
 
           {/* Kakao Button */}
