@@ -317,6 +317,20 @@ export default function CommunityPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPost, setSelectedPost] = useState<any | null>(null);
 
+  // Card translation language state (ko, en, vn, mn)
+  const [cardLangs, setCardLangs] = useState<Record<number, "ko" | "en" | "vn" | "mn">>({});
+
+  const getCardLang = (postId: number): "ko" | "en" | "vn" | "mn" => {
+    const cardLang = cardLangs[postId];
+    if (cardLang) return cardLang;
+    if (lang === "ko" || lang === "en" || lang === "vn" || lang === "mn") {
+      return lang;
+    }
+    return "ko";
+  };
+
+  const selectedPostLang = selectedPost ? getCardLang(selectedPost.id) : ((lang === "ko" || lang === "en" || lang === "vn" || lang === "mn") ? lang : "ko");
+
   // Custom comment states to simulate database insertion reactively
   const [dynamicPosts, setDynamicPosts] = useState<any[]>(MOCK_POSTS);
   const [commentText, setCommentText] = useState("");
@@ -455,9 +469,10 @@ export default function CommunityPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
             {filteredPosts.length > 0 ? (
               filteredPosts.map(post => {
-                const postTitle = post.title[lang as "ko" | "en" | "vn" | "mn"] || post.title.ko;
-                const postBody = post.body[lang as "ko" | "en" | "vn" | "mn"] || post.body.ko;
-                const postTime = typeof post.time === "string" ? post.time : (post.time[lang as "ko" | "en" | "vn" | "mn"] || post.time.ko);
+                const postLang = getCardLang(post.id);
+                const postTitle = post.title[postLang] || post.title.ko;
+                const postBody = post.body[postLang] || post.body.ko;
+                const postTime = typeof post.time === "string" ? post.time : (post.time[postLang] || post.time.ko);
 
                 return (
                   <div 
@@ -465,10 +480,46 @@ export default function CommunityPage() {
                     onClick={() => handleOpenPost(post)}
                     className="post-card glass-panel"
                   >
-                    <div className="post-header">
-                      <span className="post-country-badge">{post.country}</span>
-                      <span className="post-author">{post.author}</span>
-                      <span className="post-time">{postTime}</span>
+                    <div className="post-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span className="post-country-badge">{post.country}</span>
+                        <span className="post-author">{post.author}</span>
+                        <span className="post-time">{postTime}</span>
+                      </div>
+                      
+                      {/* Card translation selector */}
+                      <div className="card-translate-selector" style={{ display: "flex", gap: "4px" }} onClick={(e) => e.stopPropagation()}>
+                        {(["ko", "en", "vn", "mn"] as const).map((l) => {
+                          const flags = { ko: "🇰🇷", en: "🇺🇸", vn: "🇻🇳", mn: "🇲🇳" };
+                          const isActive = postLang === l;
+                          return (
+                            <button
+                              key={l}
+                              onClick={() => {
+                                setCardLangs(prev => ({ ...prev, [post.id]: l }));
+                              }}
+                              style={{
+                                background: isActive ? "rgba(255, 222, 0, 0.2)" : "rgba(255, 255, 255, 0.05)",
+                                border: isActive ? "1px solid var(--accent-color, #ffde00)" : "1px solid rgba(255, 255, 255, 0.1)",
+                                borderRadius: "4px",
+                                padding: "2px 6px",
+                                fontSize: "0.85rem",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "2px",
+                                transition: "all 0.2s ease"
+                              }}
+                              title={l.toUpperCase()}
+                            >
+                              <span>{flags[l]}</span>
+                              <span style={{ fontSize: "0.65rem", fontWeight: isActive ? "bold" : "normal", color: isActive ? "#ffde00" : "var(--text-secondary)" }}>
+                                {l.toUpperCase()}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                     <h3 className="post-title">{postTitle}</h3>
                     <p className="post-body-preview">{postBody}</p>
@@ -552,8 +603,44 @@ export default function CommunityPage() {
 
             {/* Post Details */}
             <div className="drawer-post-header">
-              <span className="post-country-badge" style={{ marginBottom: "12px", display: "inline-block" }}>{selectedPost.country}</span>
-              <h2 className="drawer-post-title">{selectedPost.title[lang as "ko" | "en" | "vn" | "mn"] || selectedPost.title.ko}</h2>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+                <span className="post-country-badge" style={{ marginBottom: 0 }}>{selectedPost.country}</span>
+                
+                {/* Translator buttons inside drawer */}
+                <div className="drawer-translate-selector" style={{ display: "flex", gap: "4px" }}>
+                  {(["ko", "en", "vn", "mn"] as const).map((l) => {
+                    const flags = { ko: "🇰🇷", en: "🇺🇸", vn: "🇻🇳", mn: "🇲🇳" };
+                    const isActive = selectedPostLang === l;
+                    return (
+                      <button
+                        key={l}
+                        onClick={() => {
+                          setCardLangs(prev => ({ ...prev, [selectedPost.id]: l }));
+                        }}
+                        style={{
+                          background: isActive ? "rgba(255, 222, 0, 0.2)" : "rgba(255, 255, 255, 0.05)",
+                          border: isActive ? "1px solid var(--accent-color, #ffde00)" : "1px solid rgba(255, 255, 255, 0.1)",
+                          borderRadius: "4px",
+                          padding: "4px 8px",
+                          fontSize: "0.9rem",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          transition: "all 0.2s ease"
+                        }}
+                        title={l.toUpperCase()}
+                      >
+                        <span>{flags[l]}</span>
+                        <span style={{ fontSize: "0.75rem", fontWeight: isActive ? "bold" : "normal", color: isActive ? "#ffde00" : "var(--text-secondary)" }}>
+                          {l.toUpperCase()}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <h2 className="drawer-post-title">{selectedPost.title[selectedPostLang] || selectedPost.title.ko}</h2>
               <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)", display: "flex", gap: "12px" }}>
                 <span>{tComm.authorLabel}: <strong>{selectedPost.author}</strong></span>
                 <span>•</span>
@@ -562,7 +649,7 @@ export default function CommunityPage() {
             </div>
 
             <div className="drawer-post-body">
-              {(selectedPost.body[lang as "ko" | "en" | "vn" | "mn"] || selectedPost.body.ko).split("\n").map((para: string, i: number) => (
+              {(selectedPost.body[selectedPostLang] || selectedPost.body.ko).split("\n").map((para: string, i: number) => (
                 <p key={i} style={{ marginBottom: "16px" }}>{para}</p>
               ))}
             </div>
@@ -573,8 +660,8 @@ export default function CommunityPage() {
               
               <div className="comments-list">
                 {selectedPost.comments.map((comment: any) => {
-                  const commentText = typeof comment.text === "string" ? comment.text : (comment.text[lang as "ko" | "en" | "vn" | "mn"] || comment.text.ko);
-                  const commentTime = typeof comment.time === "string" ? comment.time : (comment.time[lang as "ko" | "en" | "vn" | "mn"] || comment.time.ko);
+                  const commentText = typeof comment.text === "string" ? comment.text : (comment.text[selectedPostLang] || comment.text.ko);
+                  const commentTime = typeof comment.time === "string" ? comment.time : (comment.time[selectedPostLang] || comment.time.ko);
 
                   return (
                     <div key={comment.id} className="comment-item">
