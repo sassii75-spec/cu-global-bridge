@@ -195,6 +195,90 @@ const QNA_TRANSLATIONS: Record<"ko" | "en" | "vn" | "mn", {
   }
 };
 
+const MOCK_STUDENT_QNAS = [
+  {
+    id: 1717680000000 + 1,
+    question: {
+      ko: "[학사/장학] 장학금 지급 기준과 신청 서류 문의",
+      en: "[Academics/Scholarship] Inquiry about scholarship criteria and application documents",
+      vn: "[Academics/Scholarship] Yêu cầu về tiêu chí học bổng và hồ sơ đăng ký",
+      mn: "[Academics/Scholarship] Тэтгэлэг олгох шалгуур болон бүрдүүлэх материалын тухай"
+    },
+    answer: {
+      ko: "[스마트 민원 자동 분류 안내]\n본 문의는 '학사/장학' 영역으로 자동 분류되어 담당자 김학사(academic@global.ac.kr / 010-1111-2222)님께 실시간 메일 및 SMS 알림이 발송되었습니다. 신속하게 답변해 드리겠습니다.",
+      en: "[Smart Routing Notification]\nThis inquiry has been categorized under '학사/장학' and dispatched to coordinator 김학사 (academic@global.ac.kr / 010-1111-2222) via email & SMS. We will reply shortly.",
+      vn: "[Tự động phân loại thông minh]\nYêu cầu này được phân loại vào mục '학사/장학' và gửi thông báo đến người phụ trách 김학사 (academic@global.ac.kr / 010-1111-2222) qua email & SMS. Chúng tôi sẽ phản hồi sớm nhất.",
+      mn: "[Ухаалаг ангилалын мэдэгдэл]\nЭнэхүү хүсэлтийг '학사/장학' ангилалд бүртгэж, хариуцсан ажилтан 김학사 (academic@global.ac.kr / 010-1111-2222) руу и-мэйл болон SMS-ээр мэдэгдэл илгээлээ. Бид удахгүй хариулах болно."
+    }
+  },
+  {
+    id: 1717680000000 + 2,
+    question: {
+      ko: "[비자/정착] 비자 연장 서류 및 출입국 사무소 방문 예약 방법",
+      en: "[Visa/Settlement] Inquiry about visa extension documents and immigration office reservation",
+      vn: "[Visa/Settlement] Yêu cầu về hồ sơ gia hạn visa và đặt lịch hẹn cục xuất nhập cảnh",
+      mn: "[Visa/Settlement] Виз сунгахад бүрдүүлэх материал болон Цагаачлалын албаны цаг захиалга"
+    },
+    answer: {
+      ko: "[스마트 민원 자동 분류 안내]\n본 문의는 '비자/정착' 영역으로 자동 분류되어 담당자 박비자(visa@global.ac.kr / 010-5555-6666)님께 실시간 메일 및 SMS 알림이 발송되었습니다. 신속하게 답변해 드리겠습니다.",
+      en: "[Smart Routing Notification]\nThis inquiry has been categorized under '비자/정착' and dispatched to coordinator 박비자 (visa@global.ac.kr / 010-5555-6666) via email & SMS. We will reply shortly.",
+      vn: "[Tự động phân loại thông minh]\nYêu cầu này được phân loại vào mục '비자/정착' và gửi thông báo đến người phụ trách 박비자 (visa@global.ac.kr / 010-5555-6666) qua email & SMS. Chúng tôi sẽ phản hồi sớm nhất.",
+      mn: "[Ухаалаг ангилалын мэдэгдэл]\nЭнэхүү хүсэлтийг '비자/정착' ангилалд бүртгэж, хариуцсан ажилтан 박비자 (visa@global.ac.kr / 010-5555-6666) руу и-мэйл болон SMS-ээр мэдэгдэл илгээлээ. Бид удахгүй хариулах болно."
+    }
+  },
+  {
+    id: 1717680000000 + 3,
+    question: {
+      ko: "[교육지원] 한국어 튜터링 프로그램 매칭 신청 방법",
+      en: "[Learning Support] How to apply for Korean language tutoring program matching",
+      vn: "[Learning Support] Cách đăng ký ghép cặp chương trình kèm tiếng Hàn",
+      mn: "[Learning Support] Солонгос хэлний туслах багш хөтөлбөрт хамрагдах хүсэлт"
+    },
+    answer: {
+      ko: "[스마트 민원 자동 분류 안내]\n본 문의는 '교육지원' 영역으로 자동 분류되어 담당자 이교육(edu@global.ac.kr / 010-3333-4444)님께 실시간 메일 및 SMS 알림이 발송되었습니다. 신속하게 답변해 드리겠습니다.",
+      en: "[Smart Routing Notification]\nThis inquiry has been categorized under '교육지원' and dispatched to coordinator 이교육 (edu@global.ac.kr / 010-3333-4444) via email & SMS. We will reply shortly.",
+      vn: "[Tự động phân loại thông minh]\nYêu cầu này được phân loại vào mục '교육지원' và gửi thông báo đến người phụ trách 이교육 (edu@global.ac.kr / 010-3333-4444) qua email & SMS. Chúng tôi sẽ phản hồi sớm nhất.",
+      mn: "[Ухаалаг ангилалын мэдэгдэл]\nЭнэхүү хүсэлтийг '교육지원' ангилалд бүртгэж, хариуцсан ажилтан 이교육 (edu@global.ac.kr / 010-3333-4444) руу и-мэйл болон SMS-ээр мэдэгдэл илгээлээ. Бид удахгүй хариулах болно."
+    }
+  }
+];
+
+const MOCK_COMPLAINTS_LOGS = [
+  {
+    id: "log-" + (1717680000000 + 1),
+    timestamp: "2026-06-06 오후 2:23:11",
+    category: "학사/장학",
+    title: "장학금 지급 기준과 신청 서류 문의",
+    body: "안녕하세요. 몽골에서 온 유학생 알탄이라고 합니다. 이번 학기 성적이 4.2 GPA인데 성적 우수 장학금 대상자인지 궁금합니다. 그리고 필요한 신청 서류와 제출 기한도 알려주세요.",
+    staffName: "김학사",
+    staffEmail: "academic@global.ac.kr",
+    staffPhone: "010-1111-2222",
+    status: "Email & SMS Sent"
+  },
+  {
+    id: "log-" + (1717680000000 + 2),
+    timestamp: "2026-06-06 오후 3:45:02",
+    category: "비자/정착",
+    title: "비자 연장 서류 및 출입국 사무소 방문 예약 방법",
+    body: "베트남 국적 근로 학생 투입니다. D-2 유학 비자 연장일이 다음 달까지인데, 학교에서 발급받아야 하는 서류 리스트가 무엇인지 알려주세요. 그리고 출입국관리사무소 방문 예약 대행이 가능한가요?",
+    staffName: "박비자",
+    staffEmail: "visa@global.ac.kr",
+    staffPhone: "010-5555-6666",
+    status: "Email & SMS Sent"
+  },
+  {
+    id: "log-" + (1717680000000 + 3),
+    timestamp: "2026-06-06 오후 4:12:30",
+    category: "교육지원",
+    title: "한국어 튜터링 프로그램 매칭 신청 방법",
+    body: "안녕하세요. 네팔에서 온 라제쉬입니다. TOPIK 4급 준비를 하고 있는데 전공 수업 단어가 너무 어렵습니다. 한국 학생들과 일대일로 매칭해주는 한국어 튜터링 프로그램이 있다고 들었는데 어떻게 신청하나요?",
+    staffName: "이교육",
+    staffEmail: "edu@global.ac.kr",
+    staffPhone: "010-3333-4444",
+    status: "Email & SMS Sent"
+  }
+];
+
 export default function QnaPage() {
   const { lang } = useLanguage();
   const tQna = QNA_TRANSLATIONS[lang as "ko" | "en" | "vn" | "mn"] || QNA_TRANSLATIONS.ko;
@@ -246,6 +330,15 @@ export default function QnaPage() {
         } catch (e) {
           console.error("Failed to parse saved Q&As:", e);
         }
+      } else {
+        const defaultList = [...MOCK_STUDENT_QNAS, ...INITIAL_QNA];
+        setQnaList(defaultList);
+        localStorage.setItem("gcu-qna-list", JSON.stringify(defaultList));
+      }
+
+      const savedLogs = localStorage.getItem("gcu-complaints-logs");
+      if (!savedLogs) {
+        localStorage.setItem("gcu-complaints-logs", JSON.stringify(MOCK_COMPLAINTS_LOGS));
       }
     }
   }, []);

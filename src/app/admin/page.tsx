@@ -577,9 +577,140 @@ Rules:
   - Fallback rule: intent = "user_list"
     `.trim();
   }
-
   return info;
 };
+
+const INITIAL_QNA = [
+  {
+    id: 1,
+    question: {
+      ko: "외국인 유학생도 정말 모든 교육 강좌와 모의고사를 무료로 이용할 수 있나요?",
+      en: "Can international students really access all educational courses and mock exams for free?",
+      vn: "Sinh viên quốc tế có thực sự được sử dụng tất cả các khóa học và thi thử miễn phí không?",
+      mn: "Гадаад оюутнууд үнэхээр бүх сургалт, загвар шалгалтыг үнэ төлбөргүй ашиглах боломжтой юу?"
+    },
+    answer: {
+      ko: "네! 본 GCU Post School 플랫폼의 모든 단계별 정규 한국어 강좌, TOPIK 대비자료, 그리고 듣기/읽기 능력 시험 모의고사는 로그인 및 회원가입 없이 외국인 누구나 전면 무료로 개방되어 운영됩니다.",
+      en: "Yes! All step-by-step regular Korean courses, TOPIK prep materials, and listening/reading mock exams on the GCU Post School platform are fully open and free for any foreigners without registration or login.",
+      vn: "Đúng vậy! Tất cả các khóa học tiếng Hàn chính quy theo cấp độ, tài liệu ôn thi TOPIK, 및 đề thi thử kỹ năng Nghe/Đọc trên nền tảng GCU Post School đều được mở hoàn toàn miễn phí cho tất cả người nước ngoài mà không cần đăng ký hay đăng nhập.",
+      mn: "Тийм ээ! Энэхүү GCU Post School платформын бүх шатны солонгос хэлний үндсэн хичээл, TOPIK-д бэлтгэх материал, сонсох/унших шалгалтын загвар шалгалтууд нь нэвтрэх болон бүртгүүлэх шаардлагагүйгээр гадаадын хэн бүхэнд бүрэн үнэ төлбөргүй нээлттэй ажиллаж байна."
+    }
+  },
+  {
+    id: 2,
+    question: {
+      ko: "K-Work 일자리 연동 및 지자체 F-2-R 비자 추천서는 어떻게 신청합니까?",
+      en: "How do I apply for K-Work job matching and the local government F-2-R visa recommendation letter?",
+      vn: "Làm thế nào để đăng ký kết nối việc làm K-Work và thư giới thiệu visa F-2-R của địa phương?",
+      mn: "K-Work ажлын байр зуучлал болон орон нутгийн F-2-R визний тодорхойлолт захидлыг хэрхэн хүсэх вэ?"
+    },
+    answer: {
+      ko: "취업/생활 페이지에서 관내 우수 연동 기업 정보를 검토한 후 본인의 자가 포인트 점수가 60점 요건을 만족하면, 근로 계약 가계약서 사본과 학위증을 지참하여 대학 행정처(support@global.ac.kr)로 신청해 주십시오. 행정 심사 후 지자체 추천서 제출용 총장 명의 공식 추천 공문을 발행해 드립니다.",
+      en: "Check the matched job vacancies on our Employment/Life page. If your self-calculator point sum is 60 or above, bring a copy of your tentative employment contract and diploma, and apply at the university administration (support@global.ac.kr). We will issue an official president-endorsed recommendation letter for local government submittal.",
+      vn: "Sau khi kiểm tra thông tin doanh nghiệp liên kết xuất sắc trên trang Việc làm & Đời sống, nếu điểm tự tính đạt từ 60 điểm trở lên, vui lòng mang theo bản sao hợp đồng lao động tạm thời 및 bằng tốt nghiệp đến phòng hành chính của trường (support@global.ac.kr) để đăng ký. Sau khi thẩm định, trường sẽ cấp văn bản giới thiệu chính thức dưới danh nghĩa Hiệu trưởng để nộp cho chính quyền địa phương.",
+      mn: "Ажил эрхлэлт/Амьдрал хуудаснаас орон нутгийн хамтрагч ажлын байрны мэдээллийг шалгана уу. Хэрэв таны өөрийн тооцоолсон оноо 60-аас дээш байвал хөдөлмөрийн гэрээний хуулбар, дипломоо авч сургуулийн захиргаанд (support@global.ac.kr) хандана уу. Захиргааны хяналтын дараа орон нутгийн захиргаанд өгөх албан ёсны тодорхойлолтыг гаргаж өгнө."
+    }
+  },
+  {
+    id: 3,
+    question: {
+      ko: "강좌 수강 중 오류나 시간제 근로 신청 관련 개별 상담은 어디로 문의하나요?",
+      en: "Where should I contact for individual counseling regarding course errors or part-time work permit applications?",
+      vn: "Tôi nên liên hệ ở đâu để được tư vấn riêng về lỗi khóa học hoặc đăng ký làm thêm?",
+      mn: "Хичээл сурах явцад алдаа гарах болон цагийн ажил хийх зөвшөөрлийн зөвлөгөөг хаанаас авах вэ?"
+    },
+    answer: {
+      ko: "글로벌 포스트 스쿨 종합 행정 지원처(☎ 02-1234-5678)로 전화해 문의하시거나 아래의 Q&A 실시간 질문 신청 양식을 작성해 전송해 주시면 24시간 이내에 개별 메일로 상세 답변을 회신해 드립니다.",
+      en: "You can call our Post School administrative helpdesk (☎ 02-1234-5678) or fill out and submit the Q&A ticket form below. A detailed response will be sent to your registered email address within 24 hours.",
+      vn: "Vui lòng gọi điện đến Văn phòng Hỗ trợ Hành chính Tổng hợp Post School (☎ 02-1234-5678) эсвэл điền vào biểu mẫu đăng ký Q&A trực tuyến bên dưới. Chúng tôi sẽ phản hồi chi tiết qua email cá nhân của bạn trong vòng 24 giờ.",
+      mn: "Пост Скүүл нэгдсэн тусламжийн төв рүү (☎ 02-1234-5678) утасдаж асуух эсвэл доорх Q&A асуулт илгээх хуудсаар асуултаа илгээвэл 24 цагийн дотор таны цахим шууданд хариу илгээнэ."
+    }
+  }
+];
+
+const MOCK_STUDENT_QNAS = [
+  {
+    id: 1717680000000 + 1,
+    question: {
+      ko: "[학사/장학] 장학금 지급 기준과 신청 서류 문의",
+      en: "[Academics/Scholarship] Inquiry about scholarship criteria and application documents",
+      vn: "[Academics/Scholarship] Yêu cầu về tiêu chí học bổng và hồ sơ đăng ký",
+      mn: "[Academics/Scholarship] Тэтгэлэг олгох шалгуур болон бүрдүүлэх материалын тухай"
+    },
+    answer: {
+      ko: "[스마트 민원 자동 분류 안내]\n본 문의는 '학사/장학' 영역으로 자동 분류되어 담당자 김학사(academic@global.ac.kr / 010-1111-2222)님께 실시간 메일 및 SMS 알림이 발송되었습니다. 신속하게 답변해 드리겠습니다.",
+      en: "[Smart Routing Notification]\nThis inquiry has been categorized under '학사/장학' and dispatched to coordinator 김학사 (academic@global.ac.kr / 010-1111-2222) via email & SMS. We will reply shortly.",
+      vn: "[Tự động phân loại thông minh]\nYêu cầu này được phân loại vào mục '학사/장학' và gửi thông báo đến người phụ trách 김학사 (academic@global.ac.kr / 010-1111-2222) qua email & SMS. Chúng tôi sẽ phản hồi sớm nhất.",
+      mn: "[Ухаалаг ангилалын мэдэгдэл]\nЭнэхүү хүсэлтийг '학사/장학' ангилалд бүртгэж, хариуцсан ажилтан 김학사 (academic@global.ac.kr / 010-1111-2222) руу и-мэйл болон SMS-ээр мэдэгдэл илгээлээ. Бид удахгүй хариулах болно."
+    }
+  },
+  {
+    id: 1717680000000 + 2,
+    question: {
+      ko: "[비자/정착] 비자 연장 서류 및 출입국 사무소 방문 예약 방법",
+      en: "[Visa/Settlement] Inquiry about visa extension documents and immigration office reservation",
+      vn: "[Visa/Settlement] Yêu cầu về hồ sơ gia hạn visa và đặt lịch hẹn cục xuất nhập cảnh",
+      mn: "[Visa/Settlement] Виз сунгахад бүрдүүлэх материал болон Цагаачлалын албаны цаг захиалга"
+    },
+    answer: {
+      ko: "[스마트 민원 자동 분류 안내]\n본 문의는 '비자/정착' 영역으로 자동 분류되어 담당자 박비자(visa@global.ac.kr / 010-5555-6666)님께 실시간 메일 및 SMS 알림이 발송되었습니다. 신속하게 답변해 드리겠습니다.",
+      en: "[Smart Routing Notification]\nThis inquiry has been categorized under '비자/정착' and dispatched to coordinator 박비자 (visa@global.ac.kr / 010-5555-6666) via email & SMS. We will reply shortly.",
+      vn: "[Tự động phân loại thông minh]\nYêu cầu này được phân loại vào mục '비자/정착' và gửi thông báo đến người phụ trách 박비자 (visa@global.ac.kr / 010-5555-6666) qua email & SMS. Chúng tôi sẽ phản hồi sớm nhất.",
+      mn: "[Ухаалаг ангилалын мэдэгдэл]\nЭнэхүү хүсэлтийг '비자/정착' ангилалд бүртгэж, хариуцсан ажилтан 박비자 (visa@global.ac.kr / 010-5555-6666) руу и-мэйл болон SMS-ээр мэдэгдэл илгээлээ. Бид удахгүй хариулах болно."
+    }
+  },
+  {
+    id: 1717680000000 + 3,
+    question: {
+      ko: "[교육지원] 한국어 튜터링 프로그램 매칭 신청 방법",
+      en: "[Learning Support] How to apply for Korean language tutoring program matching",
+      vn: "[Learning Support] Cách đăng ký ghép cặp chương trình kèm tiếng Hàn",
+      mn: "[Learning Support] Солонгос хэлний туслах багш хөтөлбөрт хамрагдах хүсэлт"
+    },
+    answer: {
+      ko: "[스마트 민원 자동 분류 안내]\n본 문의는 '교육지원' 영역으로 자동 분류되어 담당자 이교육(edu@global.ac.kr / 010-3333-4444)님께 실시간 메일 및 SMS 알림이 발송되었습니다. 신속하게 답변해 드리겠습니다.",
+      en: "[Smart Routing Notification]\nThis inquiry has been categorized under '교육지원' and dispatched to coordinator 이교육 (edu@global.ac.kr / 010-3333-4444) via email & SMS. We will reply shortly.",
+      vn: "[Tự động phân loại thông minh]\nYêu cầu này được phân loại vào mục '교육지원' và gửi thông báo đến người phụ trách 이교육 (edu@global.ac.kr / 010-3333-4444) qua email & SMS. Chúng tôi sẽ phản hồi sớm nhất.",
+      mn: "[Ухаалаг ангилалын мэдэгдэл]\nЭнэхүү хүсэлтийг '교육지원' ангилалд бүртгэж, хариуцсан ажилтан 이교육 (edu@global.ac.kr / 010-3333-4444) руу и-мэйл болон SMS-ээр мэдэгдэл илгээлээ. Бид удахгүй хариулах болно."
+    }
+  }
+];
+
+const MOCK_COMPLAINTS_LOGS = [
+  {
+    id: "log-" + (1717680000000 + 1),
+    timestamp: "2026-06-06 오후 2:23:11",
+    category: "학사/장학",
+    title: "장학금 지급 기준과 신청 서류 문의",
+    body: "안녕하세요. 몽골에서 온 유학생 알탄이라고 합니다. 이번 학기 성적이 4.2 GPA인데 성적 우수 장학금 대상자인지 궁금합니다. 그리고 필요한 신청 서류와 제출 기한도 알려주세요.",
+    staffName: "김학사",
+    staffEmail: "academic@global.ac.kr",
+    staffPhone: "010-1111-2222",
+    status: "Email & SMS Sent"
+  },
+  {
+    id: "log-" + (1717680000000 + 2),
+    timestamp: "2026-06-06 오후 3:45:02",
+    category: "비자/정착",
+    title: "비자 연장 서류 및 출입국 사무소 방문 예약 방법",
+    body: "베트남 국적 근로 학생 투입니다. D-2 유학 비자 연장일이 다음 달까지인데, 학교에서 발급받아야 하는 서류 리스트가 무엇인지 알려주세요. 그리고 출입국관리사무소 방문 예약 대행이 가능한가요?",
+    staffName: "박비자",
+    staffEmail: "visa@global.ac.kr",
+    staffPhone: "010-5555-6666",
+    status: "Email & SMS Sent"
+  },
+  {
+    id: "log-" + (1717680000000 + 3),
+    timestamp: "2026-06-06 오후 4:12:30",
+    category: "교육지원",
+    title: "한국어 튜터링 프로그램 매칭 신청 방법",
+    body: "안녕하세요. 네팔에서 온 라제쉬입니다. TOPIK 4급 준비를 하고 있는데 전공 수업 단어가 너무 어렵습니다. 한국 학생들과 일대일로 매칭해주는 한국어 튜터링 프로그램이 있다고 들었는데 어떻게 신청하나요?",
+    staffName: "이교육",
+    staffEmail: "edu@global.ac.kr",
+    staffPhone: "010-3333-4444",
+    status: "Email & SMS Sent"
+  }
+];
 
 export default function AdminPage() {
   const { lang } = useLanguage();
@@ -763,6 +894,9 @@ export default function AdminPage() {
         try {
           setComplaintsLogs(JSON.parse(savedLogs));
         } catch (e) {}
+      } else {
+        setComplaintsLogs(MOCK_COMPLAINTS_LOGS);
+        localStorage.setItem("gcu-complaints-logs", JSON.stringify(MOCK_COMPLAINTS_LOGS));
       }
 
       // Load QnA list
@@ -771,6 +905,10 @@ export default function AdminPage() {
         try {
           setQnaList(JSON.parse(savedQna));
         } catch (e) {}
+      } else {
+        const defaultList = [...MOCK_STUDENT_QNAS, ...INITIAL_QNA];
+        setQnaList(defaultList);
+        localStorage.setItem("gcu-qna-list", JSON.stringify(defaultList));
       }
     }
   }, []);
