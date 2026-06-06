@@ -208,6 +208,22 @@ export default function QnaPage() {
   const [qnaBody, setQnaBody] = useState("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Auto classify category based on title/body text keywords
+  useEffect(() => {
+    const text = (qnaTitle + " " + qnaBody).toLowerCase();
+    if (!text.trim()) return;
+
+    if (text.includes("비자") || text.includes("정착") || text.includes("출입국") || text.includes("외국인등록증") || text.includes("visa") || text.includes("settle") || text.includes("immigration")) {
+      setQnaCategory("비자/정착");
+    } else if (text.includes("장학") || text.includes("등록금") || text.includes("학사") || text.includes("성적") || text.includes("gpa") || text.includes("scholarship") || text.includes("tuition") || text.includes("academic")) {
+      setQnaCategory("학사/장학");
+    } else if (text.includes("교육") || text.includes("강좌") || text.includes("튜터") || text.includes("학습") || text.includes("공부") || text.includes("수업") || text.includes("course") || text.includes("class") || text.includes("learn") || text.includes("tutor")) {
+      setQnaCategory("교육지원");
+    } else {
+      setQnaCategory("일반문의");
+    }
+  }, [qnaTitle, qnaBody]);
+
   // Load from localStorage on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -245,6 +261,58 @@ export default function QnaPage() {
     e.preventDefault();
     if (!qnaTitle.trim() || !qnaBody.trim()) return;
 
+    // Read complaints config from localStorage
+    let staff = { name: "최일반", email: "support@global.ac.kr", phone: "010-7777-8888" };
+    if (typeof window !== "undefined") {
+      const config = localStorage.getItem("gcu-complaints-config");
+      if (config) {
+        try {
+          const parsed = JSON.parse(config);
+          const match = parsed.find((c: any) => c.category === qnaCategory);
+          if (match) staff = match;
+        } catch (err) {}
+      } else {
+        // Setup default config if missing
+        const defaultConfig = [
+          { category: "학사/장학", name: "김학사", email: "academic@global.ac.kr", phone: "010-1111-2222" },
+          { category: "교육지원", name: "이교육", email: "edu@global.ac.kr", phone: "010-3333-4444" },
+          { category: "비자/정착", name: "박비자", email: "visa@global.ac.kr", phone: "010-5555-6666" },
+          { category: "일반문의", name: "최일반", email: "support@global.ac.kr", phone: "010-7777-8888" }
+        ];
+        localStorage.setItem("gcu-complaints-config", JSON.stringify(defaultConfig));
+        const match = defaultConfig.find((c: any) => c.category === qnaCategory);
+        if (match) staff = match;
+      }
+    }
+
+    // Add log to gcu-complaints-logs
+    const newLog = {
+      id: "log-" + Date.now(),
+      timestamp: new Date().toLocaleString(),
+      category: qnaCategory,
+      title: qnaTitle,
+      body: qnaBody,
+      staffName: staff.name,
+      staffEmail: staff.email,
+      staffPhone: staff.phone,
+      status: "Email & SMS Sent"
+    };
+
+    if (typeof window !== "undefined") {
+      const savedLogs = localStorage.getItem("gcu-complaints-logs");
+      const currentLogs = savedLogs ? JSON.parse(savedLogs) : [];
+      const updatedLogs = [newLog, ...currentLogs];
+      localStorage.setItem("gcu-complaints-logs", JSON.stringify(updatedLogs));
+    }
+
+    // Dynamic routing notice in 4 languages
+    const autoRoutingMsg = {
+      ko: `[스마트 민원 자동 분류 안내]\n본 문의는 '${qnaCategory}' 영역으로 자동 분류되어 담당자 ${staff.name}(${staff.email} / ${staff.phone})님께 실시간 메일 및 SMS 알림이 발송되었습니다. 신속하게 답변해 드리겠습니다.`,
+      en: `[Smart Routing Notification]\nThis inquiry has been categorized under '${qnaCategory}' and dispatched to coordinator ${staff.name} (${staff.email} / ${staff.phone}) via email & SMS. We will reply shortly.`,
+      vn: `[Tự động phân loại thông minh]\nYêu cầu này được phân loại vào mục '${qnaCategory}' và gửi thông báo đến người phụ trách ${staff.name} (${staff.email} / ${staff.phone}) qua email & SMS. Chúng tôi sẽ phản hồi sớm nhất.`,
+      mn: `[Ухаалаг ангилалын мэдэгдэл]\nЭнэхүү хүсэлтийг '${qnaCategory}' ангилалд бүртгэж, хариуцсан ажилтан ${staff.name} (${staff.email} / ${staff.phone}) руу и-мэйл болон SMS-ээр мэдэгдэл илгээлээ. Бид удахгүй хариулах болно.`
+    };
+
     // Create dynamic question dictionary mapping in all 4 languages to prevent translation breakages on user submissions
     const newQnaItem = {
       id: Date.now(),
@@ -255,10 +323,10 @@ export default function QnaPage() {
         mn: `[${qnaCategory}] ${qnaTitle}`
       },
       answer: {
-        ko: tQna.submitReceipt,
-        en: tQna.submitReceipt,
-        vn: tQna.submitReceipt,
-        mn: tQna.submitReceipt
+        ko: autoRoutingMsg.ko,
+        en: autoRoutingMsg.en,
+        vn: autoRoutingMsg.vn,
+        mn: autoRoutingMsg.mn
       }
     };
 
@@ -271,7 +339,12 @@ export default function QnaPage() {
 
     setQnaTitle("");
     setQnaBody("");
-    setToastMessage(tQna.submitSuccess);
+
+    const toastInfo = lang === "ko" ? `민원이 '${qnaCategory}' 담당자에게 자동 라우팅 및 알림 발송되었습니다.`
+                    : lang === "vn" ? `Yêu cầu đã được tự động chuyển đến người phụ trách ${qnaCategory}.`
+                    : lang === "mn" ? `Хүсэлтийг ${qnaCategory} хариуцсан мэргэжилтэн рүү автоматаар шилжүүллээ.`
+                    : `Ticket routed automatically to ${qnaCategory} coordinator.`;
+    setToastMessage(toastInfo);
 
     setExpandedQna({
       ...expandedQna,

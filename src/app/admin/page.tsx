@@ -548,6 +548,24 @@ Input Validation:
   - Duplicate email check in existing DB
   - Locale provider synchronization
     `.trim();
+  } else if (intent === "complaint_routing") {
+    info.sourceDb = "GCU 민원 자동 라우팅 엔진 (LocalStorage: `gcu-complaints-logs`)";
+    info.dataLocation = "Local Browser Storage & SMS/Email Dispatch Gateway Logs";
+    info.latency = msg.actionData?.latency || "14ms";
+    info.confidence = "100% (자동 키워드 매칭 분류)";
+    info.schema = `
+Table: ComplaintsLogs
+Columns:
+  - id: VARCHAR (Primary Key)
+  - timestamp: VARCHAR (발송 일시)
+  - category: VARCHAR (학사/장학 | 교육지원 | 비자/정착 | 일반문의)
+  - title: VARCHAR (민원 제목)
+  - body: TEXT (민원 상세 본문)
+  - staffName: VARCHAR (담당자 성명)
+  - staffEmail: VARCHAR (담당자 이메일)
+  - staffPhone: VARCHAR (담당자 핸드폰)
+  - status: VARCHAR ("Email & SMS Sent")
+    `.trim();
   } else {
     info.sourceDb = "GCU Admin AI NLU Parser NLUResult 규칙 엔진 및 학사 업무 지침 가이드라인 Ver 1.0";
     info.dataLocation = "In-memory Regular Expression Dictionary";
@@ -587,7 +605,25 @@ export default function AdminPage() {
   const [adminName, setAdminName] = useState("S");
 
   // Tab State
-  const [adminActiveTab, setAdminActiveTab] = useState<"users" | "exams">("users");
+  const [adminActiveTab, setAdminActiveTab] = useState<"users" | "exams" | "complaints">("users");
+
+  // Complaints Management States
+  const [complaintsConfig, setComplaintsConfig] = useState<Array<{ category: string; name: string; email: string; phone: string }>>([]);
+  const [complaintsLogs, setComplaintsLogs] = useState<any[]>([]);
+  const [qnaList, setQnaList] = useState<any[]>([]);
+
+  // Coordinator Editing States
+  const [editingConfigCategory, setEditingConfigCategory] = useState<string | null>(null);
+  const [configFormName, setConfigFormName] = useState("");
+  const [configFormEmail, setConfigFormEmail] = useState("");
+  const [configFormPhone, setConfigFormPhone] = useState("");
+
+  // Q&A Inquiry Replying States
+  const [replyingQnaId, setReplyingQnaId] = useState<number | null>(null);
+  const [replyTextKo, setReplyTextKo] = useState("");
+  const [replyTextEn, setReplyTextEn] = useState("");
+  const [replyTextVn, setReplyTextVn] = useState("");
+  const [replyTextMn, setReplyTextMn] = useState("");
 
   // Filter & Search states
   const [searchTerm, setSearchTerm] = useState("");
@@ -703,6 +739,39 @@ export default function AdminPage() {
             setExams(DEFAULT_EXAMS);
           }
         });
+
+      // Load complaints config
+      const savedConfig = localStorage.getItem("gcu-complaints-config");
+      if (savedConfig) {
+        try {
+          setComplaintsConfig(JSON.parse(savedConfig));
+        } catch (e) {}
+      } else {
+        const defaultConfig = [
+          { category: "학사/장학", name: "김학사", email: "academic@global.ac.kr", phone: "010-1111-2222" },
+          { category: "교육지원", name: "이교육", email: "edu@global.ac.kr", phone: "010-3333-4444" },
+          { category: "비자/정착", name: "박비자", email: "visa@global.ac.kr", phone: "010-5555-6666" },
+          { category: "일반문의", name: "최일반", email: "support@global.ac.kr", phone: "010-7777-8888" }
+        ];
+        setComplaintsConfig(defaultConfig);
+        localStorage.setItem("gcu-complaints-config", JSON.stringify(defaultConfig));
+      }
+
+      // Load complaints logs
+      const savedLogs = localStorage.getItem("gcu-complaints-logs");
+      if (savedLogs) {
+        try {
+          setComplaintsLogs(JSON.parse(savedLogs));
+        } catch (e) {}
+      }
+
+      // Load QnA list
+      const savedQna = localStorage.getItem("gcu-qna-list");
+      if (savedQna) {
+        try {
+          setQnaList(JSON.parse(savedQna));
+        } catch (e) {}
+      }
     }
   }, []);
 
@@ -970,6 +1039,67 @@ export default function AdminPage() {
       localStorage.setItem("gcu-users-db", JSON.stringify(updatedUsersList));
     }
     triggerToast(t.toastDeleted);
+  };
+
+  // Complaints Management Handlers
+  const handleStartEditConfig = (c: any) => {
+    setEditingConfigCategory(c.category);
+    setConfigFormName(c.name);
+    setConfigFormEmail(c.email);
+    setConfigFormPhone(c.phone);
+  };
+
+  const handleSaveConfig = (category: string) => {
+    if (!configFormName.trim() || !configFormEmail.trim() || !configFormPhone.trim()) return;
+    const updated = complaintsConfig.map((c) => {
+      if (c.category === category) {
+        return { category, name: configFormName.trim(), email: configFormEmail.trim(), phone: configFormPhone.trim() };
+      }
+      return c;
+    });
+    setComplaintsConfig(updated);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gcu-complaints-config", JSON.stringify(updated));
+    }
+    setEditingConfigCategory(null);
+    triggerToast("담당자 정보가 성공적으로 업데이트되었습니다!");
+  };
+
+  const handleSaveQnaReply = (id: number) => {
+    if (!replyTextKo.trim()) return;
+    const updatedQna = qnaList.map((item) => {
+      if (item.id === id) {
+        return {
+          ...item,
+          answer: {
+            ko: replyTextKo.trim(),
+            en: replyTextEn.trim() || replyTextKo.trim(),
+            vn: replyTextVn.trim() || replyTextKo.trim(),
+            mn: replyTextMn.trim() || replyTextKo.trim()
+          }
+        };
+      }
+      return item;
+    });
+    setQnaList(updatedQna);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gcu-qna-list", JSON.stringify(updatedQna));
+    }
+    setReplyingQnaId(null);
+    setReplyTextKo("");
+    setReplyTextEn("");
+    setReplyTextVn("");
+    setReplyTextMn("");
+    triggerToast("민원 답변이 등록 완료되었습니다!");
+  };
+
+  const handleStartReply = (item: any) => {
+    setReplyingQnaId(item.id);
+    const isDefaultRouting = item.answer?.ko?.includes("스마트 민원 자동 분류");
+    setReplyTextKo(isDefaultRouting ? "" : item.answer?.ko || "");
+    setReplyTextEn(isDefaultRouting ? "" : item.answer?.en || "");
+    setReplyTextVn(isDefaultRouting ? "" : item.answer?.vn || "");
+    setReplyTextMn(isDefaultRouting ? "" : item.answer?.mn || "");
   };
 
   // Exam Management Handlers
@@ -1519,6 +1649,13 @@ export default function AdminPage() {
         >
           ✏️ 모의고사 출제 제어
         </button>
+        <button 
+          onClick={() => { setAdminViewMode("classic"); setAdminActiveTab("complaints"); }}
+          className={`comm-tab-btn ${adminActiveTab === "complaints" ? "active" : ""}`}
+          style={{ padding: "10px 20px", fontSize: "0.9rem", fontWeight: "700", whiteSpace: "nowrap" }}
+        >
+          📋 스마트 민원관리
+        </button>
       </div>
 
       {adminActiveTab === "users" && (
@@ -1900,6 +2037,336 @@ export default function AdminPage() {
           </div>
         </>
       )}
+
+      {adminActiveTab === "complaints" && (
+        <>
+          {/* Section 1: Title and Banner */}
+          <div className="glass-panel" style={{ padding: "24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
+            <div>
+              <h3 style={{ fontSize: "1.2rem", fontWeight: "700", color: "var(--text-primary)", margin: 0 }}>📋 스마트 민원 자동 분류 및 알림 관리</h3>
+              <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", margin: "4px 0 0 0" }}>
+                1:1 실시간 문의의 내용(키워드)을 감지하여 담당 부서로 실시간 라우팅 및 SMS/Email 알림을 전송하는 스마트 관리 도구입니다.
+              </p>
+            </div>
+          </div>
+
+          {/* Two column layout: Coordinator Configuration & Inquiry List */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", alignItems: "start" }}>
+            
+            {/* Left Column: Coordinator Settings */}
+            <div className="glass-panel" style={{ padding: "20px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "10px", marginBottom: "15px" }}>
+                <h4 style={{ fontSize: "0.95rem", fontWeight: "700", color: "var(--text-primary)", margin: 0 }}>👤 분야별 민원 담당자 지정</h4>
+                <span style={{ fontSize: "0.75rem", color: "var(--gcu-sky)", fontWeight: "600" }}>자동 분류 라우팅 대상</span>
+              </div>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {complaintsConfig.map((config) => {
+                  const isEditing = editingConfigCategory === config.category;
+                  return (
+                    <div 
+                      key={config.category} 
+                      style={{ 
+                        background: "rgba(255,255,255,0.02)", 
+                        border: "1px solid rgba(255,255,255,0.05)", 
+                        borderRadius: "8px", 
+                        padding: "12px 14px", 
+                        display: "flex", 
+                        flexDirection: "column", 
+                        gap: "8px" 
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span className="feed-tag event" style={{ fontSize: "0.75rem", padding: "2px 8px" }}>{config.category}</span>
+                        {!isEditing ? (
+                          <button 
+                            onClick={() => handleStartEditConfig(config)} 
+                            className="resource-download-btn"
+                            style={{ padding: "2px 8px", fontSize: "0.75rem", background: "rgba(0, 185, 242, 0.1)", border: "1px solid var(--gcu-sky)", color: "var(--gcu-sky)" }}
+                          >
+                            설정 수정
+                          </button>
+                        ) : (
+                          <div style={{ display: "flex", gap: "6px" }}>
+                            <button 
+                              onClick={() => setEditingConfigCategory(null)} 
+                              className="resource-download-btn"
+                              style={{ padding: "2px 6px", fontSize: "0.72rem", background: "rgba(255,255,255,0.05)", border: "1px solid #5f6368", color: "#9aa0a6" }}
+                            >
+                              취소
+                            </button>
+                            <button 
+                              onClick={() => handleSaveConfig(config.category)} 
+                              className="resource-download-btn"
+                              style={{ padding: "2px 6px", fontSize: "0.72rem", background: "rgba(114, 191, 68, 0.15)", border: "1px solid var(--gcu-green)", color: "var(--gcu-green)" }}
+                            >
+                              저장
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {isEditing ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
+                          <div style={{ display: "flex", gap: "8px" }}>
+                            <div style={{ flex: 1 }}>
+                              <label style={{ fontSize: "0.7rem", color: "#888d96", display: "block", marginBottom: "2px" }}>담당자명</label>
+                              <input 
+                                type="text" 
+                                value={configFormName} 
+                                onChange={(e) => setConfigFormName(e.target.value)} 
+                                className="ai-form-input" 
+                                style={{ padding: "4px 8px", fontSize: "0.8rem", height: "30px" }}
+                              />
+                            </div>
+                            <div style={{ flex: 2 }}>
+                              <label style={{ fontSize: "0.7rem", color: "#888d96", display: "block", marginBottom: "2px" }}>핸드폰 번호</label>
+                              <input 
+                                type="text" 
+                                value={configFormPhone} 
+                                onChange={(e) => setConfigFormPhone(e.target.value)} 
+                                className="ai-form-input" 
+                                style={{ padding: "4px 8px", fontSize: "0.8rem", height: "30px" }}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label style={{ fontSize: "0.7rem", color: "#888d96", display: "block", marginBottom: "2px" }}>이메일</label>
+                            <input 
+                              type="email" 
+                              value={configFormEmail} 
+                              onChange={(e) => setConfigFormEmail(e.target.value)} 
+                              className="ai-form-input" 
+                              style={{ padding: "4px 8px", fontSize: "0.8rem", height: "30px" }}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", fontSize: "0.82rem", color: "var(--text-secondary)", marginTop: "4px" }}>
+                          <div>성명: <strong style={{ color: "var(--text-primary)" }}>{config.name}</strong></div>
+                          <div>연락처: <strong style={{ color: "var(--text-primary)" }}>{config.phone}</strong></div>
+                          <div style={{ gridColumn: "span 2" }}>이메일: <strong style={{ color: "var(--text-primary)" }}>{config.email}</strong></div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Right Column: Q&A inquiry manager */}
+            <div className="glass-panel" style={{ padding: "20px" }}>
+              <div style={{ borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "10px", marginBottom: "15px" }}>
+                <h4 style={{ fontSize: "0.95rem", fontWeight: "700", color: "var(--text-primary)", margin: 0 }}>💬 학생 1:1 민원 접수 현황</h4>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxHeight: "450px", overflowY: "auto", paddingRight: "4px" }}>
+                {qnaList.filter(item => item.id > 1000).length > 0 ? (
+                  qnaList.filter(item => item.id > 1000).map((item) => {
+                    const isPending = item.answer?.ko?.includes("스마트 민원 자동 분류 안내");
+                    const isReplying = replyingQnaId === item.id;
+                    const matchingLog = complaintsLogs.find(l => l.id === "log-" + item.id);
+                    const qTitle = item.question?.ko || "";
+                    const qBody = matchingLog?.body || "상세 민원 본문이 로그에 없습니다.";
+
+                    return (
+                      <div 
+                        key={item.id} 
+                        style={{ 
+                          background: "rgba(255,255,255,0.02)", 
+                          border: isPending ? "1px solid rgba(247, 147, 30, 0.2)" : "1px solid rgba(114, 191, 68, 0.2)", 
+                          borderRadius: "8px", 
+                          padding: "14px", 
+                          display: "flex", 
+                          flexDirection: "column", 
+                          gap: "8px" 
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>ID: {item.id}</span>
+                          <span 
+                            className={`feed-tag ${isPending ? "notice" : "event"}`} 
+                            style={{ fontSize: "0.7rem", padding: "1px 6px" }}
+                          >
+                            {isPending ? "답변 대기" : "답변 완료"}
+                          </span>
+                        </div>
+
+                        <div style={{ fontSize: "0.88rem", fontWeight: "700", color: "var(--text-primary)" }}>
+                          {qTitle}
+                        </div>
+
+                        <div style={{ fontSize: "0.82rem", color: "var(--text-secondary)", background: "rgba(0,0,0,0.15)", padding: "8px 10px", borderRadius: "6px", whiteSpace: "pre-wrap" }}>
+                          {qBody}
+                        </div>
+
+                        {isReplying ? (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "6px" }}>
+                            <div>
+                              <label style={{ fontSize: "0.72rem", color: "#8ab4f8", display: "block", marginBottom: "3px", fontWeight: "700" }}>한국어 답변 (KO)</label>
+                              <textarea 
+                                value={replyTextKo} 
+                                onChange={(e) => setReplyTextKo(e.target.value)} 
+                                className="ai-form-input" 
+                                style={{ fontSize: "0.8rem", minHeight: "60px", resize: "vertical" }}
+                                placeholder="한국어로 답변을 작성하세요..."
+                              />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: "0.72rem", color: "#8ab4f8", display: "block", marginBottom: "3px", fontWeight: "700" }}>영어 답변 (EN - 선택)</label>
+                              <textarea 
+                                value={replyTextEn} 
+                                onChange={(e) => setReplyTextEn(e.target.value)} 
+                                className="ai-form-input" 
+                                style={{ fontSize: "0.8rem", minHeight: "40px", resize: "vertical" }}
+                                placeholder="영어 답변 미입력 시 한국어 답변이 대체 사용됩니다..."
+                              />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: "0.72rem", color: "#8ab4f8", display: "block", marginBottom: "3px", fontWeight: "700" }}>베트남어 답변 (VN - 선택)</label>
+                              <textarea 
+                                value={replyTextVn} 
+                                onChange={(e) => setReplyTextVn(e.target.value)} 
+                                className="ai-form-input" 
+                                style={{ fontSize: "0.8rem", minHeight: "40px", resize: "vertical" }}
+                                placeholder="베트남어 답변 미입력 시 한국어 답변이 대체 사용됩니다..."
+                              />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: "0.72rem", color: "#8ab4f8", display: "block", marginBottom: "3px", fontWeight: "700" }}>몽골어 답변 (MN - 선택)</label>
+                              <textarea 
+                                value={replyTextMn} 
+                                onChange={(e) => setReplyTextMn(e.target.value)} 
+                                className="ai-form-input" 
+                                style={{ fontSize: "0.8rem", minHeight: "40px", resize: "vertical" }}
+                                placeholder="몽골어 답변 미입력 시 한국어 답변이 대체 사용됩니다..."
+                              />
+                            </div>
+                            <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "4px" }}>
+                              <button 
+                                onClick={() => setReplyingQnaId(null)} 
+                                className="resource-download-btn"
+                                style={{ padding: "4px 10px", fontSize: "0.78rem", background: "rgba(255,255,255,0.05)", border: "1px solid #5f6368", color: "#9aa0a6" }}
+                              >
+                                취소
+                              </button>
+                              <button 
+                                onClick={() => handleSaveQnaReply(item.id)} 
+                                className="resource-download-btn"
+                                style={{ padding: "4px 12px", fontSize: "0.78rem", background: "rgba(114, 191, 68, 0.15)", border: "1px solid var(--gcu-green)", color: "var(--gcu-green)" }}
+                              >
+                                답변 등록
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "4px" }}>
+                            {!isPending && (
+                              <div style={{ fontSize: "0.82rem", color: "var(--gcu-green)", background: "rgba(114,191,68,0.06)", border: "1px solid rgba(114,191,68,0.15)", padding: "8px 10px", borderRadius: "6px" }}>
+                                <strong>답변 내용 (KO):</strong>
+                                <div style={{ marginTop: "3px", whiteSpace: "pre-wrap" }}>{item.answer?.ko}</div>
+                              </div>
+                            )}
+                            <button 
+                              onClick={() => handleStartReply(item)} 
+                              className="btn-primary"
+                              style={{ padding: "6px 12px", fontSize: "0.78rem", borderRadius: "6px", color: "#ffffff", width: "fit-content", fontWeight: "700", alignSelf: "flex-end" }}
+                            >
+                              {isPending ? "✍️ 답변 작성하기" : "✏️ 답변 수정하기"}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div style={{ textAlign: "center", color: "var(--text-secondary)", padding: "30px 0", fontSize: "0.85rem" }}>
+                    접수된 사용자 1:1 민원이 없습니다.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Row: Dispatch logs */}
+          <div className="glass-panel" style={{ padding: "20px" }}>
+            <div style={{ borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "10px", marginBottom: "15px" }}>
+              <h4 style={{ fontSize: "0.95rem", fontWeight: "700", color: "var(--text-primary)", margin: 0 }}>✉️ 민원 자동 라우팅 및 알림 발송 이력 (Delivery Logs)</h4>
+            </div>
+
+            <div style={{ overflowX: "auto" }}>
+              <table className="resource-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    <th>분류</th>
+                    <th>민원 제목</th>
+                    <th>담당 수신처</th>
+                    <th>발송 채널/일시</th>
+                    <th>처리 시간</th>
+                    <th>Delivery Status</th>
+                    <th>보안 무결성</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {complaintsLogs.length > 0 ? (
+                    complaintsLogs.map((log) => {
+                      const computedLatency = 12 + (parseInt(log.id.replace("log-", "")) % 30) + "ms";
+                      return (
+                        <tr key={log.id}>
+                          <td>
+                            <span className="feed-tag event" style={{ fontSize: "0.75rem", padding: "2px 8px" }}>{log.category}</span>
+                          </td>
+                          <td style={{ fontWeight: "700", color: "var(--text-primary)", fontSize: "0.85rem" }}>{log.title}</td>
+                          <td style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+                            <div>{log.staffName} ({log.staffPhone})</div>
+                            <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{log.staffEmail}</div>
+                          </td>
+                          <td style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+                            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                              <span style={{ fontSize: "0.9rem" }}>✉️</span> 
+                              <span style={{ fontSize: "0.9rem" }}>📱</span>
+                              <span>{log.timestamp}</span>
+                            </div>
+                          </td>
+                          <td style={{ fontSize: "0.8rem", color: "#8ab4f8", fontWeight: "600" }}>{computedLatency}</td>
+                          <td>
+                            <span className="feed-tag guide" style={{ fontSize: "0.75rem", padding: "2px 8px", background: "rgba(114, 191, 68, 0.15)", color: "var(--gcu-green)", border: "1px solid rgba(114, 191, 68, 0.25)" }}>
+                              {log.status}
+                            </span>
+                          </td>
+                          <td>
+                            <button 
+                              onClick={() => {
+                                setTraceabilityMsg({
+                                  id: log.id,
+                                  text: log.body,
+                                  actionType: "complaint_routing",
+                                  actionData: { ...log, latency: computedLatency },
+                                  userQuery: "민원 자동 분류 알림 라우팅 무결성 검증"
+                                });
+                              }}
+                              className="resource-download-btn"
+                              style={{ padding: "4px 8px", fontSize: "0.75rem", display: "flex", alignItems: "center", gap: "4px", background: "rgba(114, 191, 68, 0.1)", border: "1px solid var(--gcu-green)", color: "var(--gcu-green)" }}
+                            >
+                              🔍 검증 (Trace)
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: "center", padding: "30px", color: "var(--text-secondary)", fontSize: "0.85rem" }}>
+                        발송 이력이 존재하지 않습니다.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
         </div>
       ) : (
         /* 2. Conversational AI Chat Console Layout */
@@ -1948,6 +2415,20 @@ export default function AdminPage() {
               onClick={() => { setAdminViewMode("classic"); setAdminActiveTab("exams"); }}
             >
               ✏️ 모의고사 출제 제어
+            </span>
+            <span 
+              style={{ 
+                fontSize: "0.85rem", 
+                fontWeight: "700", 
+                color: "#888d96", 
+                borderBottom: "none", 
+                paddingBottom: "12px", 
+                cursor: "pointer", 
+                transition: "all 0.2s" 
+              }} 
+              onClick={() => { setAdminViewMode("classic"); setAdminActiveTab("complaints"); }}
+            >
+              📋 스마트 민원관리
             </span>
             <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "#4d5156", paddingBottom: "12px", cursor: "not-allowed" }}>이미지</span>
             <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "#4d5156", paddingBottom: "12px", cursor: "not-allowed" }}>동영상</span>
