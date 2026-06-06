@@ -260,6 +260,7 @@ export default function Home() {
   const [selectedCard, setSelectedCard] = useState<any | null>(null);
   const [applyForm, setApplyForm] = useState({ name: "", email: "", phone: "", topik: "Level 3", intro: "" });
   const [applySuccessMsg, setApplySuccessMsg] = useState<string | null>(null);
+  const [checklist, setChecklist] = useState<Record<string, boolean>>({});
 
   const handleSyncPortals = () => {
     if (isSyncing) return;
@@ -364,6 +365,12 @@ export default function Home() {
         const savedApp = localStorage.getItem("gcu-applications");
         if (savedApp) {
           setApplications(JSON.parse(savedApp));
+        }
+        
+        // Load checklist state
+        const savedChecklist = localStorage.getItem("gcu-checklist-v1");
+        if (savedChecklist) {
+          setChecklist(JSON.parse(savedChecklist));
         }
         
         // Pre-fill application form with user details
@@ -536,24 +543,415 @@ export default function Home() {
     const circ = 2 * Math.PI * radius;
     const offset = circ - (circ * eligibilityScore) / 100;
 
-    // Visa Steps based on student vs worker
-    const isStudent = activeUser.role === "student";
+    const role = activeUser.role || "student";
+    const isStudent = role === "student";
+    const isWorker = role === "worker";
+    const isGraduate = role === "graduate";
+
+    // Visa Steps based on role
     const steps = isStudent 
       ? [
           { key: "D-2", label: tDash.visaD2, status: tDash.visaStatusActive },
           { key: "D-10", label: tDash.visaD10, status: tDash.visaStatusPending },
           { key: "F-2-R", label: tDash.visaF2R, status: tDash.visaStatusGoal }
         ]
-      : [
-          { key: "E-9", label: tDash.visaE9, status: tDash.visaStatusActive },
-          { key: "E-7-4", label: tDash.visaE74, status: tDash.visaStatusPending },
-          { key: "F-2-R", label: tDash.visaF2R, status: tDash.visaStatusGoal }
-        ];
+      : isWorker
+        ? [
+            { key: "E-9", label: tDash.visaE9, status: tDash.visaStatusActive },
+            { key: "E-7-4", label: tDash.visaE74, status: tDash.visaStatusPending },
+            { key: "F-2-R", label: tDash.visaF2R, status: tDash.visaStatusGoal }
+          ]
+        : [
+            { key: "D-10", label: tDash.visaD10, status: tDash.visaStatusActive },
+            { key: "F-2-R", label: tDash.visaF2R, status: tDash.visaStatusPending },
+            { key: "F-5", label: tDash.visaF5, status: tDash.visaStatusGoal }
+          ];
 
     // Current translated visa requirements
     const displayVisaInfo = selectedVisaStep 
-      ? (VISA_INFO[lang as "ko" | "en" | "vn" | "mn"]?.[selectedVisaStep as "D-2" | "D-10" | "F-2-R" | "E-9" | "E-7-4"] || selectedVisaStep)
+      ? (VISA_INFO[lang as "ko" | "en" | "vn" | "mn"]?.[selectedVisaStep as "D-2" | "D-10" | "F-2-R" | "E-9" | "E-7-4" | "F-5"] || selectedVisaStep)
       : (lang === "ko" ? "지도 단계를 탭하여 이수 조건 및 매칭 기준을 확인하세요." : "Tap a roadmap node to view requirements and matching criteria.");
+
+    // D-day calculation
+    const calculateDDay = (targetDateStr: string) => {
+      const target = new Date(targetDateStr);
+      const today = new Date();
+      target.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+      const diffTime = target.getTime() - today.getTime();
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    };
+
+    const targetDate = isStudent ? "2026-07-12" : isWorker ? "2026-08-23" : "2026-10-15";
+    const ddayValue = calculateDDay(targetDate);
+
+    // Alerts Center list
+    const getTailoredAlerts = () => {
+      const alertsList = {
+        student: [
+          {
+            id: "alert-s-1",
+            type: "warning",
+            ko: "⚠️ 외국인 시간제 취업 허가 기간 만료 14일 전! 기한 내에 아르바이트 신청을 갱신하십시오.",
+            en: "⚠️ Part-time work permit expires in 14 days! Please renew your permit in time.",
+            vn: "⚠️ Giấy phép làm thêm của bạn sẽ hết hạn sau 14 ngày! Hãy gia hạn kịp thời.",
+            mn: "⚠️ Цагийн ажлын зөвшөөрлийн хугацаа 14 хоногийн дараа дуусна! Хугацааг сунгана уу."
+          },
+          {
+            id: "alert-s-2",
+            type: "info",
+            ko: "🎓 이번 학기 성적 우수 장학금 심사가 70% 완료되었습니다. 출석 요건을 계속 유지하세요.",
+            en: "🎓 Academic Excellence Scholarship assessment is 70% complete. Maintain your attendance.",
+            vn: "🎓 Xét duyệt học bổng xuất sắc học kỳ này đã hoàn thành 70%. Hãy tiếp tục duy trì chuyên cần.",
+            mn: "🎓 Сурлагын өндөр амжилтын тэтгэлгийн үнэлгээ 70%-тай байна. Ирцээ хэвийн хадгална уу."
+          }
+        ],
+        worker: [
+          {
+            id: "alert-w-1",
+            type: "warning",
+            ko: "⚠️ E-7-4 비자 전환을 위한 숙련기능 점수 사전 모의 진단표가 발급되었습니다. 필수 요건을 검토하십시오.",
+            en: "⚠️ Pre-simulation score sheet for E-7-4 visa conversion has been issued. Check requirements.",
+            vn: "⚠️ Phiếu chẩn đoán điểm kỹ năng chuyển đổi visa E-7-4 đã được cấp. Vui lòng kiểm tra yêu cầu.",
+            mn: "⚠️ E-7-4 виз солих мэргэжлийн онооны урьдчилсан үнэлгээ гарлаа. Шаардлагуудыг шалгана уу."
+          },
+          {
+            id: "alert-w-2",
+            type: "danger",
+            ko: "🛡️ [산업안전] 법정 근로자 의무 소방 대피 및 재해 예방 모바일 안전 교육을 금일 이수해야 합니다.",
+            en: "🛡️ [Safety] Mandatory industrial safety and fire evacuation mobile training must be completed today.",
+            vn: "🛡️ [An toàn] Đào tạo an toàn lao động và lánh nạn hỏa hoạn bắt buộc trên điện thoại phải hoàn thành hôm nay.",
+            mn: "🛡️ [Аюулгүй байдал] Албан журмын галын аюулаас урьдчилан сэргийлэх сургалтыг өнөөдөр дүүргэнэ үү."
+          }
+        ],
+        graduate: [
+          {
+            id: "alert-g-1",
+            type: "warning",
+            ko: "🎓 지자체 추천(F-2-R)을 위한 인구감소지역 거주 확인 및 일자리 매칭 완료 증빙 서류를 업로드하십시오.",
+            en: "🎓 Upload proof of residence and job matching completion for F-2-R Regional Quota Recommendation.",
+            vn: "🎓 Vui lòng nộp chứng nhận cư trú và hoàn thành khớp việc làm để xin thư giới thiệu F-2-R từ địa phương.",
+            mn: "🎓 F-2-R орон нутгийн квотын тодорхойлолт авахын тулд оршин суугаа хаяг болон ажлын байрны мэдээллээ оруулна уу."
+          },
+          {
+            id: "alert-g-2",
+            type: "info",
+            ko: "⚖️ F-5 영주권 전환 요건인 전년도 한국 GNI 소득 조건(4,248만원) 고시가 업데이트되었습니다.",
+            en: "⚖️ Korea's GNI income requirement (42.48M KRW) for F-5 permanent residency has been updated.",
+            vn: "⚖️ Bản cập nhật điều kiện thu nhập GNI Hàn Quốc năm ngoái (42.48 triệu KRW) cho visa định cư F-5 đã được công bố.",
+            mn: "⚖️ F-5 байнгын оршин суух визний шалгуур болох БНСУ-ын өнгөрсөн оны GNI орлогын доод хэмжээ (42.48 сая KRW) шинэчлэгдлээ."
+          }
+        ]
+      };
+      return alertsList[role as "student" | "worker" | "graduate"] || alertsList.student;
+    };
+
+    const toggleChecklistItem = (key: string) => {
+      const updated = { ...checklist, [key]: !checklist[key] };
+      setChecklist(updated);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("gcu-checklist-v1", JSON.stringify(updated));
+      }
+    };
+
+    const getChecklistItems = () => {
+      const checklists = {
+        student: [
+          {
+            key: "s-gpa",
+            ko: "학점 유지 (GPA 3.8 이상)",
+            en: "Maintain GPA (3.8 or above)",
+            vn: "Duy trì GPA (từ 3.8 trở lên)",
+            mn: "Голч дүн хадгалах (GPA 3.8+)"
+          },
+          {
+            key: "s-topik",
+            ko: "TOPIK 4급 이상 취득",
+            en: "Obtain TOPIK Level 4+",
+            vn: "Đạt chứng chỉ TOPIK Cấp 4+",
+            mn: "TOPIK 4-р түвшин дээш авах"
+          },
+          {
+            key: "s-permit",
+            ko: "시간제 취업 허가 갱신",
+            en: "Renew Part-time Work Permit",
+            vn: "Gia hạn giấy phép làm thêm",
+            mn: "Цагийн ажлын зөвшөөрөл сунгах"
+          },
+          {
+            key: "s-attendance",
+            ko: "출석률 90% 이상 유지",
+            en: "Maintain 90%+ Attendance",
+            vn: "Duy trì chuyên cần trên 90%",
+            mn: "Ирцээ 90%-иас дээш хадгалах"
+          }
+        ],
+        worker: [
+          {
+            key: "w-kiip",
+            ko: "사회통합프로그램(KIIP) 이수",
+            en: "Complete KIIP Course",
+            vn: "Hoàn thành khóa học KIIP",
+            mn: "Нийгмийн харилцан нөлөөллийн хөтөлбөр (KIIP) дүүргэх"
+          },
+          {
+            key: "w-salary",
+            ko: "연 소득 2,600만원 이상 유지",
+            en: "Maintain Annual Income 26M+ KRW",
+            vn: "Duy trì thu nhập 26tr+ KRW/năm",
+            mn: "Жилийн орлого 26 сая KRW-оос дээш байх"
+          },
+          {
+            key: "w-workplace",
+            ko: "근무지 변경/지정 허가 확인",
+            en: "Verify Workplace Transfer Approval",
+            vn: "Kiểm tra phép thay đổi nơi làm việc",
+            mn: "Ажлын байр шилжилтийн зөвшөөрөл шалгах"
+          },
+          {
+            key: "w-safety",
+            ko: "모바일 안전 교육 법정이수",
+            en: "Complete Mobile Safety Training",
+            vn: "Hoàn thành đào tạo an toàn lao động",
+            mn: "Аюулгүй байдлын цахим сургалт дүүргэх"
+          }
+        ],
+        graduate: [
+          {
+            key: "g-residence",
+            ko: "인구감소지역 거주지 이전 신고",
+            en: "Report Residence (Designated Rural Area)",
+            vn: "Khai báo cư trú tại khu vực giảm dân số",
+            mn: "Оршин суугаа хаяг шилжүүлснээ бүртгүүлэх (Квоттой бүс)"
+          },
+          {
+            key: "g-contract",
+            ko: "F-2-R 전제 정식 근로계약 체결",
+            en: "Sign F-2-R Employment Contract",
+            vn: "Ký hợp đồng lao động chính thức F-2-R",
+            mn: "F-2-R-ийн хөдөлмөрийн гэрээ байгуулах"
+          },
+          {
+            key: "g-recom",
+            ko: "지자체 추천서 신청 구비서류 접수",
+            en: "Prepare Municipality Recommendation Docs",
+            vn: "Chuẩn bị hồ sơ xin giới thiệu của tỉnh",
+            mn: "Тодорхойлох захидал авахад шаардлагатай материал бүрдүүлэх"
+          },
+          {
+            key: "g-f5income",
+            ko: "F-5 영주권 요건 연간 소득 증빙",
+            en: "Prepare F-5 GNI Income Proof",
+            vn: "Chuẩn bị chứng minh thu nhập GNI F-5",
+            mn: "F-5 визний жилийн орлогын баталгаа бэлдэх"
+          }
+        ]
+      };
+      return checklists[role as "student" | "worker" | "graduate"] || checklists.student;
+    };
+
+    // Sort or filter jobs based on role
+    let displayedJobs = [...JOBS_DATA];
+    if (role === "student") {
+      displayedJobs.sort((a, b) => {
+        if (a.id === "job-2" || a.id === "job-3") return -1;
+        if (b.id === "job-2" || b.id === "job-3") return 1;
+        return 0;
+      });
+    } else if (role === "worker") {
+      displayedJobs.sort((a, b) => {
+        if (a.id === "job-1") return -1;
+        if (b.id === "job-1") return 1;
+        return 0;
+      });
+    } else if (role === "graduate") {
+      displayedJobs.sort((a, b) => {
+        if (a.id === "job-3") return -1;
+        if (b.id === "job-3") return 1;
+        return 0;
+      });
+    }
+
+    // Sort or filter scholarships based on role
+    let displayedScholarships = [...SCHOLARSHIPS_DATA];
+    if (role === "student") {
+      displayedScholarships.sort((a, b) => {
+        if (a.id === "scholarship-1") return -1;
+        if (b.id === "scholarship-1") return 1;
+        return 0;
+      });
+    } else if (role === "worker") {
+      displayedScholarships.sort((a, b) => {
+        if (a.id === "scholarship-3") return -1;
+        if (b.id === "scholarship-3") return 1;
+        return 0;
+      });
+    } else if (role === "graduate") {
+      displayedScholarships.sort((a, b) => {
+        if (a.id === "scholarship-2") return -1;
+        if (b.id === "scholarship-2") return 1;
+        return 0;
+      });
+    }
+
+    const renderJobsSection = () => (
+      <div>
+        <div className="section-header" style={{ marginBottom: "16px" }}>
+          <div className="section-title">
+            <span className="section-title-dot"></span>
+            <h2 style={{ fontSize: "1.25rem" }}>💼 {tDash.jobFeedTitle}</h2>
+          </div>
+        </div>
+        <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "20px", marginTop: "-8px" }}>
+          {tDash.jobFeedDesc}
+        </p>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
+          {displayedJobs.map((job) => {
+            const applied = applications.includes(job.id);
+            const title = job.title[lang as "ko" | "en" | "vn" | "mn"] || job.title.ko;
+            const category = job.category[lang as "ko" | "en" | "vn" | "mn"] || job.category.ko;
+            const salary = job.salary[lang as "ko" | "en" | "vn" | "mn"] || job.salary.ko;
+            const location = job.location[lang as "ko" | "en" | "vn" | "mn"] || job.location.ko;
+            const visa = job.visaSupport[lang as "ko" | "en" | "vn" | "mn"] || job.visaSupport.ko;
+
+            return (
+              <div 
+                key={job.id} 
+                className="card-news-item glass-panel"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  padding: "24px",
+                  borderRadius: "16px",
+                  border: `1px solid ${job.borderColor}`,
+                  background: job.color,
+                  transition: "all 0.3s ease",
+                  position: "relative",
+                  minHeight: "280px"
+                }}
+              >
+                <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap" }}>
+                  <span style={{ fontSize: "0.65rem", fontWeight: "700", padding: "2.5px 8px", borderRadius: "4px", background: job.badgeColor, color: job.badgeTextColor }}>
+                    {category}
+                  </span>
+                  <span style={{ fontSize: "0.65rem", fontWeight: "700", padding: "2.5px 8px", borderRadius: "4px", background: "rgba(0,0,0,0.06)", color: "var(--text-primary)" }}>
+                    Visa Match
+                  </span>
+                </div>
+
+                <h4 style={{ fontSize: "0.98rem", fontWeight: "800", color: "var(--gcu-navy)", margin: "0 0 16px 0", lineHeight: "1.45" }}>
+                  {title}
+                </h4>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.78rem", color: "var(--text-secondary)", marginBottom: "24px" }}>
+                  <div>💰 <strong>{salary}</strong></div>
+                  <div>📍 {location}</div>
+                  <div>⚖️ {visa}</div>
+                </div>
+
+                <button
+                  onClick={() => handleOpenApplyModal(job)}
+                  style={{
+                    marginTop: "auto",
+                    width: "100%",
+                    height: "38px",
+                    border: "none",
+                    borderRadius: "8px",
+                    background: applied ? "var(--gcu-navy)" : "var(--gcu-red)",
+                    color: "#ffffff",
+                    fontWeight: "700",
+                    fontSize: "0.78rem",
+                    cursor: "pointer",
+                    transition: "all 0.2s"
+                  }}
+                >
+                  {applied ? `✓ ${tDash.appliedBtn}` : tDash.viewDetailBtn}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+
+    const renderScholarshipsSection = () => (
+      <div style={{ marginBottom: "40px" }}>
+        <div className="section-header" style={{ marginBottom: "16px" }}>
+          <div className="section-title">
+            <span className="section-title-dot"></span>
+            <h2 style={{ fontSize: "1.25rem" }}>🎁 {tDash.scholarshipFeedTitle}</h2>
+          </div>
+        </div>
+        <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "20px", marginTop: "-8px" }}>
+          {tDash.scholarshipFeedDesc}
+        </p>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
+          {displayedScholarships.map((sch) => {
+            const applied = applications.includes(sch.id);
+            const title = sch.title[lang as "ko" | "en" | "vn" | "mn"] || sch.title.ko;
+            const reward = sch.reward[lang as "ko" | "en" | "vn" | "mn"] || sch.reward.ko;
+            const criteria = sch.criteria[lang as "ko" | "en" | "vn" | "mn"] || sch.criteria.ko;
+
+            return (
+              <div 
+                key={sch.id} 
+                className="card-news-item glass-panel"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  padding: "24px",
+                  borderRadius: "16px",
+                  border: `1px solid ${sch.borderColor}`,
+                  background: sch.color,
+                  transition: "all 0.3s ease",
+                  position: "relative",
+                  minHeight: "280px"
+                }}
+              >
+                <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap" }}>
+                  <span style={{ fontSize: "0.65rem", fontWeight: "700", padding: "2.5px 8px", borderRadius: "4px", background: sch.badgeColor, color: sch.badgeTextColor }}>
+                    Scholarship
+                  </span>
+                  <span style={{ fontSize: "0.65rem", fontWeight: "700", padding: "2.5px 8px", borderRadius: "4px", background: "rgba(198,26,43,0.06)", color: "var(--gcu-red)" }}>
+                    Tuition Match
+                  </span>
+                </div>
+
+                <h4 style={{ fontSize: "0.98rem", fontWeight: "800", color: "var(--gcu-navy)", margin: "0 0 16px 0", lineHeight: "1.45" }}>
+                  {title}
+                </h4>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.78rem", color: "var(--text-secondary)", marginBottom: "24px" }}>
+                  <div>🎁 <strong>{reward}</strong></div>
+                  <div>🎓 {criteria}</div>
+                </div>
+
+                <button
+                  onClick={() => handleOpenApplyModal(sch)}
+                  style={{
+                    marginTop: "auto",
+                    width: "100%",
+                    height: "38px",
+                    border: "none",
+                    borderRadius: "8px",
+                    background: applied ? "var(--gcu-navy)" : "var(--gcu-red)",
+                    color: "#ffffff",
+                    fontWeight: "700",
+                    fontSize: "0.78rem",
+                    cursor: "pointer",
+                    transition: "all 0.2s"
+                  }}
+                >
+                  {applied ? `✓ ${tDash.appliedBtn}` : tDash.viewDetailBtn}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
 
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: "32px", position: "relative" }}>
@@ -675,7 +1073,7 @@ export default function Home() {
                   🌎 {tDash.nationality}: {activeUser.nationality}
                 </span>
                 <span style={{ fontSize: "0.78rem", padding: "4px 12px", background: "rgba(198, 26, 43, 0.06)", color: "var(--gcu-red)", borderRadius: "20px", fontWeight: "700", border: "1px solid rgba(198, 26, 43, 0.1)" }}>
-                  💼 {tDash.role}: {isStudent ? tDash.student : tDash.worker}
+                  💼 {tDash.role}: {isStudent ? tDash.student : isWorker ? tDash.worker : tDash.graduate}
                 </span>
               </div>
             </div>
@@ -693,6 +1091,83 @@ export default function Home() {
               <div style={{ fontSize: "1.7rem", fontWeight: "800", color: "var(--gcu-navy)", display: "flex", alignItems: "center", gap: "4px" }}>
                 🏆 {eligibilityScore}%
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Real-time Alerts & D-day Countdown row */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px" }}>
+          {/* Alerts panel */}
+          <div className="glass-panel" style={{
+            padding: "20px",
+            border: "1px solid rgba(198, 26, 43, 0.15)",
+            background: "rgba(255, 255, 255, 0.6)",
+            borderRadius: "16px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px"
+          }}>
+            <h3 style={{ fontSize: "1.0rem", fontWeight: "800", color: "var(--gcu-navy)", margin: 0, display: "flex", alignItems: "center", gap: "8px" }}>
+              {tDash.notificationsTitle}
+            </h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {getTailoredAlerts().map((alert) => {
+                const text = alert[lang as "ko" | "en" | "vn" | "mn"] || alert.ko;
+                const isWarn = alert.type === "warning" || alert.type === "danger";
+                return (
+                  <div key={alert.id} style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    padding: "10px 14px",
+                    borderRadius: "10px",
+                    background: isWarn ? "rgba(198, 26, 43, 0.04)" : "rgba(18, 42, 77, 0.04)",
+                    border: isWarn ? "1px solid rgba(198, 26, 43, 0.1)" : "1px solid rgba(18, 42, 77, 0.1)",
+                    fontSize: "0.82rem",
+                    fontWeight: "600",
+                    color: "var(--text-primary)"
+                  }}>
+                    <span style={{ fontSize: "1.1rem" }}>{alert.type === "warning" ? "⚠️" : alert.type === "danger" ? "🚨" : "📢"}</span>
+                    <div style={{ flex: 1 }}>{text}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* D-day banner */}
+          <div className="glass-panel" style={{
+            padding: "20px 24px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            background: "linear-gradient(135deg, rgba(198, 26, 43, 0.05) 0%, rgba(18, 42, 77, 0.05) 100%)",
+            border: "1px solid rgba(198, 26, 43, 0.25)",
+            borderRadius: "16px",
+            boxShadow: "0 4px 15px rgba(198, 26, 43, 0.05)",
+            alignSelf: "stretch"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <span style={{ fontSize: "2.2rem" }}>⏳</span>
+              <div>
+                <h4 style={{ margin: 0, fontSize: "1.0rem", fontWeight: "800", color: "var(--gcu-navy)", lineHeight: "1.4" }}>
+                  {isStudent ? tDash.ddayExam : isWorker ? tDash.ddayKiip : tDash.ddayQuota}
+                </h4>
+                <p style={{ margin: "4px 0 0 0", fontSize: "0.78rem", color: "var(--text-secondary)", fontWeight: "500" }}>
+                  Target: {targetDate}
+                </p>
+              </div>
+            </div>
+            <div style={{
+              fontSize: "1.65rem",
+              fontWeight: "900",
+              color: "var(--gcu-red)",
+              background: "rgba(198, 26, 43, 0.1)",
+              padding: "8px 18px",
+              borderRadius: "12px",
+              letterSpacing: "-0.5px"
+            }}>
+              D-{ddayValue}
             </div>
           </div>
         </div>
@@ -897,6 +1372,60 @@ export default function Home() {
               📝 {lang === "ko" ? "무료 TOPIK 모의고사 응시하러 가기" : "Take Free TOPIK Mock Exam"} ➔
             </a>
           </div>
+
+          {/* Card D: Tailored Checklist */}
+          <div className="glass-panel" style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: "800", color: "var(--gcu-navy)", margin: "0 0 4px 0", display: "flex", alignItems: "center", gap: "8px" }}>
+                <span>📋</span> {lang === "ko" ? "맞춤형 정착 체크리스트" : lang === "vn" ? "Danh sách kiểm tra định cư" : lang === "mn" ? "Төлөвлөгөөт хяналтын хуудас" : "Tailored Checklist"}
+              </h3>
+              <p style={{ fontSize: "0.75rem", color: "var(--text-secondary)", margin: 0 }}>
+                {lang === "ko" ? "체류 자격과 목표 달성을 위한 필수 준비 항목입니다." : lang === "vn" ? "Các hạng mục chuẩn bị thiết yếu cho tư cách lưu trú." : lang === "mn" ? "Оршин суух зөвшөөрөл болон зорилтод хүрэх бэлтгэл." : "Essential preparations for your status and goals."}
+              </p>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "4px" }}>
+              {getChecklistItems().map((item) => {
+                const isChecked = !!checklist[item.key];
+                const text = item[lang as "ko" | "en" | "vn" | "mn"] || item.ko;
+                return (
+                  <label 
+                    key={item.key}
+                    onClick={(e) => e.stopPropagation()} 
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      fontSize: "0.8rem",
+                      fontWeight: "600",
+                      color: "var(--text-primary)",
+                      cursor: "pointer",
+                      padding: "8px 12px",
+                      background: isChecked ? "rgba(114, 191, 68, 0.05)" : "rgba(0,0,0,0.02)",
+                      border: isChecked ? "1px solid rgba(114, 191, 68, 0.2)" : "1px solid rgba(0,0,0,0.05)",
+                      borderRadius: "8px",
+                      transition: "all 0.2s"
+                    }}
+                  >
+                    <input 
+                      type="checkbox" 
+                      checked={isChecked}
+                      onChange={() => toggleChecklistItem(item.key)}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ 
+                        accentColor: "var(--gcu-green)",
+                        width: "16px",
+                        height: "16px",
+                        cursor: "pointer"
+                      }}
+                    />
+                    <span style={{ textDecoration: isChecked ? "line-through" : "none", color: isChecked ? "var(--text-muted)" : "var(--text-primary)" }}>
+                      {text}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         {/* 3. Daily Activity Area (Phrase & Attendance calendar) */}
@@ -1057,162 +1586,18 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 4. Card News feeds: Jobs */}
-        <div>
-          <div className="section-header" style={{ marginBottom: "16px" }}>
-            <div className="section-title">
-              <span className="section-title-dot"></span>
-              <h2 style={{ fontSize: "1.25rem" }}>💼 {tDash.jobFeedTitle}</h2>
-            </div>
-          </div>
-          <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "20px", marginTop: "-8px" }}>
-            {tDash.jobFeedDesc}
-          </p>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
-            {JOBS_DATA.map((job) => {
-              const applied = applications.includes(job.id);
-              const title = job.title[lang as "ko" | "en" | "vn" | "mn"] || job.title.ko;
-              const category = job.category[lang as "ko" | "en" | "vn" | "mn"] || job.category.ko;
-              const salary = job.salary[lang as "ko" | "en" | "vn" | "mn"] || job.salary.ko;
-              const location = job.location[lang as "ko" | "en" | "vn" | "mn"] || job.location.ko;
-              const visa = job.visaSupport[lang as "ko" | "en" | "vn" | "mn"] || job.visaSupport.ko;
-
-              return (
-                <div 
-                  key={job.id} 
-                  className="card-news-item glass-panel"
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    padding: "24px",
-                    borderRadius: "16px",
-                    border: `1px solid ${job.borderColor}`,
-                    background: job.color,
-                    transition: "all 0.3s ease",
-                    position: "relative",
-                    minHeight: "280px"
-                  }}
-                >
-                  <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap" }}>
-                    <span style={{ fontSize: "0.65rem", fontWeight: "700", padding: "2.5px 8px", borderRadius: "4px", background: job.badgeColor, color: job.badgeTextColor }}>
-                      {category}
-                    </span>
-                    <span style={{ fontSize: "0.65rem", fontWeight: "700", padding: "2.5px 8px", borderRadius: "4px", background: "rgba(0,0,0,0.06)", color: "var(--text-primary)" }}>
-                      Visa Match
-                    </span>
-                  </div>
-
-                  <h4 style={{ fontSize: "0.98rem", fontWeight: "800", color: "var(--gcu-navy)", margin: "0 0 16px 0", lineHeight: "1.45" }}>
-                    {title}
-                  </h4>
-
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.78rem", color: "var(--text-secondary)", marginBottom: "24px" }}>
-                    <div>💰 <strong>{salary}</strong></div>
-                    <div>📍 {location}</div>
-                    <div>⚖️ {visa}</div>
-                  </div>
-
-                  <button
-                    onClick={() => handleOpenApplyModal(job)}
-                    style={{
-                      marginTop: "auto",
-                      width: "100%",
-                      height: "38px",
-                      border: "none",
-                      borderRadius: "8px",
-                      background: applied ? "var(--gcu-navy)" : "var(--gcu-red)",
-                      color: "#ffffff",
-                      fontWeight: "700",
-                      fontSize: "0.78rem",
-                      cursor: "pointer",
-                      transition: "all 0.2s"
-                    }}
-                  >
-                    {applied ? `✓ ${tDash.appliedBtn}` : tDash.viewDetailBtn}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 5. Card News feeds: Scholarships */}
-        <div style={{ marginBottom: "40px" }}>
-          <div className="section-header" style={{ marginBottom: "16px" }}>
-            <div className="section-title">
-              <span className="section-title-dot"></span>
-              <h2 style={{ fontSize: "1.25rem" }}>🎁 {tDash.scholarshipFeedTitle}</h2>
-            </div>
-          </div>
-          <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "20px", marginTop: "-8px" }}>
-            {tDash.scholarshipFeedDesc}
-          </p>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
-            {SCHOLARSHIPS_DATA.map((sch) => {
-              const applied = applications.includes(sch.id);
-              const title = sch.title[lang as "ko" | "en" | "vn" | "mn"] || sch.title.ko;
-              const reward = sch.reward[lang as "ko" | "en" | "vn" | "mn"] || sch.reward.ko;
-              const criteria = sch.criteria[lang as "ko" | "en" | "vn" | "mn"] || sch.criteria.ko;
-
-              return (
-                <div 
-                  key={sch.id} 
-                  className="card-news-item glass-panel"
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    padding: "24px",
-                    borderRadius: "16px",
-                    border: `1px solid ${sch.borderColor}`,
-                    background: sch.color,
-                    transition: "all 0.3s ease",
-                    position: "relative",
-                    minHeight: "280px"
-                  }}
-                >
-                  <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap" }}>
-                    <span style={{ fontSize: "0.65rem", fontWeight: "700", padding: "2.5px 8px", borderRadius: "4px", background: sch.badgeColor, color: sch.badgeTextColor }}>
-                      Scholarship
-                    </span>
-                    <span style={{ fontSize: "0.65rem", fontWeight: "700", padding: "2.5px 8px", borderRadius: "4px", background: "rgba(198,26,43,0.06)", color: "var(--gcu-red)" }}>
-                      Tuition Match
-                    </span>
-                  </div>
-
-                  <h4 style={{ fontSize: "0.98rem", fontWeight: "800", color: "var(--gcu-navy)", margin: "0 0 16px 0", lineHeight: "1.45" }}>
-                    {title}
-                  </h4>
-
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px", fontSize: "0.78rem", color: "var(--text-secondary)", marginBottom: "24px" }}>
-                    <div>🎁 <strong>{reward}</strong></div>
-                    <div>🎓 {criteria}</div>
-                  </div>
-
-                  <button
-                    onClick={() => handleOpenApplyModal(sch)}
-                    style={{
-                      marginTop: "auto",
-                      width: "100%",
-                      height: "38px",
-                      border: "none",
-                      borderRadius: "8px",
-                      background: applied ? "var(--gcu-navy)" : "var(--gcu-red)",
-                      color: "#ffffff",
-                      fontWeight: "700",
-                      fontSize: "0.78rem",
-                      cursor: "pointer",
-                      transition: "all 0.2s"
-                    }}
-                  >
-                    {applied ? `✓ ${tDash.appliedBtn}` : tDash.viewDetailBtn}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        {/* 4 & 5. Card News feeds: Jobs & Scholarships (Ordered dynamically based on role) */}
+        {isStudent ? (
+          <>
+            {renderScholarshipsSection()}
+            {renderJobsSection()}
+          </>
+        ) : (
+          <>
+            {renderJobsSection()}
+            {renderScholarshipsSection()}
+          </>
+        )}
 
         {/* 6. Cooperation Partners List (Footer of Dashboard) */}
         <section className="glass-panel" style={{ padding: "32px", background: "rgba(255, 255, 255, 0.02)", border: "1px solid var(--border-color)", borderRadius: "24px" }}>

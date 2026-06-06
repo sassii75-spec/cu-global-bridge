@@ -42,7 +42,13 @@ export const DASHBOARD_TRANSLATIONS = {
     visaE74: "E-7-4 숙련기능비자",
     visaStatusActive: "진행중",
     visaStatusPending: "대기",
-    visaStatusGoal: "최종목표"
+    visaStatusGoal: "최종목표",
+    graduate: "졸업자",
+    notificationsTitle: "🚨 실시간 맞춤 정보 알림",
+    visaF5: "F-5 영주비자",
+    ddayExam: "📅 TOPIK 95회 시험일자",
+    ddayQuota: "📅 F-2-R 지자체 쿼터 마감",
+    ddayKiip: "📅 KIIP 평가 시험일자"
   },
   en: {
     welcome: "Welcome, ",
@@ -87,7 +93,13 @@ export const DASHBOARD_TRANSLATIONS = {
     visaE74: "E-7-4 Skilled Work",
     visaStatusActive: "Active",
     visaStatusPending: "Pending",
-    visaStatusGoal: "Final Goal"
+    visaStatusGoal: "Final Goal",
+    graduate: "Graduate",
+    notificationsTitle: "🚨 Live Personalized Alerts",
+    visaF5: "F-5 Permanent Residency",
+    ddayExam: "📅 TOPIK 95th Exam",
+    ddayQuota: "📅 F-2-R Regional Quota Deadline",
+    ddayKiip: "📅 KIIP Assessment Exam"
   },
   vn: {
     welcome: "Chào mừng, ",
@@ -132,7 +144,13 @@ export const DASHBOARD_TRANSLATIONS = {
     visaE74: "Visa kỹ năng E-7-4",
     visaStatusActive: "Đang tiến hành",
     visaStatusPending: "Đang chờ",
-    visaStatusGoal: "Mục tiêu cuối cùng"
+    visaStatusGoal: "Mục tiêu cuối cùng",
+    graduate: "Tốt nghiệp",
+    notificationsTitle: "🚨 Thông báo cá nhân hóa",
+    visaF5: "Visa định cư F-5",
+    ddayExam: "📅 Ngày thi TOPIK lần thứ 95",
+    ddayQuota: "📅 Hạn nộp Quota F-2-R",
+    ddayKiip: "📅 Ngày thi đánh giá KIIP"
   },
   mn: {
     welcome: "Тавтай морилно уу, ",
@@ -177,7 +195,13 @@ export const DASHBOARD_TRANSLATIONS = {
     visaE74: "E-7-4 Нарийн мэргэжлийн виз",
     visaStatusActive: "Идэвхтэй",
     visaStatusPending: "Хүлээгдэж буй",
-    visaStatusGoal: "Эцсийн зорилго"
+    visaStatusGoal: "Эцсийн зорилго",
+    graduate: "Төгсөгч",
+    notificationsTitle: "🚨  Бодит цагийн тохирсон мэдэгдэл",
+    visaF5: "F-5 Байнгын виз",
+    ddayExam: "📅 TOPIK 95-р шалгалт",
+    ddayQuota: "📅 F-2-R Квот дуусах хугацаа",
+    ddayKiip: "📅 KIIP үнэлгээний шалгалт"
   }
 };
 
@@ -208,28 +232,32 @@ export const VISA_INFO: Record<string, Record<string, string>> = {
     "D-10": "D-10 구직비자: 졸업 후 구직 또는 인턴십 가능 비자. 190점 중 60점 이상 획득 시 전환 가능 (TOPIK 점수 및 학위 반영).",
     "F-2-R": "F-2-R 지역특화비자: 인구감소지역 거주 및 취업 조건부 거주비자. TOPIK 3급 또는 KIIP 3단계 이수, 지자체 추천서 필요.",
     "E-9": "E-9 비전문취업비자: 고용허가제를 통한 취업 비자. 제조업, 농축산업 등에서 단순 노무. 체류 기간 제한 및 이직 제한 존재.",
-    "E-7-4": "E-7-4 숙련기능인력비자: E-9 보유자가 숙련도를 검증받아 전환하는 비자. 연봉 2,600만원 이상, TOPIK 2급 및 경력 환산 점수제."
+    "E-7-4": "E-7-4 숙련기능인력비자: E-9 보유자가 숙련도를 검증받아 전환하는 비자. 연봉 2,600만원 이상, TOPIK 2급 및 경력 환산 점수제.",
+    "F-5": "F-5 영주비자: 대한민국 내 영주 체류 가능한 무기한 비자. 연간 GNI 1배 이상 소득 및 TOPIK 5급 또는 KIIP 5단계 영주용 종합평가 합격 필수."
   },
   en: {
     "D-2": "D-2 Study Visa: For regular degree students. Requires GPA 2.0+ and enrollment. Part-time work permit is mandatory for jobbing.",
     "D-10": "D-10 Job Seeking Visa: For job search or internship after graduation. Requires 60+ points out of 190 (based on TOPIK, degree, etc.).",
     "F-2-R": "F-2-R Regional Resident Visa: Conditional visa for working/living in designated rural areas. Requires TOPIK Level 3+ or KIIP Level 3, and municipality recommendation.",
     "E-9": "E-9 Unskilled Work Visa: For simple labor via Employment Permit System. Limits on residency extension and workplace transitions.",
-    "E-7-4": "E-7-4 Skilled Worker Visa: Point-based conversion for E-9 holders. Requires annual income 26M+ KRW, TOPIK Level 2+, and experience points."
+    "E-7-4": "E-7-4 Skilled Worker Visa: Point-based conversion for E-9 holders. Requires annual income 26M+ KRW, TOPIK Level 2+, and experience points.",
+    "F-5": "F-5 Permanent Residency: Indefinite stay visa in Korea. Requires annual income above 1x GNI and TOPIK Level 5+ or KIIP Level 5 comprehensive test pass."
   },
   vn: {
     "D-2": "Visa du học D-2: Visa học tập chính quy. Yêu cầu GPA 2.0+ và giấy chứng nhận học tập. Phải xin phép làm thêm để đi làm.",
     "D-10": "Visa tìm việc D-10: Dành cho tìm việc hoặc thực tập sau tốt nghiệp. Yêu cầu đạt 60/190 điểm theo hệ thống tính điểm (bao gồm TOPIK, bằng cấp).",
     "F-2-R": "Visa định cư F-2-R: Visa cư trú có điều kiện sinh sống & làm việc tại khu vực dân số giảm. Yêu cầu TOPIK cấp 3 hoặc KIIP lớp 3, và thư giới thiệu của chính quyền.",
     "E-9": "Visa lao động E-9: Visa làm việc phổ thông. Giới hạn thời gian cư trú và thay đổi nơi làm việc.",
-    "E-7-4": "Visa kỹ năng E-7-4: Chuyển đổi từ E-9 dựa trên điểm tích lũy. Yêu cầu thu nhập 26tr+ KRW/năm, TOPIK cấp 2 và kinh nghiệm làm việc."
+    "E-7-4": "Visa kỹ năng E-7-4: Chuyển đổi từ E-9 dựa trên điểm tích lũy. Yêu cầu thu nhập 26tr+ KRW/năm, TOPIK cấp 2 và kinh nghiệm làm việc.",
+    "F-5": "Visa định cư F-5: Visa cư trú vô thời hạn tại Hàn Quốc. Yêu cầu thu nhập hàng năm trên 1x GNI và đạt TOPIK Cấp 5 hoặc thi đỗ KIIP Lớp 5."
   },
   mn: {
     "D-2": "D-2 Сурлагын виз: Үндсэн их сургуульд суралцах виз. GPA 2.0+ ба сургуулийн тодорхойлолт шаардлагатай. Цагийн ажил хийхэд зөвшөөрөл авна.",
     "D-10": "D-10 Ажил хайх виз: Төгсөөд ажил хайх эсвэл дадлага хийх виз. 190 онооноос 60 оноо авсан тохиолдолд шилжих боломжтой (TOPIK, боловсрол).",
     "F-2-R": "F-2-R Орон нутгийн виз: Хүн ам багатай бүсэд ажиллаж, амьдрах виз. TOPIK 3-р түвшин эсвэл KIIP 3-р шат, орон нутгийн тодорхойлолт шаардлагатай.",
     "E-9": "E-9 Ажил эрхлэх виз: Хөдөлмөрийн гэрээгээр ажиллах виз. Үйлдвэрлэл, хөдөө аж ахуйн салбарт ажиллах. Хугацаа болон ажлын байр солиход хязгаарлалттай.",
-    "E-7-4": "E-7-4 Нарийн мэргэжлийн виз: E-9 визтэй ажилтан ур чадвараараа шилжих виз. Жилийн цалин 26 сая+ KRW, TOPIK 2-р түвшин, ажлын туршлага оноогоор тооцно."
+    "E-7-4": "E-7-4 Нарийн мэргэжлийн виз: E-9 визтэй ажилтан ур чадвараараа шилжих виз. Жилийн цалин 26 сая+ KRW, TOPIK 2-р түвшин, ажлын туршлага оноогоор тооцно.",
+    "F-5": "F-5 Байнгын виз: БНСУ-д байнгын оршин суух хугацаагүй виз. Жилийн орлого GNI-ээс 1 дахин дээш байх ба TOPIK 5-р түвшин эсвэл KIIP 5-р шатны шалгалтанд тэнцсэн байх шаардлагатай."
   }
 };
 

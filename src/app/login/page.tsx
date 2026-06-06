@@ -99,7 +99,7 @@ export default function LoginPage() {
         const defaultUsers = [
           { id: "admin", name: "관리자 (Kim)", email: "admin@global.ac.kr", nationality: "🇰🇷 대한민국", role: "admin", provider: "credentials", joinedDate: "2024-01-10" },
           { id: "google-altan", name: "Altantsetseg", email: "altan@mongol.net", nationality: "🇲🇳 몽골", role: "student", provider: "google", joinedDate: "2025-03-12" },
-          { id: "naver-sherzod", name: "Sherzod", email: "sherzod@uzbek.net", nationality: "🇺🇿 우즈베키스탄", role: "student", provider: "naver", joinedDate: "2026-02-15" },
+          { id: "naver-sherzod", name: "Sherzod", email: "sherzod@uzbek.net", nationality: "🇺🇿 우즈베키스탄", role: "graduate", provider: "naver", joinedDate: "2026-02-15" },
           { id: "kakao-rajesh", name: "Rajesh Kumar", email: "rajesh@nepal.org", nationality: "🇳🇵 네팔", role: "worker", provider: "kakao", joinedDate: "2024-08-20" },
           { id: "credentials-thu", name: "Nguyen Thu", email: "thu@vietnam.com", nationality: "🇻🇳 베트남", role: "student", provider: "credentials", joinedDate: "2025-09-01" },
           { id: "apple-thu", name: "Nguyen Thu", email: "thu@vietnam.com", nationality: "🇻🇳 베트남", role: "student", provider: "apple", joinedDate: "2025-09-01" }
@@ -182,7 +182,7 @@ export default function LoginPage() {
           name: "Sherzod",
           email: "sherzod@uzbek.net",
           nationality: "🇺🇿 우즈베키스탄",
-          role: "student",
+          role: "graduate",
           provider: "naver"
         });
       } else if (provider === "apple") {
