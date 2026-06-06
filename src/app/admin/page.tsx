@@ -756,6 +756,10 @@ export default function AdminPage() {
   const [replyTextVn, setReplyTextVn] = useState("");
   const [replyTextMn, setReplyTextMn] = useState("");
 
+  // Q&A Translation States
+  const [inquiryLangs, setInquiryLangs] = useState<Record<number, "ko" | "en" | "vn" | "mn">>({});
+  const [translatingIds, setTranslatingIds] = useState<Record<number, boolean>>({});
+
   // Filter & Search states
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -1238,6 +1242,89 @@ export default function AdminPage() {
     setReplyTextEn(isDefaultRouting ? "" : item.answer?.en || "");
     setReplyTextVn(isDefaultRouting ? "" : item.answer?.vn || "");
     setReplyTextMn(isDefaultRouting ? "" : item.answer?.mn || "");
+  };
+
+  // Translation Dictionaries & Mock Translator
+  const COMPLAINT_BODY_TRANSLATIONS: Record<number, Record<"ko" | "en" | "vn" | "mn", string>> = {
+    1717680000001: {
+      ko: "안녕하세요. 몽골에서 온 유학생 알탄이라고 합니다. 이번 학기 성적이 4.2 GPA인데 성적 우수 장학금 대상자인지 궁금합니다. 그리고 필요한 신청 서류와 제출 기한도 알려주세요.",
+      en: "Hello, I am Altan, an international student from Mongolia. My GPA this semester is 4.2, and I would like to know if I qualify for the academic excellence scholarship. Please let me know what documents are required and the submission deadline.",
+      vn: "Xin chào, tôi là Altan, sinh viên quốc tế đến từ Mông Cổ. Điểm GPA kỳ này của tôi là 4.2, tôi muốn hỏi mình có đủ điều kiện nhận học bổng xuất sắc không. Xin vui lòng cho biết hồ sơ cần thiết và hạn chót nộp.",
+      mn: "Сайн байна уу, намайг Монголоос ирсэн гадаад оюутан Алтан гэдэг. Энэ улирлын голч дүн маань 4.2 байгаа бөгөөд сурлагын амжилтын тэтгэлэгт хамрагдах боломжтой эсэхийг мэдмээр байна. Мөн бүрдүүлэх материал болон эцсийн хугацааг хэлж өгнө үү."
+    },
+    1717680000002: {
+      ko: "베트남 국적 근로 학생 투입니다. D-2 유학 비자 연장일이 다음 달까지인데, 학교에서 발급받아야 하는 서류 리스트가 무엇인지 알려주세요. 그리고 출입국관리사무소 방문 예약 대행이 가능한가요?",
+      en: "I am Thu, a student worker of Vietnamese nationality. My D-2 student visa extension is due next month, so please tell me the list of documents I need to get from the school. Also, is it possible to get help with booking an immigration office visit?",
+      vn: "Tôi là Thu, học sinh làm việc quốc tịch Việt Nam. Hạn gia hạn visa du học D-2 của tôi là tháng sau, xin vui lòng cung cấp danh sách hồ sơ cần lấy từ trường. Ngoài ra, trường có hỗ trợ đăng ký lịch hẹn cục xuất nhập cảnh không?",
+      mn: "Вьетнам улсын харьяат ажилчин оюутан Тү байна. Миний D-2 оюутны визний сунгалт ирэх сард дуусах тул сургуулиас авах шаардлагатай материалын жагсаалтыг хэлж өгнө үү. Мөн Цагаачлалын албаны цаг захиалгыг сургуулиас зуучилж өгөх боломжтой юу?"
+    },
+    1717680000003: {
+      ko: "안녕하세요. 네팔에서 온 라제쉬입니다. TOPIK 4급 준비를 하고 있는데 전공 수업 단어가 너무 어렵습니다. 한국 학생들과 일대일로 매칭해주는 한국어 튜터링 프로그램이 있다고 들었는데 어떻게 신청하나요?",
+      en: "Hello, I am Rajesh from Nepal. I am preparing for TOPIK Level 4, but the vocabulary in my major classes is too difficult. I heard there is a Korean language tutoring program matching international students one-on-one with Korean students. How do I apply?",
+      vn: "Xin chào, tôi là Rajesh đến từ Nepal. Tôi đang chuẩn bị thi TOPIK cấp 4, nhưng từ vựng các lớp chuyên ngành khó quá. Tôi nghe nói có chương trình kèm tiếng Hàn kết nối một-một giữa sinh viên nước ngoài và sinh viên Hàn Quốc. Làm thế nào để đăng ký?",
+      mn: "Сайн байна уу, намайг Непалаас ирсэн Ражеш гэдэг. Би TOPIK 4-р түвшинд бэлдэж байгаа боловч мэргэжлийн хичээлийн үгс маш хэцүү байна. Гадаад оюутнуудыг солонгос оюутнуудтай ганцаарчлан холбож өгдөг солонгос хэлний туслах багш хөтөлбөр байдаг гэж сонссон, хэрхэн хүсэлт гаргах вэ?"
+    }
+  };
+
+  const mockTranslate = (text: string, targetLang: "ko" | "en" | "vn" | "mn") => {
+    if (targetLang === "ko") return text;
+    
+    let translated = text;
+    if (targetLang === "en") {
+      translated = `[AI Translation to English]\n${text
+        .replace(/안녕하세요/g, "Hello")
+        .replace(/감사합니다/g, "Thank you")
+        .replace(/비자/g, "Visa")
+        .replace(/장학금/g, "Scholarship")
+        .replace(/등록금/g, "Tuition fee")
+        .replace(/수업/g, "Class")
+        .replace(/성적/g, "Grades/GPA")
+        .replace(/서류/g, "Documents")
+        .replace(/신청/g, "Application")
+        .replace(/문의/g, "Inquiry")
+        .replace(/한국어/g, "Korean")
+        .replace(/튜터/g, "Tutor")
+        .replace(/도와주세요/g, "Please help me")}`;
+    } else if (targetLang === "vn") {
+      translated = `[AI Dịch sang Tiếng Việt]\n${text
+        .replace(/안녕하세요/g, "Xin chào")
+        .replace(/감사합니다/g, "Xin cảm ơn")
+        .replace(/비자/g, "Visa")
+        .replace(/장학금/g, "Học bổng")
+        .replace(/등록금/g, "Học phí")
+        .replace(/수업/g, "Lớp học")
+        .replace(/성적/g, "Điểm số")
+        .replace(/서류/g, "Hồ sơ")
+        .replace(/신청/g, "Đăng ký")
+        .replace(/문의/g, "Yêu cầu")
+        .replace(/한국어/g, "Tiếng Hàn")
+        .replace(/튜터/g, "Gia sư")
+        .replace(/도와주세요/g, "Xin giúp tôi")}`;
+    } else if (targetLang === "mn") {
+      translated = `[Монгол хэл рүү хийсэн AI орчуулга]\n${text
+        .replace(/안녕하세요/g, "Сайн байна уу")
+        .replace(/감사합니다/g, "Баярлалаа")
+        .replace(/비자/g, "Виз")
+        .replace(/장학금/g, "Тэтгэлэг")
+        .replace(/등록금/g, "Сургалтын төлбөр")
+        .replace(/수업/g, "Хичээл")
+        .replace(/성적/g, "Дүн")
+        .replace(/서류/g, "Материал")
+        .replace(/신청/g, "Хүсэлт")
+        .replace(/문의/g, "Лавлагаа")
+        .replace(/한국어/g, "Солонгос хэл")
+        .replace(/튜터/g, "Туслах багш")
+        .replace(/도와주세요/g, "Туслаарай")}`;
+    }
+    return translated;
+  };
+
+  const handleTranslateTicket = (id: number, targetLang: "ko" | "en" | "vn" | "mn") => {
+    setTranslatingIds(prev => ({ ...prev, [id]: true }));
+    setTimeout(() => {
+      setInquiryLangs(prev => ({ ...prev, [id]: targetLang }));
+      setTranslatingIds(prev => ({ ...prev, [id]: false }));
+    }, 600);
   };
 
   // Exam Management Handlers
@@ -2304,8 +2391,17 @@ export default function AdminPage() {
                     const isPending = item.answer?.ko?.includes("스마트 민원 자동 분류 안내");
                     const isReplying = replyingQnaId === item.id;
                     const matchingLog = complaintsLogs.find(l => l.id === "log-" + item.id);
-                    const qTitle = item.question?.ko || "";
-                    const qBody = matchingLog?.body || "상세 민원 본문이 로그에 없습니다.";
+                    const ticketLang = inquiryLangs[item.id] || "ko";
+                    const isTranslating = translatingIds[item.id] || false;
+                    
+                    const qTitle = item.question?.[ticketLang] || item.question?.ko || "";
+                    
+                    let qBody = matchingLog?.body || "상세 민원 본문이 로그에 없습니다.";
+                    if (COMPLAINT_BODY_TRANSLATIONS[item.id]) {
+                      qBody = COMPLAINT_BODY_TRANSLATIONS[item.id][ticketLang] || qBody;
+                    } else {
+                      qBody = mockTranslate(qBody, ticketLang);
+                    }
 
                     return (
                       <div 
@@ -2320,8 +2416,40 @@ export default function AdminPage() {
                           gap: "8px" 
                         }}
                       >
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        {/* Translation Selector Row */}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.04)", paddingBottom: "6px", marginBottom: "4px" }}>
                           <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>ID: {item.id}</span>
+                          <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                            <span style={{ fontSize: "0.7rem", color: "var(--gcu-sky)", fontWeight: "600", marginRight: "4px" }}>🌐 AI 번역:</span>
+                            {(["ko", "en", "vn", "mn"] as const).map((langOption) => {
+                              const flags = { ko: "🇰🇷 KO", en: "🇺🇸 EN", vn: "🇻🇳 VN", mn: "🇲🇳 MN" };
+                              const isActive = ticketLang === langOption;
+                              return (
+                                <button
+                                  key={langOption}
+                                  onClick={() => handleTranslateTicket(item.id, langOption)}
+                                  disabled={isTranslating}
+                                  style={{
+                                    padding: "2px 6px",
+                                    fontSize: "0.68rem",
+                                    borderRadius: "4px",
+                                    background: isActive ? "rgba(0, 185, 242, 0.15)" : "rgba(255,255,255,0.03)",
+                                    border: isActive ? "1px solid var(--gcu-sky)" : "1px solid rgba(255,255,255,0.08)",
+                                    color: isActive ? "var(--gcu-sky)" : "var(--text-secondary)",
+                                    cursor: isTranslating ? "not-allowed" : "pointer",
+                                    fontWeight: isActive ? "700" : "500",
+                                    transition: "all 0.2s"
+                                  }}
+                                >
+                                  {flags[langOption]}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span className="feed-tag event" style={{ fontSize: "0.7rem", padding: "1px 6px" }}>{matchingLog?.category || "민원"}</span>
                           <span 
                             className={`feed-tag ${isPending ? "notice" : "event"}`} 
                             style={{ fontSize: "0.7rem", padding: "1px 6px" }}
@@ -2330,13 +2458,21 @@ export default function AdminPage() {
                           </span>
                         </div>
 
-                        <div style={{ fontSize: "0.88rem", fontWeight: "700", color: "var(--text-primary)" }}>
-                          {qTitle}
-                        </div>
+                        {isTranslating ? (
+                          <div style={{ padding: "15px 0", textAlign: "center", color: "var(--gcu-sky)", fontSize: "0.82rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                            <span>🔄</span> AI 다국어 번역 엔진 가동 중...
+                          </div>
+                        ) : (
+                          <>
+                            <div style={{ fontSize: "0.88rem", fontWeight: "700", color: "var(--text-primary)" }}>
+                              {qTitle}
+                            </div>
 
-                        <div style={{ fontSize: "0.82rem", color: "var(--text-secondary)", background: "rgba(0,0,0,0.15)", padding: "8px 10px", borderRadius: "6px", whiteSpace: "pre-wrap" }}>
-                          {qBody}
-                        </div>
+                            <div style={{ fontSize: "0.82rem", color: "var(--text-secondary)", background: "rgba(0,0,0,0.15)", padding: "8px 10px", borderRadius: "6px", whiteSpace: "pre-wrap" }}>
+                              {qBody}
+                            </div>
+                          </>
+                        )}
 
                         {isReplying ? (
                           <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "6px" }}>
