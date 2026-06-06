@@ -704,6 +704,132 @@ function matchesResource(res: any, query: string): boolean {
   return nameMatch || typeMatch;
 }
 
+// AI Domain-wise mock exam analysis helpers
+const DOMAIN_MAPPING = [
+  { 
+    key: "vocab",
+    name: { ko: "어휘 (Vocabulary)", en: "Vocabulary", vn: "Từ vựng", mn: "Үгсийн сан" }, 
+    indices: [0, 1, 2], 
+    icon: "📚",
+    tip: {
+      ko: "어휘 영역 향상을 위해 매일 TOPIK 필수 단어 교안 50개씩 복습하고 단어 퀴즈를 활용하십시오.",
+      en: "To improve vocabulary, review 50 essential TOPIK words daily and practice with flashcard quizzes.",
+      vn: "Để cải thiện từ vựng, hãy ôn tập 50 từ TOPIK bắt buộc mỗi ngày và thực hành với bộ câu hỏi trắc nghiệm.",
+      mn: "Үгсийн санг сайжруулахын тулд өдөр бүр TOPIK-ын заавал цээжлэх 50 үгийг давтаж, асуулт хариултын карт ашиглаарай."
+    }
+  },
+  { 
+    key: "grammar",
+    name: { ko: "문법 (Grammar)", en: "Grammar", vn: "Ngữ pháp", mn: "Дүрэм" }, 
+    indices: [3, 4], 
+    icon: "✍️",
+    tip: {
+      ko: "문법 실수를 줄이기 위해 간접 화법 표현 및 접속어미 연결 규칙 교재 단원을 다시 확인해 보십시오.",
+      en: "To reduce grammar mistakes, re-verify indirect speech patterns and sentence linking rules in your textbook.",
+      vn: "Để giảm lỗi ngữ pháp, hãy kiểm tra lại cấu trúc gián tiếp và quy tắc liên kết câu trong tài liệu học tập.",
+      mn: "Хэлний дүрмийн алдааг багасгахын тулд шууд бус ярианы хэлбэрүүд болон холбох нөхцөлийн дүрмийг сурах бичиг дээрээсээ дахин харна уу."
+    }
+  },
+  { 
+    key: "listening",
+    name: { ko: "듣기 (Listening)", en: "Listening", vn: "Nghe", mn: "Сонсох" }, 
+    indices: [5, 6, 7], 
+    icon: "🎧",
+    tip: {
+      ko: "듣기는 IBT 기출 듣기 트랙 재생 속도를 1.2배속으로 조절하여 지문 쉐도잉 복창 훈련을 권장합니다.",
+      en: "For listening, adjust key exam track playback to 1.2x and perform shadow speaking drills with transcripts.",
+      vn: "Về phần nghe, khuyên bạn nên điều chỉnh tốc độ phát lại ở mức 1.2x và luyện nói đuổi theo kịch bản lời thoại.",
+      mn: "Сонсох чадварын хувьд шалгалтын аудиог 1.2 дахин хурдан болгож, текстийг дагаж дуудах дасгал хийгээрэй."
+    }
+  },
+  { 
+    key: "reading",
+    name: { ko: "읽기 (Reading)", en: "Reading", vn: "Đọc", mn: "Унших" }, 
+    indices: [8, 9], 
+    icon: "📖",
+    tip: {
+      ko: "읽기는 중심 생각 파악 문제 풀이법을 복습하고, 단락별 핵심 키워드 서치 속도를 높이는 훈련을 하십시오.",
+      en: "For reading, practice identifying core paragraph themes and speed up keyword scanning across texts.",
+      vn: "Về phần đọc, hãy ôn tập phương pháp tìm ý chính và tăng tốc độ quét từ khóa cốt lõi trong đoạn văn.",
+      mn: "Унших чадварын хувьд параграфын гол санааг олох дасгал хийж, түлхүүр үгсийг хурдан хайж олох чадвараа хөгжүүлээрэй."
+    }
+  }
+];
+
+function getDomainAnalysis(selected: number[], key: number[], lang: string) {
+  let weakestDomain = "vocab";
+  let lowestPercent = 101;
+
+  const analysis = DOMAIN_MAPPING.map(domain => {
+    let correct = 0;
+    let total = 0;
+    
+    domain.indices.forEach(idx => {
+      if (idx < key.length) {
+        total += 1;
+        const markedAns = selected && selected[idx] !== undefined ? selected[idx] : -1;
+        if (markedAns === key[idx]) {
+          correct += 1;
+        }
+      }
+    });
+    
+    const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
+    
+    if (percentage < lowestPercent) {
+      lowestPercent = percentage;
+      weakestDomain = domain.key;
+    }
+    
+    return {
+      key: domain.key,
+      name: domain.name[lang as "ko" | "en" | "vn" | "mn"] || domain.name.ko,
+      icon: domain.icon,
+      correct,
+      total,
+      percentage,
+      tip: domain.tip[lang as "ko" | "en" | "vn" | "mn"] || domain.tip.ko
+    };
+  });
+
+  return {
+    domains: analysis,
+    weakestDomain,
+    lowestPercent
+  };
+}
+
+function getPrescription(weakest: string, lang: string) {
+  const prescriptions: Record<string, Record<"ko" | "en" | "vn" | "mn", string>> = {
+    vocab: {
+      ko: "🤖 AI 종합 처방: 어휘 영역 보완이 가장 시급합니다. 어휘가 흔들리면 읽기 및 듣기 전반의 오해를 불러올 수 있습니다. 매일 GCU 단어장을 암기해 보십시오.",
+      en: "🤖 AI Prescription: Vocabulary reinforcement is most urgent. Weak vocabulary causes misinterpretations in both reading and listening. Study GCU vocabs daily.",
+      vn: "🤖 Đơn thuốc AI: Việc củng cố Từ vựng là khẩn cấp nhất. Từ vựng yếu sẽ dẫn đến hiểu sai trong cả phần đọc và nghe. Hãy học từ vựng GCU hàng ngày.",
+      mn: "🤖 AI Зөвлөмж: Үгсийн санг сайжруулах нь хамгийн тулгамдсан асуудал юм. Үгсийн сан сул байх нь унших, сонсох чадварт сөргөөр нөлөөлнө. GCU-ийн үгсийн санг өдөр бүр цээжлээрэй."
+    },
+    grammar: {
+      ko: "🤖 AI 종합 처방: 문법 기초가 흔들리고 있습니다. 자주 출제되는 TOPIK 연결어미와 어미 결합 규칙(예: -아/어서 vs -(으)니까)을 단원별로 교안에서 다시 복습해 보십시오.",
+      en: "🤖 AI Prescription: Grammar fundamentals need review. Review common TOPIK connection endings and combination rules (e.g. -아/어서 vs -(으)니까) in the syllabus.",
+      vn: "🤖 Đơn thuốc AI: Kiến thức ngữ pháp cơ bản đang bị hổng. Hãy ôn tập lại các đuôi liên từ TOPIK thường gặp và quy tắc kết hợp đuôi từ trong giáo trình.",
+      mn: "🤖 AI Зөвлөмж: Дүрмийн суурь сул байна. Түгээмэл хэрэглэгддэг TOPIK-ын холбох нөхцөлүүд болон дүрэмүүдийг хичээлийн хөтөлбөрөөсөө дахин давтана уу."
+    },
+    listening: {
+      ko: "🤖 AI 종합 처방: 듣기 영역 집중 훈련이 요망됩니다. 기출 음원 파일을 1.2배속으로 들으며 받아쓰거나 중심 생각을 구어로 즉시 번역 요약하는 연습을 매일 20분씩 하십시오.",
+      en: "🤖 AI Prescription: Intensive listening drills are needed. Practice listening to mock audio at 1.2x speed, writing down dictation, and summarizing content for 20 minutes daily.",
+      vn: "🤖 Đơn thuốc AI: Cần luyện nghe chuyên sâu. Hãy nghe các tệp âm thanh thi thử với tốc độ 1.2x, ghi chép chính tả và tóm tắt nội dung chính 20 phút mỗi ngày.",
+      mn: "🤖 AI Зөвлөмж: Сонсох чадварын эрчимтэй дасгал хийх шаардлагатай. Шалгалтын аудиог 1.2 дахин хурдан хурдаар сонсож, сонссоноо тэмдэглэх дасгалыг өдөр бүр 20 минут хийгээрэй."
+    },
+    reading: {
+      ko: "🤖 AI 종합 처방: 읽기 독해 속도 개선이 시급합니다. 시간 관리를 위해 중심 생각이 위치하는 단락 앞뒤 문장을 재빨리 스캔하는 발췌독 속독법을 훈련할 것을 추천합니다.",
+      en: "🤖 AI Prescription: Reading comprehension speed needs improvement. To manage time, practice skimming the first and last sentences of paragraph passages to locate core themes.",
+      vn: "🤖 Đơn thuốc AI: Cần cải thiện tốc độ đọc hiểu. Để quản lý thời gian, hãy luyện kỹ năng đọc lướt câu đầu và câu cuối của mỗi đoạn văn để nhanh chóng tìm ra chủ đề chính.",
+      mn: "🤖 AI Зөвлөмж: Уншиж ойлгох хурдыг сайжруулах шаардлагатай. Шалгалтын цагаа зөв хуваарилахын тулд параграфын эхний болон сүүлчийн өгүүлбэりをхурдан уншиж, гол санааг олох дасгал хийгээрэй."
+    }
+  };
+
+  return prescriptions[weakest]?.[lang as "ko" | "en" | "vn" | "mn"] || prescriptions[weakest]?.ko || "";
+}
+
 export default function LearningPage() {
   const { lang, t } = useLanguage();
   const tLearn = LEARNING_TRANSLATIONS[lang as "ko" | "en" | "vn" | "mn"] || LEARNING_TRANSLATIONS.ko;
@@ -2488,6 +2614,92 @@ export default function LearningPage() {
                     </div>
                   </div>
 
+                  {/* 🤖 AI 영역별 분석 리포트 패널 */}
+                  {(() => {
+                    const analysisResult = getDomainAnalysis(selectedAnswers, activeExam.answerKey, lang);
+                    const prescriptionText = getPrescription(analysisResult.weakestDomain, lang);
+
+                    return (
+                      <div 
+                        className="glass-panel" 
+                        style={{ 
+                          padding: "24px 28px", 
+                          maxWidth: "680px", 
+                          margin: "0 auto 36px auto", 
+                          textAlign: "left",
+                          border: "1px solid rgba(33, 64, 154, 0.15)",
+                          background: "linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(33, 64, 154, 0.03) 100%)"
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+                          <span style={{ fontSize: "1.5rem" }}>🤖</span>
+                          <div>
+                            <h3 style={{ fontSize: "1.05rem", fontWeight: "800", color: "var(--gcu-navy)", margin: 0 }}>
+                              {lang === "ko" ? "AI 영역별 성취도 분석 리포트" : 
+                               lang === "en" ? "AI Domain Achievement Analysis Report" :
+                               lang === "vn" ? "Báo cáo phân tích thành tích từng phần bằng AI" :
+                               "AI салбар бүрийн амжилтын дүн шинжилгээний тайлан"}
+                            </h3>
+                            <span style={{ fontSize: "0.78rem", color: "var(--text-secondary)" }}>
+                              {lang === "ko" ? "문항별 카테고리를 자동 분류하여 취약 영역을 분석합니다." : 
+                               lang === "en" ? "Automatically categorizes questions to analyze weaker areas." :
+                               lang === "vn" ? "Tự động phân loại câu hỏi để phân tích các phần còn yếu." :
+                               "Асуултуудыг автоматаар ангилж, сул талыг шинжилнэ."}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* 영역별 프로그레스 그리드 */}
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "16px", marginBottom: "20px" }}>
+                          {analysisResult.domains.map(dom => (
+                            <div key={dom.key} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.85rem" }}>
+                                <span style={{ fontWeight: "700", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "6px" }}>
+                                  <span>{dom.icon}</span>
+                                  <span>{dom.name}</span>
+                                </span>
+                                <span style={{ fontWeight: "700", color: dom.percentage >= 60 ? "var(--gcu-green)" : "var(--gcu-orange)" }}>
+                                  {dom.correct} / {dom.total} {lang === "ko" ? "맞춤" : lang === "en" ? "Correct" : lang === "vn" ? "Đúng" : "Зөв"} ({dom.percentage}%)
+                                </span>
+                              </div>
+                              {/* 게이지 트랙 */}
+                              <div style={{ height: "8px", background: "rgba(0,0,0,0.06)", borderRadius: "4px", overflow: "hidden", position: "relative" }}>
+                                <div 
+                                  style={{ 
+                                    height: "100%", 
+                                    width: `${dom.percentage}%`, 
+                                    background: dom.percentage === 0 ? "transparent" : `linear-gradient(90deg, var(--gcu-orange, #f7931e) 0%, var(--gcu-green, #72bf44) 100%)`,
+                                    borderRadius: "4px",
+                                    transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)"
+                                  }}
+                                />
+                              </div>
+                              <span style={{ fontSize: "0.76rem", color: "var(--text-secondary)", lineHeight: "1.4", paddingLeft: "4px" }}>
+                                💡 {dom.tip}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* AI 종합 학습 처방 */}
+                        <div 
+                          style={{ 
+                            padding: "16px 20px", 
+                            background: "linear-gradient(135deg, rgba(33, 64, 154, 0.06) 0%, rgba(247, 147, 30, 0.05) 100%)", 
+                            borderRadius: "10px", 
+                            borderLeft: "4px solid var(--gcu-navy)",
+                            fontSize: "0.82rem",
+                            lineHeight: "1.5",
+                            color: "var(--text-primary)",
+                            fontWeight: "500"
+                          }}
+                        >
+                          {prescriptionText}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   {/* Review Sheets: Question-by-Question grading logs list */}
                   <div style={{ textAlign: "left", maxWidth: "680px", margin: "0 auto 36px auto" }}>
                     <h3 style={{ fontSize: "1rem", fontWeight: "700", color: "var(--gcu-navy)", marginBottom: "16px" }}>🎯 문항별 마킹 결과 오답 노트</h3>
@@ -2735,6 +2947,86 @@ export default function LearningPage() {
                 <span style={{ fontSize: "0.92rem", color: "var(--text-secondary)", display: "block", marginTop: "8px", fontWeight: "600" }}>{selectedHistoryRecord.date}</span>
               </div>
             </div>
+
+            {/* 🤖 AI 영역별 분석 리포트 패널 */}
+            {(() => {
+              const analysisResult = getDomainAnalysis(
+                selectedHistoryRecord.selectedAnswers, 
+                selectedHistoryRecord.answerKey, 
+                lang
+              );
+              const prescriptionText = getPrescription(analysisResult.weakestDomain, lang);
+
+              return (
+                <div 
+                  className="glass-panel" 
+                  style={{ 
+                    padding: "20px 24px", 
+                    marginBottom: "24px", 
+                    textAlign: "left",
+                    border: "1px solid rgba(33, 64, 154, 0.12)",
+                    background: "linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(33, 64, 154, 0.02) 100%)"
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+                    <span style={{ fontSize: "1.3rem" }}>🤖</span>
+                    <div>
+                      <h4 style={{ fontSize: "0.95rem", fontWeight: "800", color: "var(--gcu-navy)", margin: 0 }}>
+                        {lang === "ko" ? "AI 영역별 성취도 분석 리포트" : 
+                         lang === "en" ? "AI Domain Achievement Analysis Report" :
+                         lang === "vn" ? "Báo cáo phân tích thành tích từng phần bằng AI" :
+                         "AI салбар бүрийн амжилтын дүн шинжилгээний тайлан"}
+                      </h4>
+                    </div>
+                  </div>
+
+                  {/* 영역별 프로그레스 리스트 */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "16px" }}>
+                    {analysisResult.domains.map(dom => (
+                      <div key={dom.key} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.8rem" }}>
+                          <span style={{ fontWeight: "700", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "4px" }}>
+                            <span>{dom.icon}</span>
+                            <span>{dom.name}</span>
+                          </span>
+                          <span style={{ fontWeight: "700", color: dom.percentage >= 60 ? "var(--gcu-green)" : "var(--gcu-orange)", fontSize: "0.78rem" }}>
+                            {dom.correct} / {dom.total} {lang === "ko" ? "맞춤" : lang === "en" ? "Correct" : lang === "vn" ? "Đúng" : "Зөв"} ({dom.percentage}%)
+                          </span>
+                        </div>
+                        {/* 게이지 트랙 */}
+                        <div style={{ height: "6px", background: "rgba(0,0,0,0.06)", borderRadius: "3px", overflow: "hidden", position: "relative" }}>
+                          <div 
+                            style={{ 
+                              height: "100%", 
+                              width: `${dom.percentage}%`, 
+                              background: dom.percentage === 0 ? "transparent" : `linear-gradient(90deg, var(--gcu-orange, #f7931e) 0%, var(--gcu-green, #72bf44) 100%)`,
+                              borderRadius: "3px",
+                              transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)"
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* AI 종합 학습 처방 */}
+                  <div 
+                    style={{ 
+                      padding: "12px 16px", 
+                      background: "linear-gradient(135deg, rgba(33, 64, 154, 0.05) 0%, rgba(247, 147, 30, 0.04) 100%)", 
+                      borderRadius: "8px", 
+                      borderLeft: "3px solid var(--gcu-navy)",
+                      fontSize: "0.78rem",
+                      lineHeight: "1.45",
+                      color: "var(--text-primary)",
+                      fontWeight: "500"
+                    }}
+                  >
+                    {prescriptionText}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* 문항별 상세 채점 내역 */}
             <div style={{ marginBottom: "24px" }}>
