@@ -336,7 +336,50 @@ export default function CommunityPage() {
   const [commentText, setCommentText] = useState("");
   const [commenterName, setCommenterName] = useState("");
 
-  // Restore community posts from localStorage on mount
+  // Small Group Board States
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [writeFormOpen, setWriteFormOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [joinedGroups, setJoinedGroups] = useState<string[]>([]);
+
+  // Group Details
+  const [groupsConfig, setGroupsConfig] = useState<Record<string, { title: string; leader: string; count: number; desc: string; banner: string }>>({
+    vn: {
+      title: "베트남 동문 모임",
+      leader: "Nguyen Thu",
+      count: 420,
+      desc: "압구정역 근처 방 중개 가이드 지원 및 아시안 식자재 공동구매 번개 모임을 진행합니다.",
+      banner: "linear-gradient(135deg, #da251d 0%, #ffde00 100%)"
+    },
+    mn: {
+      title: "몽골 유학생 연합회",
+      leader: "Bataa",
+      count: 310,
+      desc: "신입생들의 대학 생활 적응 지원 및 취업/비자 정보 공유 세미나를 정기적으로 개최합니다.",
+      banner: "linear-gradient(135deg, #003ca6 0%, #da251d 100%)"
+    },
+    np: {
+      title: "네팔 교민/학생 모임",
+      leader: "Rajesh",
+      count: 190,
+      desc: "1:1 전공 튜터링 스터디 매칭과 명절 맞이 오프라인 단체 문화제 파티를 진행합니다.",
+      banner: "linear-gradient(135deg, #003893 0%, #dc143c 100%)"
+    },
+    uz: {
+      title: "우즈베키스탄 친목 모임",
+      leader: "Anvar",
+      count: 140,
+      desc: "F-2-R 지역특화형 비자 취득 수기 공유 및 토픽 읽기 스터디 그룹을 운영합니다.",
+      banner: "linear-gradient(135deg, #00c1e4 0%, #ffffff 100%)"
+    }
+  });
+
+  // Blog Post Writer Form states
+  const [newPostTitle, setNewPostTitle] = useState("");
+  const [newPostBody, setNewPostBody] = useState("");
+  const [newPostCategory, setNewPostCategory] = useState("자유");
+
+  // Restore community posts and configurations from localStorage on mount
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       const savedPosts = localStorage.getItem("gcu-community-posts");
@@ -345,6 +388,33 @@ export default function CommunityPage() {
           setDynamicPosts(JSON.parse(savedPosts));
         } catch (e) {
           console.error("Failed to parse saved community posts:", e);
+        }
+      }
+
+      const savedJoined = localStorage.getItem("gcu-joined-groups");
+      if (savedJoined) {
+        try {
+          setJoinedGroups(JSON.parse(savedJoined));
+        } catch (e) {
+          console.error("Failed to parse joined groups:", e);
+        }
+      }
+
+      const savedConfig = localStorage.getItem("gcu-groups-config");
+      if (savedConfig) {
+        try {
+          setGroupsConfig(JSON.parse(savedConfig));
+        } catch (e) {
+          console.error("Failed to parse saved groups config:", e);
+        }
+      }
+
+      const userSession = localStorage.getItem("gcu-active-user");
+      if (userSession) {
+        try {
+          setCurrentUser(JSON.parse(userSession));
+        } catch (e) {
+          console.error("Failed to parse user session:", e);
         }
       }
     }
@@ -449,95 +519,381 @@ export default function CommunityPage() {
       </div>
 
       <div className="comm-layout">
-        {/* Left Side: Post feeds */}
+        {/* Left Side: Post feeds or Group Board */}
         <div>
-          {/* Board Search */}
-          <div className="search-container" style={{ marginBottom: "32px" }}>
-            <div className="search-input-wrapper">
-              <input 
-                type="text" 
-                placeholder={tComm.searchPlaceholder}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-              <span className="search-icon-svg">🔍</span>
-            </div>
-          </div>
-
-          {/* Posts List */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-            {filteredPosts.length > 0 ? (
-              filteredPosts.map(post => {
-                const postLang = getCardLang(post.id);
-                const postTitle = post.title[postLang] || post.title.ko;
-                const postBody = post.body[postLang] || post.body.ko;
-                const postTime = typeof post.time === "string" ? post.time : (post.time[postLang] || post.time.ko);
-
-                return (
-                  <div 
-                    key={post.id} 
-                    onClick={() => handleOpenPost(post)}
-                    className="post-card glass-panel"
+          {selectedGroup ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+              {/* Group Banner Header */}
+              <div 
+                style={{ 
+                  background: groupsConfig[selectedGroup].banner, 
+                  borderRadius: "16px", 
+                  padding: "28px", 
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  color: "#ffffff",
+                  position: "relative",
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.3)"
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+                  <button 
+                    onClick={() => {
+                      setSelectedGroup(null);
+                      setWriteFormOpen(false);
+                    }}
+                    className="comm-tab-btn"
+                    style={{ background: "rgba(0, 0, 0, 0.4)", color: "#ffffff", border: "1px solid rgba(255,255,255,0.2)", fontSize: "0.8rem", padding: "6px 12px" }}
                   >
-                    <div className="post-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <span className="post-country-badge">{post.country}</span>
-                        <span className="post-author">{post.author}</span>
-                        <span className="post-time">{postTime}</span>
-                      </div>
-                      
-                      {/* Card translation selector */}
-                      <div className="card-translate-selector" style={{ display: "flex", gap: "4px" }} onClick={(e) => e.stopPropagation()}>
-                        {(["ko", "en", "vn", "mn"] as const).map((l) => {
-                          const flags = { ko: "🇰🇷", en: "🇺🇸", vn: "🇻🇳", mn: "🇲🇳" };
-                          const isActive = postLang === l;
-                          return (
-                            <button
-                              key={l}
-                              onClick={() => {
-                                setCardLangs(prev => ({ ...prev, [post.id]: l }));
-                              }}
-                              style={{
-                                background: isActive ? "rgba(255, 222, 0, 0.2)" : "rgba(255, 255, 255, 0.05)",
-                                border: isActive ? "1px solid var(--accent-color, #ffde00)" : "1px solid rgba(255, 255, 255, 0.1)",
-                                borderRadius: "4px",
-                                padding: "2px 6px",
-                                fontSize: "0.85rem",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "2px",
-                                transition: "all 0.2s ease"
-                              }}
-                              title={l.toUpperCase()}
-                            >
-                              <span>{flags[l]}</span>
-                              <span style={{ fontSize: "0.65rem", fontWeight: isActive ? "bold" : "normal", color: isActive ? "#ffde00" : "var(--text-secondary)" }}>
-                                {l.toUpperCase()}
-                              </span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    <h3 className="post-title">{postTitle}</h3>
-                    <p className="post-body-preview">{postBody}</p>
+                    ⬅️ 전체 커뮤니티로 돌아가기
+                  </button>
+                  <span style={{ background: "rgba(255, 255, 255, 0.2)", padding: "4px 12px", borderRadius: "12px", fontSize: "0.75rem", fontWeight: "700" }}>
+                    {selectedGroup.toUpperCase()} GATHERING
+                  </span>
+                </div>
+                
+                <h2 style={{ fontSize: "1.8rem", fontWeight: "800", margin: "0 0 8px 0", textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>
+                  {selectedGroup === "vn" ? "🇻🇳 " : selectedGroup === "mn" ? "🇲🇳 " : selectedGroup === "np" ? "🇳🇵 " : "🇺🇿 "}
+                  {groupsConfig[selectedGroup].title}
+                </h2>
+                
+                <p style={{ fontSize: "0.9rem", color: "rgba(255, 255, 255, 0.85)", margin: "0 0 16px 0", lineHeight: "1.5", maxWidth: "600px" }}>
+                  {groupsConfig[selectedGroup].desc}
+                </p>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(255, 255, 255, 0.15)", paddingTop: "14px", flexWrap: "wrap", gap: "10px" }}>
+                  <div style={{ fontSize: "0.82rem", color: "rgba(255, 255, 255, 0.9)", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <span>대표 리더: <strong>{groupsConfig[selectedGroup].leader}</strong></span>
+                    <span>|</span>
+                    <span>활성 회원: <strong>{groupsConfig[selectedGroup].count}명</strong></span>
                     
-                    <div className="post-footer">
-                      <span className="post-footer-item"><span className="post-footer-icon">👁</span> {post.views} {tComm.viewsLabel}</span>
-                      <span className="post-footer-item"><span className="post-footer-icon">♥</span> {post.likes} {tComm.likesLabel}</span>
-                      <span className="post-footer-item"><span className="post-footer-icon">💬</span> {post.comments.length} {tComm.commentsLabel}</span>
-                    </div>
+                    {/* Instant Join Button */}
+                    {joinedGroups.includes(selectedGroup) ? (
+                      <span style={{ background: "rgba(114, 191, 68, 0.25)", border: "1px solid var(--gcu-green, #72bf44)", color: "#95e06c", padding: "3px 10px", borderRadius: "20px", fontSize: "0.75rem", fontWeight: "700", marginLeft: "8px" }}>
+                        ✅ 가입 완료
+                      </span>
+                    ) : (
+                      <button 
+                        onClick={() => {
+                          const updatedJoined = [...joinedGroups, selectedGroup];
+                          setJoinedGroups(updatedJoined);
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem("gcu-joined-groups", JSON.stringify(updatedJoined));
+                          }
+                          
+                          const updatedConfig = { ...groupsConfig };
+                          updatedConfig[selectedGroup].count += 1;
+                          setGroupsConfig(updatedConfig);
+                          if (typeof window !== "undefined") {
+                            localStorage.setItem("gcu-groups-config", JSON.stringify(updatedConfig));
+                          }
+                          
+                          alert(`${groupsConfig[selectedGroup].title}에 가입되었습니다!`);
+                        }}
+                        style={{
+                          background: "#ffde00",
+                          color: "#122a4d",
+                          border: "none",
+                          padding: "3px 12px",
+                          borderRadius: "20px",
+                          fontSize: "0.75rem",
+                          fontWeight: "700",
+                          cursor: "pointer",
+                          marginLeft: "8px",
+                          boxShadow: "0 2px 6px rgba(0,0,0,0.2)"
+                        }}
+                      >
+                        🙋 가입하기
+                      </button>
+                    )}
                   </div>
-                );
-              })
-            ) : (
-              <div className="glass-panel" style={{ padding: "60px", textAlign: "center", color: "var(--text-secondary)" }}>
-                {tComm.noPosts}
+                  
+                  {/* Write Toggle Button */}
+                  <button 
+                    onClick={() => setWriteFormOpen(!writeFormOpen)}
+                    className="btn-primary"
+                    style={{ padding: "6px 14px", fontSize: "0.8rem", borderRadius: "8px" }}
+                  >
+                    {writeFormOpen ? "✕ 작성 취소" : "📝 새 글 쓰기"}
+                  </button>
+                </div>
               </div>
-            )}
-          </div>
+
+              {/* Inline Write Form */}
+              {writeFormOpen && (
+                <div className="glass-panel" style={{ padding: "24px" }}>
+                  <h4 style={{ fontSize: "1rem", fontWeight: "700", color: "var(--text-primary)", margin: "0 0 16px 0", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "10px" }}>
+                    📝 소모임 게시판에 새 글 작성하기
+                  </h4>
+                  <form 
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (!newPostTitle.trim() || !newPostBody.trim()) return;
+                      
+                      const countryMap = { vn: "베트남", mn: "몽골", np: "네팔", uz: "우즈베키스탄" };
+                      const countryName = countryMap[selectedGroup as "vn" | "mn" | "np" | "uz"];
+                      const flag = selectedGroup === "vn" ? "🇻🇳" : selectedGroup === "mn" ? "🇲🇳" : selectedGroup === "np" ? "🇳🇵" : "🇺🇿";
+                      
+                      const newGroupPost = {
+                        id: Date.now(),
+                        board: "groups",
+                        country: `${flag} ${countryName}`,
+                        author: currentUser ? currentUser.name : "익명 학우",
+                        time: { ko: "방금 전", en: "just now", vn: "vừa xong", mn: "саяхан" },
+                        title: {
+                          ko: `[${newPostCategory}] ${newPostTitle}`,
+                          en: `[${newPostCategory}] ${newPostTitle}`,
+                          vn: `[${newPostCategory}] ${newPostTitle}`,
+                          mn: `[${newPostCategory}] ${newPostTitle}`
+                        },
+                        body: {
+                          ko: newPostBody,
+                          en: newPostBody,
+                          vn: newPostBody,
+                          mn: newPostBody
+                        },
+                        views: 1,
+                        likes: 0,
+                        comments: []
+                      };
+
+                      const updatedPosts = [newGroupPost, ...dynamicPosts];
+                      setDynamicPosts(updatedPosts);
+                      if (typeof window !== "undefined") {
+                        localStorage.setItem("gcu-community-posts", JSON.stringify(updatedPosts));
+                      }
+
+                      setNewPostTitle("");
+                      setNewPostBody("");
+                      setWriteFormOpen(false);
+                      alert("게시글이 성공적으로 등록되었습니다!");
+                    }}
+                    style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+                  >
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 3fr", gap: "12px" }}>
+                      <div>
+                        <label style={{ fontSize: "0.8rem", color: "var(--text-secondary)", display: "block", marginBottom: "6px", fontWeight: "700" }}>분류</label>
+                        <select 
+                          value={newPostCategory}
+                          onChange={(e) => setNewPostCategory(e.target.value)}
+                          className="calc-select"
+                          style={{ width: "100%", height: "40px", background: "var(--bg-input)", border: "1px solid var(--border-color)", color: "#fff", borderRadius: "6px", padding: "0 10px" }}
+                        >
+                          <option value="자유">💬 자유 이야기</option>
+                          <option value="정보">🏠 정착 정보</option>
+                          <option value="번개">⚡ 친목 번개</option>
+                          <option value="스터디">📚 스터디/학습</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ fontSize: "0.8rem", color: "var(--text-secondary)", display: "block", marginBottom: "6px", fontWeight: "700" }}>제목</label>
+                        <input 
+                          type="text"
+                          value={newPostTitle}
+                          onChange={(e) => setNewPostTitle(e.target.value)}
+                          placeholder="게시글 제목을 입력하세요..."
+                          className="calc-select"
+                          style={{ width: "100%", height: "40px", background: "var(--bg-input)", border: "1px solid var(--border-color)", color: "#fff", borderRadius: "6px", padding: "0 12px" }}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ fontSize: "0.8rem", color: "var(--text-secondary)", display: "block", marginBottom: "6px", fontWeight: "700" }}>본문 내용</label>
+                      <textarea
+                        value={newPostBody}
+                        onChange={(e) => setNewPostBody(e.target.value)}
+                        placeholder="소모임 학우들과 나누고 싶은 대화나 정보를 자세히 적어주세요..."
+                        style={{ width: "100%", minHeight: "140px", background: "var(--bg-input)", border: "1px solid var(--border-color)", color: "#fff", borderRadius: "6px", padding: "12px", outline: "none", resize: "vertical", fontSize: "0.9rem", lineHeight: "1.5" }}
+                        required
+                      />
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      className="btn-primary" 
+                      style={{ padding: "10px 24px", fontSize: "0.9rem", borderRadius: "8px", fontWeight: "700", alignSelf: "flex-end" }}
+                    >
+                      🚀 게시글 등록하기
+                    </button>
+                  </form>
+                </div>
+              )}
+
+              {/* Feed List */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                <h4 style={{ fontSize: "1rem", fontWeight: "700", color: "var(--text-primary)", margin: "0 0 4px 0" }}>📰 모임 최근 소식 & 게시글 피드</h4>
+                {dynamicPosts.filter(post => {
+                  const countryMap = { vn: "베트남", mn: "몽골", np: "네팔", uz: "우즈베키스탄" };
+                  const activeCountry = countryMap[selectedGroup as "vn" | "mn" | "np" | "uz"];
+                  return post.board === "groups" && post.country.includes(activeCountry);
+                }).length > 0 ? (
+                  dynamicPosts.filter(post => {
+                    const countryMap = { vn: "베트남", mn: "몽골", np: "네팔", uz: "우즈베키스탄" };
+                    const activeCountry = countryMap[selectedGroup as "vn" | "mn" | "np" | "uz"];
+                    return post.board === "groups" && post.country.includes(activeCountry);
+                  }).map(post => {
+                    const postLang = getCardLang(post.id);
+                    const postTitle = post.title[postLang] || post.title.ko;
+                    const postBody = post.body[postLang] || post.body.ko;
+                    const postTime = typeof post.time === "string" ? post.time : (post.time[postLang] || post.time.ko);
+
+                    return (
+                      <div 
+                        key={post.id} 
+                        onClick={() => handleOpenPost(post)}
+                        className="post-card glass-panel"
+                      >
+                        <div className="post-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span className="post-country-badge">{post.country}</span>
+                            <span className="post-author">{post.author}</span>
+                            <span className="post-time">{postTime}</span>
+                          </div>
+                          
+                          {/* Card translation selector */}
+                          <div className="card-translate-selector" style={{ display: "flex", gap: "4px" }} onClick={(e) => e.stopPropagation()}>
+                            {(["ko", "en", "vn", "mn"] as const).map((l) => {
+                              const flags = { ko: "🇰🇷", en: "🇺🇸", vn: "🇻🇳", mn: "🇲🇳" };
+                              const isActive = postLang === l;
+                              return (
+                                <button
+                                  key={l}
+                                  onClick={() => {
+                                    setCardLangs(prev => ({ ...prev, [post.id]: l }));
+                                  }}
+                                  style={{
+                                    background: isActive ? "rgba(255, 222, 0, 0.2)" : "rgba(255, 255, 255, 0.05)",
+                                    border: isActive ? "1px solid var(--accent-color, #ffde00)" : "1px solid rgba(255, 255, 255, 0.1)",
+                                    borderRadius: "4px",
+                                    padding: "2px 6px",
+                                    fontSize: "0.85rem",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "2px",
+                                    transition: "all 0.2s ease"
+                                  }}
+                                  title={l.toUpperCase()}
+                                >
+                                  <span>{flags[l]}</span>
+                                  <span style={{ fontSize: "0.65rem", fontWeight: isActive ? "bold" : "normal", color: isActive ? "#ffde00" : "var(--text-secondary)" }}>
+                                    {l.toUpperCase()}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        <h3 className="post-title">{postTitle}</h3>
+                        <p className="post-body-preview">{postBody}</p>
+                        
+                        <div className="post-footer">
+                          <span className="post-footer-item"><span className="post-footer-icon">👁</span> {post.views} {tComm.viewsLabel}</span>
+                          <span className="post-footer-item"><span className="post-footer-icon">♥</span> {post.likes} {tComm.likesLabel}</span>
+                          <span className="post-footer-item"><span className="post-footer-icon">💬</span> {post.comments.length} {tComm.commentsLabel}</span>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="glass-panel" style={{ padding: "60px", textAlign: "center", color: "var(--text-secondary)" }}>
+                    아직 등록된 모임 소식이 없습니다. '새 글 쓰기'를 클릭해 모임의 첫 글을 공유해 보세요!
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Board Search */}
+              <div className="search-container" style={{ marginBottom: "32px" }}>
+                <div className="search-input-wrapper">
+                  <input 
+                    type="text" 
+                    placeholder={tComm.searchPlaceholder}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-input"
+                  />
+                  <span className="search-icon-svg">🔍</span>
+                </div>
+              </div>
+
+              {/* Posts List */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                {filteredPosts.length > 0 ? (
+                  filteredPosts.map(post => {
+                    const postLang = getCardLang(post.id);
+                    const postTitle = post.title[postLang] || post.title.ko;
+                    const postBody = post.body[postLang] || post.body.ko;
+                    const postTime = typeof post.time === "string" ? post.time : (post.time[postLang] || post.time.ko);
+
+                    return (
+                      <div 
+                        key={post.id} 
+                        onClick={() => handleOpenPost(post)}
+                        className="post-card glass-panel"
+                      >
+                        <div className="post-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span className="post-country-badge">{post.country}</span>
+                            <span className="post-author">{post.author}</span>
+                            <span className="post-time">{postTime}</span>
+                          </div>
+                          
+                          {/* Card translation selector */}
+                          <div className="card-translate-selector" style={{ display: "flex", gap: "4px" }} onClick={(e) => e.stopPropagation()}>
+                            {(["ko", "en", "vn", "mn"] as const).map((l) => {
+                              const flags = { ko: "🇰🇷", en: "🇺🇸", vn: "🇻🇳", mn: "🇲🇳" };
+                              const isActive = postLang === l;
+                              return (
+                                <button
+                                  key={l}
+                                  onClick={() => {
+                                    setCardLangs(prev => ({ ...prev, [post.id]: l }));
+                                  }}
+                                  style={{
+                                    background: isActive ? "rgba(255, 222, 0, 0.2)" : "rgba(255, 255, 255, 0.05)",
+                                    border: isActive ? "1px solid var(--accent-color, #ffde00)" : "1px solid rgba(255, 255, 255, 0.1)",
+                                    borderRadius: "4px",
+                                    padding: "2px 6px",
+                                    fontSize: "0.85rem",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "2px",
+                                    transition: "all 0.2s ease"
+                                  }}
+                                  title={l.toUpperCase()}
+                                >
+                                  <span>{flags[l]}</span>
+                                  <span style={{ fontSize: "0.65rem", fontWeight: isActive ? "bold" : "normal", color: isActive ? "#ffde00" : "var(--text-secondary)" }}>
+                                    {l.toUpperCase()}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        <h3 className="post-title">{postTitle}</h3>
+                        <p className="post-body-preview">{postBody}</p>
+                        
+                        <div className="post-footer">
+                          <span className="post-footer-item"><span className="post-footer-icon">👁</span> {post.views} {tComm.viewsLabel}</span>
+                          <span className="post-footer-item"><span className="post-footer-icon">♥</span> {post.likes} {tComm.likesLabel}</span>
+                          <span className="post-footer-item"><span className="post-footer-icon">💬</span> {post.comments.length} {tComm.commentsLabel}</span>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="glass-panel" style={{ padding: "60px", textAlign: "center", color: "var(--text-secondary)" }}>
+                    {tComm.noPosts}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Right Side Sidebar Widgets */}
@@ -546,33 +902,33 @@ export default function CommunityPage() {
           <section className="glass-panel gathering-box">
             <h3 className="gathering-title">{tComm.hotTitle}</h3>
             <div className="gathering-list">
-              <div onClick={() => { setSearchTerm("베트남"); setActiveBoard("all"); }} className="gathering-item">
+              <div onClick={() => { setSelectedGroup("vn"); setWriteFormOpen(false); }} className="gathering-item" style={{ cursor: "pointer" }}>
                 <div className="gathering-flag-group">
                   <span className="gathering-flag">🇻🇳</span>
                   <span className="gathering-name">{tComm.vnGathering}</span>
                 </div>
-                <span className="gathering-count">420{tComm.gatheringActive}</span>
+                <span className="gathering-count">{groupsConfig.vn.count}{tComm.gatheringActive}</span>
               </div>
-              <div onClick={() => { setSearchTerm("몽골"); setActiveBoard("all"); }} className="gathering-item">
+              <div onClick={() => { setSelectedGroup("mn"); setWriteFormOpen(false); }} className="gathering-item" style={{ cursor: "pointer" }}>
                 <div className="gathering-flag-group">
                   <span className="gathering-flag">🇲🇳</span>
                   <span className="gathering-name">{tComm.mnGathering}</span>
                 </div>
-                <span className="gathering-count">310{tComm.gatheringActive}</span>
+                <span className="gathering-count">{groupsConfig.mn.count}{tComm.gatheringActive}</span>
               </div>
-              <div onClick={() => { setSearchTerm("네팔"); setActiveBoard("all"); }} className="gathering-item">
+              <div onClick={() => { setSelectedGroup("np"); setWriteFormOpen(false); }} className="gathering-item" style={{ cursor: "pointer" }}>
                 <div className="gathering-flag-group">
                   <span className="gathering-flag">🇳🇵</span>
                   <span className="gathering-name">{tComm.npGathering}</span>
                 </div>
-                <span className="gathering-count">190{tComm.gatheringActive}</span>
+                <span className="gathering-count">{groupsConfig.np.count}{tComm.gatheringActive}</span>
               </div>
-              <div onClick={() => { setSearchTerm("우즈벡"); setActiveBoard("all"); }} className="gathering-item">
+              <div onClick={() => { setSelectedGroup("uz"); setWriteFormOpen(false); }} className="gathering-item" style={{ cursor: "pointer" }}>
                 <div className="gathering-flag-group">
                   <span className="gathering-flag">🇺🇿</span>
                   <span className="gathering-name">{tComm.uzGathering}</span>
                 </div>
-                <span className="gathering-count">140{tComm.gatheringActive}</span>
+                <span className="gathering-count">{groupsConfig.uz.count}{tComm.gatheringActive}</span>
               </div>
             </div>
           </section>
