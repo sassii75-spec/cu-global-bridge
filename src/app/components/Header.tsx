@@ -74,7 +74,7 @@ export default function Header() {
               👤 {lang === "ko" ? "마이페이지" : "My Page"}
             </a>
           )}
-          {activeUser?.role === "admin" && (
+          {(activeUser?.role === "admin" || activeUser?.role === "manager") && (
             <a 
               href="/admin" 
               className="gcu-nav-item" 
@@ -222,7 +222,7 @@ export default function Header() {
                 👤 {lang === "ko" ? "마이페이지" : "My Page"}
               </a>
             )}
-            {activeUser?.role === "admin" && (
+            {(activeUser?.role === "admin" || activeUser?.role === "manager") && (
               <a 
                 href="/admin" 
                 className="gcu-mobile-nav-item" 

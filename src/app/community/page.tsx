@@ -378,7 +378,100 @@ export default function CommunityPage() {
   const [newPostTitle, setNewPostTitle] = useState("");
   const [newPostBody, setNewPostBody] = useState("");
   const [newPostCategory, setNewPostCategory] = useState("자유");
+  const checkSpamAndProfanity = (title: string, body: string, author: string, type: "post" | "comment"): {
+    shouldBlock: boolean;
+    shouldMask: boolean;
+    detected: string[];
+    cleanTitle: string;
+    cleanBody: string;
+  } => {
+    if (typeof window === "undefined") {
+      return { shouldBlock: false, shouldMask: false, detected: [], cleanTitle: title, cleanBody: body };
+    }
 
+    const savedSpamConfig = localStorage.getItem("gcu-spam-config");
+    if (!savedSpamConfig) {
+      return { shouldBlock: false, shouldMask: false, detected: [], cleanTitle: title, cleanBody: body };
+    }
+
+    try {
+      const cfg = JSON.parse(savedSpamConfig);
+      const mode = cfg.filterMode || "disabled";
+      const keywords: string[] = cfg.keywords || [];
+      const linkBlock: boolean = cfg.linkBlock || false;
+
+      if (mode === "disabled") {
+        return { shouldBlock: false, shouldMask: false, detected: [], cleanTitle: title, cleanBody: body };
+      }
+
+      const detectedList: string[] = [];
+      let nextTitle = title;
+      let nextBody = body;
+
+      // Check keywords
+      keywords.forEach(kw => {
+        const kwRegex = new RegExp(kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+        const inTitle = kwRegex.test(title);
+        const inBody = kwRegex.test(body);
+
+        if (inTitle || inBody) {
+          detectedList.push(kw);
+          if (mode === "masking") {
+            nextTitle = nextTitle.replace(kwRegex, "*".repeat(kw.length));
+            nextBody = nextBody.replace(kwRegex, "*".repeat(kw.length));
+          }
+        }
+      });
+
+      // Check links
+      if (linkBlock) {
+        const urlRegex = /https?:\/\/[^\s]+/gi;
+        const linkInTitle = urlRegex.test(title);
+        const linkInBody = urlRegex.test(body);
+
+        if (linkInTitle || linkInBody) {
+          detectedList.push("외부 링크(URL)");
+          if (mode === "masking") {
+            nextTitle = nextTitle.replace(urlRegex, "[링크 차단됨]");
+            nextBody = nextBody.replace(urlRegex, "[링크 차단됨]");
+          }
+        }
+      }
+
+      if (detectedList.length > 0) {
+        // Write to logs
+        const savedLogsStr = localStorage.getItem("gcu-spam-logs") || "[]";
+        let logsList = [];
+        try {
+          logsList = JSON.parse(savedLogsStr);
+        } catch (e) {}
+
+        const newLog = {
+          id: "spam-log-" + Date.now(),
+          timestamp: new Date().toISOString(),
+          type,
+          author,
+          originalText: title ? `[제목: ${title}] ${body}` : body,
+          detectedKeywords: detectedList,
+          actionTaken: mode === "blocking" ? "blocked" : "masked"
+        };
+
+        localStorage.setItem("gcu-spam-logs", JSON.stringify([newLog, ...logsList]));
+
+        return {
+          shouldBlock: mode === "blocking",
+          shouldMask: mode === "masking",
+          detected: detectedList,
+          cleanTitle: nextTitle,
+          cleanBody: nextBody
+        };
+      }
+    } catch (e) {
+      console.error("Spam filter evaluation error:", e);
+    }
+
+    return { shouldBlock: false, shouldMask: false, detected: [], cleanTitle: title, cleanBody: body };
+  };
   // Restore community posts and configurations from localStorage on mount
   React.useEffect(() => {
     if (typeof window !== "undefined") {
@@ -436,11 +529,23 @@ export default function CommunityPage() {
     e.preventDefault();
     if (!commentText.trim() || !commenterName.trim() || !selectedPost) return;
 
+    // Apply Spam/Profanity check
+    const filterResult = checkSpamAndProfanity("", commentText, commenterName, "comment");
+    if (filterResult.shouldBlock) {
+      alert(`⚠️ 등록 실패: 비속어 또는 홍보성 스팸 단어 [${filterResult.detected.join(", ")}]가 검출되어 등록이 제한되었습니다.`);
+      return;
+    }
+
+    const finalCommentText = filterResult.shouldMask ? filterResult.cleanBody : commentText;
+    if (filterResult.shouldMask) {
+      alert(`⚠️ 등록 안내: 부적절한 단어 [${filterResult.detected.join(", ")}]가 포함되어 마스킹(***) 처리된 채 등록되었습니다.`);
+    }
+
     const newComment = {
       id: Date.now(),
       author: commenterName,
-      time: { ko: "방금 전", en: "just now", vn: "vừa xong", mn: "саяхан" },
-      text: { ko: commentText, en: commentText, vn: commentText, mn: commentText }
+      time: { ko: "방금 전", en: "just now", vn: "vừa xong", mn: "사яхан" },
+      text: { ko: finalCommentText, en: finalCommentText, vn: finalCommentText, mn: finalCommentText }
     };
 
     // Update dynamicPosts array reactively

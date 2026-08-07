@@ -8,9 +8,12 @@ interface User {
   name: string;
   email: string;
   nationality: string;
-  role: "student" | "worker" | "admin";
-  provider: "credentials" | "google" | "kakao" | "naver";
+  role: "admin" | "manager" | "user";
+  userType: "student" | "worker" | "graduate";
+  provider: "credentials" | "google" | "kakao" | "naver" | "apple";
   joinedDate: string;
+  status: "active" | "suspended";
+  password?: string;
 }
 
 // Multilingual translations for the Admin Panel
@@ -32,11 +35,22 @@ const ADMIN_TRANSLATIONS = {
     btnEdit: "수정",
     btnDelete: "삭제",
     filterRoleAll: "모든 권한",
-    filterRoleStudent: "학생",
-    filterRoleWorker: "근로자",
     filterRoleAdmin: "관리자",
+    filterRoleManager: "매니저",
+    filterRoleUser: "일반 회원",
+    filterTypeAll: "모든 유형",
+    filterTypeStudent: "학생",
+    filterTypeWorker: "근로자",
+    filterTypeGraduate: "졸업생",
+    filterStatusAll: "모든 상태",
+    filterStatusActive: "정상",
+    filterStatusSuspended: "이용제한",
     filterNatAll: "모든 국적",
     filterProvAll: "모든 로그인",
+    btnExportExcel: "📊 엑셀 다운로드",
+    lblFieldUserType: "사용자 유형",
+    lblFieldStatus: "계정 상태",
+    btnResetPassword: "비밀번호 초기화",
     
     // Modal Translations
     modalAddTitle: "👤 새 글로벌 계정 등록",
@@ -70,11 +84,22 @@ const ADMIN_TRANSLATIONS = {
     btnEdit: "Edit",
     btnDelete: "Delete",
     filterRoleAll: "All Roles",
-    filterRoleStudent: "Student",
-    filterRoleWorker: "Worker",
     filterRoleAdmin: "Admin",
+    filterRoleManager: "Manager",
+    filterRoleUser: "General User",
+    filterTypeAll: "All Types",
+    filterTypeStudent: "Student",
+    filterTypeWorker: "Worker",
+    filterTypeGraduate: "Graduate",
+    filterStatusAll: "All Statuses",
+    filterStatusActive: "Active",
+    filterStatusSuspended: "Suspended",
     filterNatAll: "All Nationalities",
     filterProvAll: "All Providers",
+    btnExportExcel: "📊 Export to Excel",
+    lblFieldUserType: "User Type",
+    lblFieldStatus: "Account Status",
+    btnResetPassword: "Reset Password",
     
     // Modal Translations
     modalAddTitle: "👤 Register New Profile",
@@ -108,11 +133,22 @@ const ADMIN_TRANSLATIONS = {
     btnEdit: "Sửa",
     btnDelete: "Xóa",
     filterRoleAll: "Tất cả vai trò",
-    filterRoleStudent: "Sinh viên",
-    filterRoleWorker: "Lao động",
     filterRoleAdmin: "Quản trị",
+    filterRoleManager: "Quản lý",
+    filterRoleUser: "Người dùng",
+    filterTypeAll: "Tất cả các loại",
+    filterTypeStudent: "Sinh viên",
+    filterTypeWorker: "Lao động",
+    filterTypeGraduate: "Tốt nghiệp",
+    filterStatusAll: "Tất cả trạng thái",
+    filterStatusActive: "Bình thường",
+    filterStatusSuspended: "Bị khóa",
     filterNatAll: "Tất cả quốc tịch",
     filterProvAll: "Tất cả nhà cung cấp",
+    btnExportExcel: "📊 Xuất Excel",
+    lblFieldUserType: "Loại người dùng",
+    lblFieldStatus: "Trạng thái",
+    btnResetPassword: "Đặt lại mật khẩu",
     
     // Modal Translations
     modalAddTitle: "👤 Đăng ký tài khoản mới",
@@ -146,11 +182,22 @@ const ADMIN_TRANSLATIONS = {
     btnEdit: "Засах",
     btnDelete: "Устгах",
     filterRoleAll: "Бүх эрх",
-    filterRoleStudent: "Оюутан",
-    filterRoleWorker: "Ажилчин",
     filterRoleAdmin: "Админ",
+    filterRoleManager: "Менежер",
+    filterRoleUser: "Хэрэглэгч",
+    filterTypeAll: "Бүх ангилал",
+    filterTypeStudent: "Оюутан",
+    filterTypeWorker: "Ажилчин",
+    filterTypeGraduate: "Төгсөгч",
+    filterStatusAll: "Бүх төлөв",
+    filterStatusActive: "Идэвхтэй",
+    filterStatusSuspended: "Хязгаарласан",
     filterNatAll: "Бүх харьяалал",
     filterProvAll: "Бүх нэвтрэлт",
+    btnExportExcel: "📊 Excel татах",
+    lblFieldUserType: "Хэрэглэгчийн ангилал",
+    lblFieldStatus: "Бүртгэлийн төлөв",
+    btnResetPassword: "Нууг үг сэргээх",
     
     // Modal Translations
     modalAddTitle: "👤 Шинэ хэрэглэгч бүртгэх",
@@ -211,11 +258,11 @@ const DEFAULT_EXAMS: MockExam[] = [
 ];
 
 const DEFAULT_USERS: User[] = [
-  { id: "admin", name: "관리자 (Kim)", email: "admin@global.ac.kr", nationality: "🇰🇷 대한민국", role: "admin", provider: "credentials", joinedDate: "2024-01-10" },
-  { id: "google-altan", name: "Altantsetseg", email: "altan@mongol.net", nationality: "🇲🇳 몽골", role: "student", provider: "google", joinedDate: "2025-03-12" },
-  { id: "naver-sherzod", name: "Sherzod", email: "sherzod@uzbek.net", nationality: "🇺🇿 우즈베키с탄", role: "student", provider: "naver", joinedDate: "2026-02-15" },
-  { id: "kakao-rajesh", name: "Rajesh Kumar", email: "rajesh@nepal.org", nationality: "🇳🇵 네팔", role: "worker", provider: "kakao", joinedDate: "2024-08-20" },
-  { id: "credentials-thu", name: "Nguyen Thu", email: "thu@vietnam.com", nationality: "🇻🇳 베트남", role: "student", provider: "credentials", joinedDate: "2025-09-01" }
+  { id: "admin", name: "관리자 (Kim)", email: "admin@global.ac.kr", nationality: "🇰🇷 대한민국", role: "admin", userType: "student", provider: "credentials", joinedDate: "2024-01-10", status: "active", password: "gcu1234!" },
+  { id: "google-altan", name: "Altantsetseg", email: "altan@mongol.net", nationality: "🇲🇳 몽골", role: "user", userType: "student", provider: "google", joinedDate: "2025-03-12", status: "active", password: "gcu1234!" },
+  { id: "naver-sherzod", name: "Sherzod", email: "sherzod@uzbek.net", nationality: "🇺🇿 우즈베키스탄", role: "user", userType: "student", provider: "naver", joinedDate: "2026-02-15", status: "active", password: "gcu1234!" },
+  { id: "kakao-rajesh", name: "Rajesh Kumar", email: "rajesh@nepal.org", nationality: "🇳🇵 네팔", role: "user", userType: "worker", provider: "kakao", joinedDate: "2024-08-20", status: "active", password: "gcu1234!" },
+  { id: "credentials-thu", name: "Nguyen Thu", email: "thu@vietnam.com", nationality: "🇻🇳 베트남", role: "user", userType: "student", provider: "credentials", joinedDate: "2025-09-01", status: "active", password: "gcu1234!" }
 ];
 
 interface InlineUserFormProps {
@@ -228,8 +275,11 @@ function InlineUserForm({ editingUser, onSubmit, onCancel }: InlineUserFormProps
   const [name, setName] = useState(editingUser?.name || "");
   const [email, setEmail] = useState(editingUser?.email || "");
   const [nationality, setNationality] = useState(editingUser?.nationality || "🇻🇳 베트남");
-  const [role, setRole] = useState<"student" | "worker" | "admin">(editingUser?.role || "student");
-  const [provider, setProvider] = useState<"credentials" | "google" | "kakao" | "naver">(editingUser?.provider || "credentials");
+  const [role, setRole] = useState<"admin" | "manager" | "user">(editingUser?.role || "user");
+  const [userType, setUserType] = useState<"student" | "worker" | "graduate">(editingUser?.userType || "student");
+  const [provider, setProvider] = useState<"credentials" | "google" | "kakao" | "naver" | "apple">(editingUser?.provider || "credentials");
+  const [status, setStatus] = useState<"active" | "suspended">(editingUser?.status || "active");
+  const [password, setPassword] = useState(editingUser?.password || "gcu1234!");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -241,7 +291,10 @@ function InlineUserForm({ editingUser, onSubmit, onCancel }: InlineUserFormProps
       email: email.trim(),
       nationality,
       role,
+      userType,
       provider,
+      status,
+      password,
       joinedDate: editingUser?.joinedDate || new Date().toISOString().split("T")[0]
     });
   };
@@ -285,15 +338,42 @@ function InlineUserForm({ editingUser, onSubmit, onCancel }: InlineUserFormProps
           </select>
         </div>
         <div className="ai-form-group">
-          <label className="ai-form-label">권한</label>
+          <label className="ai-form-label">회원 권한</label>
           <select 
             value={role} 
             onChange={(e) => setRole(e.target.value as any)}
             className="ai-form-input"
           >
+            <option value="user">일반 회원</option>
+            <option value="manager">매니저</option>
+            <option value="admin">관리자</option>
+          </select>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+        <div className="ai-form-group">
+          <label className="ai-form-label">사용자 유형</label>
+          <select 
+            value={userType} 
+            onChange={(e) => setUserType(e.target.value as any)}
+            className="ai-form-input"
+          >
             <option value="student">학생</option>
             <option value="worker">근로자</option>
-            <option value="admin">관리자</option>
+            <option value="graduate">졸업생</option>
+          </select>
+        </div>
+        <div className="ai-form-group">
+          <label className="ai-form-label">계정 상태</label>
+          <select 
+            value={status} 
+            onChange={(e) => setStatus(e.target.value as any)}
+            className="ai-form-input"
+            style={{ color: status === "suspended" ? "#f28b82" : "#8ab4f8" }}
+          >
+            <option value="active">정상 (Active)</option>
+            <option value="suspended">이용제한 (Suspended)</option>
           </select>
         </div>
       </div>
@@ -309,8 +389,28 @@ function InlineUserForm({ editingUser, onSubmit, onCancel }: InlineUserFormProps
           <option value="google">Google</option>
           <option value="kakao">Kakao</option>
           <option value="naver">Naver</option>
+          <option value="apple">Apple</option>
         </select>
       </div>
+
+      {editingUser && (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(255,255,255,0.03)", padding: "8px 10px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.05)", marginBottom: "8px" }}>
+          <span style={{ fontSize: "0.74rem", color: "#9aa0a6" }}>비밀번호 초기화:</span>
+          <button 
+            type="button" 
+            onClick={() => {
+              if (confirm(`비밀번호를 'gcu1234!'로 초기화하시겠습니까?`)) {
+                setPassword("gcu1234!");
+                alert("비밀번호가 임시 비밀번호 'gcu1234!'로 설정되었습니다. 아래 저장 버튼을 누르면 DB에 최종 반영됩니다.");
+              }
+            }} 
+            className="ai-btn-danger" 
+            style={{ padding: "2px 8px", fontSize: "0.7rem" }}
+          >
+            초기화
+          </button>
+        </div>
+      )}
 
       <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", marginTop: "8px" }}>
         <button type="button" onClick={onCancel} className="ai-btn-danger" style={{ padding: "6px 14px" }}>취소</button>
@@ -325,9 +425,13 @@ interface NLUResult {
   replyText: string;
   actionData?: {
     query?: string;
-    role?: "student" | "worker" | "admin";
+    role?: "admin" | "manager" | "user";
+    userType?: "student" | "worker" | "graduate";
     nationality?: string;
-    provider?: "credentials" | "google" | "kakao" | "naver";
+    provider?: "credentials" | "google" | "kakao" | "naver" | "apple";
+    status?: "active" | "suspended";
+    startDate?: string;
+    endDate?: string;
   };
 }
 
@@ -341,7 +445,7 @@ const parseNLUQuery = (queryText: string): NLUResult => {
     };
   }
   
-  const userKeywords = ["유저", "사용자", "학생", "근로자", "근로", "회원", "계정", "사람", "멤버", "인원", "명단", "학적"];
+  const userKeywords = ["유저", "사용자", "학생", "근로자", "근로", "회원", "계정", "사람", "멤버", "인원", "명단", "학적", "졸업생"];
   const examKeywords = ["모의고사", "시험", "기출", "ibt", "topik"];
   const createKeywords = ["추가", "등록", "생성", "가입", "만들기", "신규", "새로운"];
   
@@ -371,22 +475,50 @@ const parseNLUQuery = (queryText: string): NLUResult => {
   }
 
   // user_list is the default intent
-  let roleFilter: "student" | "worker" | "admin" | undefined = undefined;
+  let roleFilter: "admin" | "manager" | "user" | undefined = undefined;
+  let userTypeFilter: "student" | "worker" | "graduate" | undefined = undefined;
   let nationalityFilter: string | undefined = undefined;
-  let providerFilter: "credentials" | "google" | "kakao" | "naver" | undefined = undefined;
+  let providerFilter: "credentials" | "google" | "kakao" | "naver" | "apple" | undefined = undefined;
+  let statusFilter: "active" | "suspended" | undefined = undefined;
+  let startDate: string | undefined = undefined;
+  let endDate: string | undefined = undefined;
   let searchWord = "";
 
   // Check Role
-  if (normalized.includes("학생") || normalized.includes("학적")) {
-    if (normalized.includes("근로")) {
-      roleFilter = "worker";
-    } else {
-      roleFilter = "student";
-    }
-  } else if (normalized.includes("근로") || normalized.includes("근로자")) {
-    roleFilter = "worker";
-  } else if (normalized.includes("관리자") || normalized.includes("어드민") || normalized.includes("교직원")) {
+  if (normalized.includes("관리자") || normalized.includes("어드민")) {
     roleFilter = "admin";
+  } else if (normalized.includes("매니저") || normalized.includes("부관리자")) {
+    roleFilter = "manager";
+  } else if (normalized.includes("일반") || normalized.includes("일반회원") || normalized.includes("유저") || normalized.includes("회원")) {
+    roleFilter = "user";
+  }
+
+  // Check User Type
+  if (normalized.includes("학생") || normalized.includes("유학생") || normalized.includes("학적")) {
+    userTypeFilter = "student";
+  } else if (normalized.includes("근로자") || normalized.includes("근로") || normalized.includes("근로학생")) {
+    userTypeFilter = "worker";
+  } else if (normalized.includes("졸업생") || normalized.includes("졸업")) {
+    userTypeFilter = "graduate";
+  }
+
+  // Check Status
+  if (normalized.includes("이용제한") || normalized.includes("제한") || normalized.includes("정지") || normalized.includes("suspended") || normalized.includes("차단")) {
+    statusFilter = "suspended";
+  } else if (normalized.includes("정상") || normalized.includes("active") || normalized.includes("활성")) {
+    statusFilter = "active";
+  }
+
+  // Check Date Filters
+  if (normalized.includes("2024년") || normalized.includes("2024-") || normalized.includes("24년")) {
+    startDate = "2024-01-01";
+    endDate = "2024-12-31";
+  } else if (normalized.includes("2025년") || normalized.includes("2025-") || normalized.includes("25년")) {
+    startDate = "2025-01-01";
+    endDate = "2025-12-31";
+  } else if (normalized.includes("2026년") || normalized.includes("2026-") || normalized.includes("26년")) {
+    startDate = "2026-01-01";
+    endDate = "2026-12-31";
   }
 
   // Check Nationality
@@ -409,13 +541,15 @@ const parseNLUQuery = (queryText: string): NLUResult => {
     providerFilter = "naver";
   } else if (normalized.includes("카카오") || normalized.includes("kakao")) {
     providerFilter = "kakao";
+  } else if (normalized.includes("애플") || normalized.includes("apple")) {
+    providerFilter = "apple";
   } else if (normalized.includes("일반") || normalized.includes("이메일") || normalized.includes("자체") || normalized.includes("인증")) {
     providerFilter = "credentials";
   }
 
   // Extract search word by tokenizing and filtering out particles/stop-words
   const stopWords = new Set([
-    "유저", "사용자", "학생", "근로자", "근로", "근로학생", "회원", "계정", "계정들", "사람", "멤버", "인원", "명단", "학적",
+    "유저", "사용자", "학생", "근로자", "근로", "근로학생", "회원", "계정", "계정들", "사람", "멤버", "인원", "명단", "학적", "졸업생",
     "보여줘", "보여주세요", "보여줘라", "보여줌", "알려줘", "알려주세요", "조회해줘", "조회해주세요", "출력해줘", "출력해주세요",
     "뿌려줘", "불러와줘", "검색해줘", "검색해주세요", "찾아줘", "찾아주세요", "조회", "검색", "리스트", "목록", "현황", "전체",
     "모든", "모두", "전부", "줘", "보여", "찾아", "출력", "불러와", "사용중인", "사용중", "가입한", "가입된", "등록된", "등록한",
@@ -423,8 +557,10 @@ const parseNLUQuery = (queryText: string): NLUResult => {
   ]);
 
   const nationalityWords = new Set(["몽골", "우즈벡", "우즈베키스탄", "네팔", "베트남", "한국", "대한민국", "mongol", "uzbek", "nepal", "vietnam", "korea"]);
-  const providerWords = new Set(["구글", "google", "네이버", "naver", "카카오", "kakao", "일반", "이메일", "자체", "credentials"]);
-  const roleWords = new Set(["학생", "근로자", "근로", "근로학생", "관리자", "어드민", "교직원", "admin", "worker", "student"]);
+  const providerWords = new Set(["구글", "google", "네이버", "naver", "카카오", "kakao", "애플", "apple", "일반", "이메일", "자체", "credentials"]);
+  const typeWords = new Set(["학생", "근로자", "근로", "근로학생", "졸업생", "student", "worker", "graduate"]);
+  const roleWords = new Set(["관리자", "어드민", "매니저", "일반회원", "일반", "admin", "manager", "user"]);
+  const statusWords = new Set(["정상", "이용제한", "정지", "차단", "active", "suspended"]);
 
   const cleanWord = (w: string) => {
     let prev = "";
@@ -444,7 +580,9 @@ const parseNLUQuery = (queryText: string): NLUResult => {
     if (stopWords.has(cleaned)) continue;
     if (nationalityWords.has(cleaned)) continue;
     if (providerWords.has(cleaned)) continue;
+    if (typeWords.has(cleaned)) continue;
     if (roleWords.has(cleaned)) continue;
+    if (statusWords.has(cleaned)) continue;
     
     candidates.push(cleaned);
   }
@@ -458,12 +596,29 @@ const parseNLUQuery = (queryText: string): NLUResult => {
   const filterDesc: string[] = [];
   if (nationalityFilter) filterDesc.push(`${nationalityFilter} 국적`);
   if (roleFilter) {
-    const roleMap = { student: "학생", worker: "근로자", admin: "관리자" };
+    const roleMap = { admin: "관리자", manager: "매니저", user: "일반 회원" };
     filterDesc.push(roleMap[roleFilter]);
   }
+  if (userTypeFilter) {
+    const typeMap = { student: "학생", worker: "근로자", graduate: "졸업생" };
+    filterDesc.push(typeMap[userTypeFilter]);
+  }
+  if (statusFilter) {
+    const statusMap = { active: "정상", suspended: "이용제한" };
+    filterDesc.push(statusMap[statusFilter]);
+  }
   if (providerFilter) {
-    const provMap = { google: "구글 로그인", naver: "네이버 로그인", kakao: "카카오 로그인", credentials: "일반 이메일 로그인" };
+    const provMap = { google: "구글 로그인", naver: "네이버 로그인", kakao: "카카오 로그인", apple: "애플 로그인", credentials: "일반 이메일 로그인" };
     filterDesc.push(provMap[providerFilter]);
+  }
+  if (startDate) {
+    filterDesc.push(`${startDate.split("-")[0]}년 가입자`);
+  }
+
+  if (filterDesc.length > 0) {
+    replyText = `📡 NLU 감지 필터 [${filterDesc.join(", ")}] 조건에 부합하는 사용자 계정을 조회합니다.`;
+  } else {
+    replyText = "👥 전체 사용자 계정 목록을 조회합니다. 원하는 조건(예: '몽골 학생', '이용제한 회원', '2025년 가입자')을 입력해 보세요.";
   }
 
   return {
@@ -472,8 +627,12 @@ const parseNLUQuery = (queryText: string): NLUResult => {
     actionData: {
       query: searchWord,
       role: roleFilter,
+      userType: userTypeFilter,
       nationality: nationalityFilter,
-      provider: providerFilter
+      provider: providerFilter,
+      status: statusFilter,
+      startDate,
+      endDate
     }
   };
 };
@@ -511,9 +670,11 @@ Columns:
   - name: VARCHAR (Student/Worker Name)
   - email: VARCHAR (Unique Identity)
   - nationality: VARCHAR (Locale/Flag)
-  - role: ENUM ('student', 'worker', 'admin')
+  - role: ENUM ('admin', 'manager', 'user')
+  - userType: ENUM ('student', 'worker', 'graduate')
   - provider: ENUM ('credentials', 'google', 'kakao', 'naver', 'apple')
   - joinedDate: DATE
+  - status: ENUM ('active', 'suspended')
     `.trim();
   } else if (intent === "exam_list" || intent === "exam_create") {
     info.sourceDb = "GCU 출제 센터 및 모의고사 출제 서버 API (Endpoint: `/api/exams`)";
@@ -736,7 +897,7 @@ export default function AdminPage() {
   const [adminName, setAdminName] = useState("S");
 
   // Tab State
-  const [adminActiveTab, setAdminActiveTab] = useState<"users" | "exams" | "complaints">("users");
+  const [adminActiveTab, setAdminActiveTab] = useState<"users" | "exams" | "complaints" | "spam">("users");
 
   // Complaints Management States
   const [complaintsConfig, setComplaintsConfig] = useState<Array<{ category: string; name: string; email: string; phone: string }>>([]);
@@ -763,8 +924,12 @@ export default function AdminPage() {
   // Filter & Search states
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [userTypeFilter, setUserTypeFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [nationalityFilter, setNationalityFilter] = useState("all");
   const [providerFilter, setProviderFilter] = useState("all");
+  const [joinStartDate, setJoinStartDate] = useState("");
+  const [joinEndDate, setJoinEndDate] = useState("");
 
   // Modal Form states (Users)
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -772,8 +937,11 @@ export default function AdminPage() {
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formNationality, setFormNationality] = useState("🇻🇳 베트남");
-  const [formRole, setFormRole] = useState<"student" | "worker" | "admin">("student");
-  const [formProvider, setFormProvider] = useState<"credentials" | "google" | "kakao" | "naver">("credentials");
+  const [formRole, setFormRole] = useState<"admin" | "manager" | "user">("user");
+  const [formUserType, setFormUserType] = useState<"student" | "worker" | "graduate">("student");
+  const [formProvider, setFormProvider] = useState<"credentials" | "google" | "kakao" | "naver" | "apple">("credentials");
+  const [formStatus, setFormStatus] = useState<"active" | "suspended">("active");
+  const [formPassword, setFormPassword] = useState("gcu1234!");
 
   // Modal Form states (Exams)
   const [exams, setExams] = useState<MockExam[]>([]);
@@ -821,6 +989,54 @@ export default function AdminPage() {
   const [answerPdfDataUrl, setAnswerPdfDataUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
+  // Spam & Profanity Filter Config states
+  const [spamFilterMode, setSpamFilterMode] = useState<"disabled" | "masking" | "blocking">("masking");
+  const [spamKeywords, setSpamKeywords] = useState<string[]>([]);
+  const [spamLinkBlock, setSpamLinkBlock] = useState<boolean>(false);
+  const [spamLogs, setSpamLogs] = useState<any[]>([]);
+  const [newKeywordInput, setNewKeywordInput] = useState<string>("");
+
+  const handleSaveSpamConfig = (mode: "disabled" | "masking" | "blocking", keywordsList: string[], linkBlockVal: boolean) => {
+    const updated = {
+      filterMode: mode,
+      keywords: keywordsList,
+      linkBlock: linkBlockVal
+    };
+    setSpamFilterMode(mode);
+    setSpamKeywords(keywordsList);
+    setSpamLinkBlock(linkBlockVal);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gcu-spam-config", JSON.stringify(updated));
+    }
+    triggerToast("🛡️ 스팸/비속어 필터 설정이 성공적으로 저장되었습니다!");
+  };
+
+  const handleAddSpamKeyword = (keyword: string) => {
+    const trimmed = keyword.trim();
+    if (!trimmed) return;
+    if (spamKeywords.includes(trimmed)) {
+      triggerToast("⚠️ 이미 등록된 키워드입니다.");
+      return;
+    }
+    const updated = [...spamKeywords, trimmed];
+    handleSaveSpamConfig(spamFilterMode, updated, spamLinkBlock);
+    setNewKeywordInput("");
+  };
+
+  const handleRemoveSpamKeyword = (keywordToRemove: string) => {
+    const updated = spamKeywords.filter(k => k !== keywordToRemove);
+    handleSaveSpamConfig(spamFilterMode, updated, spamLinkBlock);
+  };
+
+  const handleClearSpamLogs = () => {
+    if (!confirm("정말로 모든 필터링 로그를 초기화하시겠습니까?")) return;
+    setSpamLogs([]);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gcu-spam-logs", JSON.stringify([]));
+    }
+    triggerToast("🗑️ 필터링 로그가 초기화되었습니다.");
+  };
+
   // Verify Admin Access and Prepopulate DB
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -828,7 +1044,7 @@ export default function AdminPage() {
       if (activeSession) {
         try {
           const user = JSON.parse(activeSession);
-          if (user.role === "admin") {
+          if (user.role === "admin" || user.role === "manager") {
             setIsAdmin(true);
             if (user.name) {
               const namePart = user.name.match(/\(([^)]+)\)/);
@@ -847,17 +1063,52 @@ export default function AdminPage() {
 
       // Load Users DB
       const savedDb = localStorage.getItem("gcu-users-db");
+      let initialUsers: User[] = [];
       if (savedDb) {
         try {
-          setUsers(JSON.parse(savedDb));
+          initialUsers = JSON.parse(savedDb);
         } catch (e) {
-          setUsers(DEFAULT_USERS);
-          localStorage.setItem("gcu-users-db", JSON.stringify(DEFAULT_USERS));
+          initialUsers = DEFAULT_USERS;
         }
       } else {
-        setUsers(DEFAULT_USERS);
-        localStorage.setItem("gcu-users-db", JSON.stringify(DEFAULT_USERS));
+        initialUsers = DEFAULT_USERS;
       }
+
+      // Migrate existing records to split role/userType and add status/password fields
+      const migratedUsers = initialUsers.map((u: any) => {
+        let role = u.role;
+        let userType = u.userType || "student";
+        let status = u.status || "active";
+        let password = u.password || "gcu1234!";
+
+        if (u.role === "student") {
+          role = "user";
+          userType = "student";
+        } else if (u.role === "worker") {
+          role = "user";
+          userType = "worker";
+        } else if (u.role === "admin") {
+          role = "admin";
+        }
+
+        if (role !== "admin" && role !== "manager" && role !== "user") {
+          role = "user";
+        }
+        if (userType !== "student" && userType !== "worker" && userType !== "graduate") {
+          userType = "student";
+        }
+
+        return {
+          ...u,
+          role,
+          userType,
+          status,
+          password
+        };
+      });
+
+      setUsers(migratedUsers);
+      localStorage.setItem("gcu-users-db", JSON.stringify(migratedUsers));
 
       // Load Exams DB from Server
       fetch("/api/exams")
@@ -913,6 +1164,58 @@ export default function AdminPage() {
         const defaultList = [...MOCK_STUDENT_QNAS, ...INITIAL_QNA];
         setQnaList(defaultList);
         localStorage.setItem("gcu-qna-list", JSON.stringify(defaultList));
+      }
+
+      // Load spam filter config
+      const savedSpamConfig = localStorage.getItem("gcu-spam-config");
+      if (savedSpamConfig) {
+        try {
+          const cfg = JSON.parse(savedSpamConfig);
+          setSpamFilterMode(cfg.filterMode || "masking");
+          setSpamKeywords(cfg.keywords || ["바보", "멍청이", "광고", "스팸", "주식", "코인", "투자", "가비지", "시발", "개새끼"]);
+          setSpamLinkBlock(cfg.linkBlock !== undefined ? cfg.linkBlock : false);
+        } catch (e) {}
+      } else {
+        const defaultCfg = {
+          filterMode: "masking",
+          keywords: ["바보", "멍청이", "광고", "스팸", "주식", "코인", "투자", "가비지", "시발", "개새끼"],
+          linkBlock: false
+        };
+        setSpamFilterMode("masking");
+        setSpamKeywords(defaultCfg.keywords);
+        setSpamLinkBlock(false);
+        localStorage.setItem("gcu-spam-config", JSON.stringify(defaultCfg));
+      }
+
+      // Load spam filter logs
+      const savedSpamLogs = localStorage.getItem("gcu-spam-logs");
+      if (savedSpamLogs) {
+        try {
+          setSpamLogs(JSON.parse(savedSpamLogs));
+        } catch (e) {}
+      } else {
+        const defaultLogs = [
+          {
+            id: "spam-log-1",
+            timestamp: "2026-06-05T14:23:10+09:00",
+            type: "post",
+            author: "익명 학우",
+            originalText: "이 주식 리딩방 들어오시면 하루 10% 수익 보장합니다! 광고 아니에요.",
+            detectedKeywords: ["광고", "주식"],
+            actionTaken: "masked"
+          },
+          {
+            id: "spam-log-2",
+            timestamp: "2026-06-06T09:12:45+09:00",
+            type: "comment",
+            author: "Nguyen Thu",
+            originalText: "아 진짜 그 교수 바보 같네 ㅋㅋㅋ",
+            detectedKeywords: ["바보"],
+            actionTaken: "masked"
+          }
+        ];
+        setSpamLogs(defaultLogs);
+        localStorage.setItem("gcu-spam-logs", JSON.stringify(defaultLogs));
       }
     }
   }, []);
@@ -976,6 +1279,10 @@ export default function AdminPage() {
     const roleFilter = actionData?.role;
     const nationalityFilter = actionData?.nationality;
     const providerFilter = actionData?.provider;
+    const userTypeFilter = actionData?.userType;
+    const statusFilter = actionData?.status;
+    const startDate = actionData?.startDate;
+    const endDate = actionData?.endDate;
 
     const filtered = users.filter(u => {
       if (q) {
@@ -986,18 +1293,60 @@ export default function AdminPage() {
       if (roleFilter && u.role !== roleFilter) return false;
       if (nationalityFilter && !u.nationality.includes(nationalityFilter)) return false;
       if (providerFilter && u.provider !== providerFilter) return false;
+      if (userTypeFilter && u.userType !== userTypeFilter) return false;
+      if (statusFilter && u.status !== statusFilter) return false;
+      if (startDate && u.joinedDate < startDate) return false;
+      if (endDate && u.joinedDate > endDate) return false;
       return true;
     });
 
+    const handleDownloadFiltered = () => {
+      const headers = ["성명", "이메일 계정", "국적", "회원 권한", "사용자 유형", "가입 일자", "로그인 제공처", "회원 상태"];
+      const rows = filtered.map(u => [
+        u.name,
+        u.email,
+        u.nationality,
+        u.role === "admin" ? "관리자" : u.role === "manager" ? "매니저" : "일반 회원",
+        u.userType === "student" ? "학생" : u.userType === "worker" ? "근로자" : "졸업생",
+        u.joinedDate,
+        u.provider.toUpperCase(),
+        u.status === "active" ? "정상" : "이용제한"
+      ]);
+
+      const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(e => e.map(val => `"${val.replace(/"/g, '""')}"`).join(","))].join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `GCU_AI_Filtered_Users_${new Date().toISOString().split("T")[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      triggerToast("📊 AI 필터링된 데이터가 엑셀(CSV) 파일로 다운로드되었습니다!");
+    };
+
     return (
       <div style={{ overflowX: "auto" }}>
-        <table className="ai-table">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", borderBottom: "1px solid rgba(255, 255, 255, 0.05)", paddingBottom: "6px" }}>
+          <span style={{ fontSize: "0.76rem", color: "#9aa0a6" }}>검색 결과: {filtered.length}명</span>
+          {filtered.length > 0 && (
+            <button 
+              onClick={handleDownloadFiltered} 
+              className="ai-btn-action" 
+              style={{ padding: "3px 8px", fontSize: "0.7rem", display: "flex", alignItems: "center", gap: "4px" }}
+            >
+              📥 엑셀 다운로드
+            </button>
+          )}
+        </div>
+        <table className="ai-table" style={{ marginTop: "4px" }}>
           <thead>
             <tr>
               <th>성명</th>
-              <th>이메일</th>
               <th>국적</th>
+              <th>유형</th>
               <th>권한</th>
+              <th>상태</th>
               <th>작업</th>
             </tr>
           </thead>
@@ -1005,16 +1354,28 @@ export default function AdminPage() {
             {filtered.length > 0 ? (
               filtered.map(user => (
                 <tr key={user.id}>
-                  <td style={{ fontWeight: "700" }}>{user.name}</td>
-                  <td style={{ color: "#9aa0a6", fontSize: "0.78rem" }}>{user.email}</td>
+                  <td style={{ fontWeight: "700" }}>
+                    <div>{user.name}</div>
+                    <div style={{ color: "#9aa0a6", fontSize: "0.72rem", fontWeight: "normal" }}>{user.email}</div>
+                  </td>
                   <td style={{ fontSize: "0.78rem" }}>{user.nationality}</td>
                   <td>
-                    <span style={{ fontSize: "0.7rem", padding: "1px 6px", borderRadius: "4px", background: user.role === "admin" ? "rgba(242,139,130,0.15)" : user.role === "worker" ? "rgba(251,188,4,0.15)" : "rgba(138,180,248,0.15)", color: user.role === "admin" ? "#f28b82" : user.role === "worker" ? "#fbbc04" : "#8ab4f8", border: "1px solid rgba(255,255,255,0.05)" }}>
-                      {user.role === "admin" ? "관리자" : user.role === "worker" ? "근로자" : "학생"}
+                    <span style={{ fontSize: "0.7rem", padding: "1px 6px", borderRadius: "4px", background: "rgba(255, 255, 255, 0.05)", color: "#e8eaed" }}>
+                      {user.userType === "student" ? "학생" : user.userType === "worker" ? "근로자" : "졸업생"}
                     </span>
                   </td>
                   <td>
-                    <div style={{ display: "flex", gap: "6px" }}>
+                    <span style={{ fontSize: "0.7rem", padding: "1px 6px", borderRadius: "4px", background: user.role === "admin" ? "rgba(242,139,130,0.15)" : user.role === "manager" ? "rgba(251,188,4,0.15)" : "rgba(138,180,248,0.15)", color: user.role === "admin" ? "#f28b82" : user.role === "manager" ? "#fbbc04" : "#8ab4f8", border: "1px solid rgba(255,255,255,0.05)" }}>
+                      {user.role === "admin" ? "관리자" : user.role === "manager" ? "매니저" : "일반"}
+                    </span>
+                  </td>
+                  <td>
+                    <span style={{ fontSize: "0.7rem", padding: "1px 6px", borderRadius: "4px", background: user.status === "suspended" ? "rgba(242,139,130,0.15)" : "rgba(114,191,68,0.15)", color: user.status === "suspended" ? "#f28b82" : "#72bf44" }}>
+                      {user.status === "suspended" ? "이용제한" : "정상"}
+                    </span>
+                  </td>
+                  <td>
+                    <div style={{ display: "flex", gap: "4px" }}>
                       <button 
                         onClick={() => {
                           setChatMessages(prev => [...prev, {
@@ -1028,14 +1389,14 @@ export default function AdminPage() {
                           }]);
                         }} 
                         className="ai-btn-action" 
-                        style={{ padding: "2px 6px", fontSize: "0.72rem" }}
+                        style={{ padding: "2px 5px", fontSize: "0.68rem" }}
                       >
                         수정
                       </button>
                       <button 
                         onClick={() => handleDeleteUser(user.id)} 
                         className="ai-btn-danger" 
-                        style={{ padding: "2px 6px", fontSize: "0.72rem" }}
+                        style={{ padding: "2px 5px", fontSize: "0.68rem" }}
                       >
                         삭제
                       </button>
@@ -1045,7 +1406,7 @@ export default function AdminPage() {
               ))
             ) : (
               <tr>
-                <td colSpan={5} style={{ textAlign: "center", color: "#9aa0a6", padding: "20px 0" }}>검색 결과가 없습니다.</td>
+                <td colSpan={6} style={{ textAlign: "center", color: "#9aa0a6", padding: "20px 0" }}>검색 결과가 없습니다.</td>
               </tr>
             )}
           </tbody>
@@ -1113,8 +1474,11 @@ export default function AdminPage() {
     setFormName("");
     setFormEmail("");
     setFormNationality("🇻🇳 베트남");
-    setFormRole("student");
+    setFormRole("user");
+    setFormUserType("student");
     setFormProvider("credentials");
+    setFormStatus("active");
+    setFormPassword("gcu1234!");
     setIsModalOpen(true);
   };
 
@@ -1124,7 +1488,10 @@ export default function AdminPage() {
     setFormEmail(user.email);
     setFormNationality(user.nationality);
     setFormRole(user.role);
+    setFormUserType(user.userType);
     setFormProvider(user.provider);
+    setFormStatus(user.status || "active");
+    setFormPassword(user.password || "gcu1234!");
     setIsModalOpen(true);
   };
 
@@ -1144,7 +1511,10 @@ export default function AdminPage() {
             email: formEmail.trim(),
             nationality: formNationality,
             role: formRole,
-            provider: formProvider
+            userType: formUserType,
+            provider: formProvider,
+            status: formStatus,
+            password: formPassword
           };
         }
         return u;
@@ -1158,7 +1528,10 @@ export default function AdminPage() {
         email: formEmail.trim(),
         nationality: formNationality,
         role: formRole,
+        userType: formUserType,
         provider: formProvider,
+        status: formStatus,
+        password: formPassword,
         joinedDate: new Date().toISOString().split("T")[0]
       };
       updatedUsersList = [newUser, ...users];
@@ -1172,6 +1545,27 @@ export default function AdminPage() {
     setIsModalOpen(false);
   };
 
+  const handleResetPassword = () => {
+    if (!editingUser) return;
+    if (!confirm(`정말로 사용자 "${formName}"의 비밀번호를 'gcu1234!'로 초기화하시겠습니까?`)) return;
+    
+    setFormPassword("gcu1234!");
+    const updatedUsersList = users.map((u) => {
+      if (u.id === editingUser.id) {
+        return {
+          ...u,
+          password: "gcu1234!"
+        };
+      }
+      return u;
+    });
+    setUsers(updatedUsersList);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gcu-users-db", JSON.stringify(updatedUsersList));
+    }
+    triggerToast(`🔑 비밀번호가 'gcu1234!'로 성공적으로 초기화되었습니다!`);
+  };
+
   const handleDeleteUser = (userId: string) => {
     if (!confirm(t.deleteConfirm)) return;
 
@@ -1181,6 +1575,31 @@ export default function AdminPage() {
       localStorage.setItem("gcu-users-db", JSON.stringify(updatedUsersList));
     }
     triggerToast(t.toastDeleted);
+  };
+
+  const handleExportCSV = () => {
+    const headers = ["성명", "이메일 계정", "국적", "회원 권한", "사용자 유형", "가입 일자", "로그인 제공처", "회원 상태"];
+    const rows = filteredUsers.map(u => [
+      u.name,
+      u.email,
+      u.nationality,
+      u.role === "admin" ? "관리자" : u.role === "manager" ? "매니저" : "일반 회원",
+      u.userType === "student" ? "학생" : u.userType === "worker" ? "근로자" : "졸업생",
+      u.joinedDate,
+      u.provider.toUpperCase(),
+      u.status === "active" ? "정상" : "이용제한"
+    ]);
+
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(e => e.map(val => `"${val.replace(/"/g, '""')}"`).join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `GCU_Users_Export_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    triggerToast("📊 조건 필터링된 회원 목록이 엑셀(CSV) 파일로 다운로드되었습니다!");
   };
 
   // Complaints Management Handlers
@@ -1675,8 +2094,18 @@ export default function AdminPage() {
     const matchesRole = roleFilter === "all" || u.role === roleFilter;
     const matchesNationality = nationalityFilter === "all" || u.nationality.includes(nationalityFilter);
     const matchesProvider = providerFilter === "all" || u.provider === providerFilter;
+    const matchesUserType = userTypeFilter === "all" || u.userType === userTypeFilter;
+    const matchesStatus = statusFilter === "all" || u.status === statusFilter;
+    
+    let matchesDate = true;
+    if (joinStartDate) {
+      matchesDate = matchesDate && u.joinedDate >= joinStartDate;
+    }
+    if (joinEndDate) {
+      matchesDate = matchesDate && u.joinedDate <= joinEndDate;
+    }
 
-    return matchesSearch && matchesRole && matchesNationality && matchesProvider;
+    return matchesSearch && matchesRole && matchesNationality && matchesProvider && matchesUserType && matchesStatus && matchesDate;
   });
 
   // Guard Clause loading check
@@ -1881,6 +2310,13 @@ export default function AdminPage() {
         >
           📋 스마트 민원관리
         </button>
+        <button 
+          onClick={() => { setAdminViewMode("classic"); setAdminActiveTab("spam"); }}
+          className={`comm-tab-btn ${adminActiveTab === "spam" ? "active" : ""}`}
+          style={{ padding: "10px 20px", fontSize: "0.9rem", fontWeight: "700", whiteSpace: "nowrap" }}
+        >
+          🛡️ 스팸/비속어 필터
+        </button>
       </div>
 
       {adminActiveTab === "users" && (
@@ -1921,19 +2357,46 @@ export default function AdminPage() {
             </div>
 
             {/* Filter Toolbar row */}
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", borderTop: "1px solid rgba(255,255,255,0.04)", paddingTop: "16px" }}>
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center", borderTop: "1px solid rgba(255,255,255,0.04)", paddingTop: "16px", width: "100%" }}>
               {/* Role Filter */}
               <select 
                 value={roleFilter} 
                 onChange={(e) => setRoleFilter(e.target.value)}
                 className="calc-select"
-                style={{ width: "auto", minWidth: "130px", height: "36px", fontSize: "0.8rem", padding: "0 10px" }}
+                style={{ width: "auto", minWidth: "110px", height: "36px", fontSize: "0.8rem", padding: "0 10px" }}
                 aria-label="Role Filter"
               >
                 <option value="all">{t.filterRoleAll}</option>
-                <option value="student">{t.filterRoleStudent}</option>
-                <option value="worker">{t.filterRoleWorker}</option>
                 <option value="admin">{t.filterRoleAdmin}</option>
+                <option value="manager">{t.filterRoleManager}</option>
+                <option value="user">{t.filterRoleUser}</option>
+              </select>
+
+              {/* User Type Filter */}
+              <select 
+                value={userTypeFilter} 
+                onChange={(e) => setUserTypeFilter(e.target.value)}
+                className="calc-select"
+                style={{ width: "auto", minWidth: "110px", height: "36px", fontSize: "0.8rem", padding: "0 10px" }}
+                aria-label="User Type Filter"
+              >
+                <option value="all">{t.filterTypeAll}</option>
+                <option value="student">{t.filterTypeStudent}</option>
+                <option value="worker">{t.filterTypeWorker}</option>
+                <option value="graduate">{t.filterTypeGraduate}</option>
+              </select>
+
+              {/* Status Filter */}
+              <select 
+                value={statusFilter} 
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="calc-select"
+                style={{ width: "auto", minWidth: "110px", height: "36px", fontSize: "0.8rem", padding: "0 10px" }}
+                aria-label="Status Filter"
+              >
+                <option value="all">{t.filterStatusAll}</option>
+                <option value="active">{t.filterStatusActive}</option>
+                <option value="suspended">{t.filterStatusSuspended}</option>
               </select>
 
               {/* Nationality Filter */}
@@ -1941,7 +2404,7 @@ export default function AdminPage() {
                 value={nationalityFilter} 
                 onChange={(e) => setNationalityFilter(e.target.value)}
                 className="calc-select"
-                style={{ width: "auto", minWidth: "130px", height: "36px", fontSize: "0.8rem", padding: "0 10px" }}
+                style={{ width: "auto", minWidth: "120px", height: "36px", fontSize: "0.8rem", padding: "0 10px" }}
                 aria-label="Nationality Filter"
               >
                 <option value="all">{t.filterNatAll}</option>
@@ -1957,7 +2420,7 @@ export default function AdminPage() {
                 value={providerFilter} 
                 onChange={(e) => setProviderFilter(e.target.value)}
                 className="calc-select"
-                style={{ width: "auto", minWidth: "130px", height: "36px", fontSize: "0.8rem", padding: "0 10px" }}
+                style={{ width: "auto", minWidth: "110px", height: "36px", fontSize: "0.8rem", padding: "0 10px" }}
                 aria-label="Provider Filter"
               >
                 <option value="all">{t.filterProvAll}</option>
@@ -1965,7 +2428,52 @@ export default function AdminPage() {
                 <option value="google">Google</option>
                 <option value="kakao">Kakao</option>
                 <option value="naver">Naver</option>
+                <option value="apple">Apple</option>
               </select>
+
+              {/* Date Filter */}
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <input 
+                  type="date" 
+                  value={joinStartDate}
+                  onChange={(e) => setJoinStartDate(e.target.value)}
+                  className="calc-select"
+                  style={{ width: "120px", height: "36px", fontSize: "0.8rem", padding: "0 10px", color: "var(--text-primary)", background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.1)" }}
+                  aria-label="Join Start Date"
+                />
+                <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>~</span>
+                <input 
+                  type="date" 
+                  value={joinEndDate}
+                  onChange={(e) => setJoinEndDate(e.target.value)}
+                  className="calc-select"
+                  style={{ width: "120px", height: "36px", fontSize: "0.8rem", padding: "0 10px", color: "var(--text-primary)", background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.1)" }}
+                  aria-label="Join End Date"
+                />
+              </div>
+
+              {/* Excel Download Button */}
+              <button
+                onClick={handleExportCSV}
+                className="btn-primary"
+                style={{ 
+                  whiteSpace: "nowrap", 
+                  borderRadius: "8px", 
+                  fontSize: "0.8rem", 
+                  padding: "0 16px", 
+                  height: "36px", 
+                  background: "linear-gradient(135deg, #107c41, #1f9a55)", 
+                  border: "none", 
+                  color: "#ffffff", 
+                  fontWeight: "700",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  marginLeft: "auto"
+                }}
+              >
+                {t.btnExportExcel}
+              </button>
             </div>
           </div>
 
@@ -1978,8 +2486,10 @@ export default function AdminPage() {
                   <th>{t.colEmail}</th>
                   <th>{t.colNat}</th>
                   <th>{t.colRole}</th>
+                  <th>{t.lblFieldUserType}</th>
                   <th>{t.colProvider}</th>
                   <th>{t.colDate}</th>
+                  <th>{t.lblFieldStatus}</th>
                   <th>{t.colActions}</th>
                 </tr>
               </thead>
@@ -1992,10 +2502,32 @@ export default function AdminPage() {
                       <td>{user.nationality}</td>
                       <td>
                         <span 
-                          className={`feed-tag ${user.role === "admin" ? "notice" : user.role === "worker" ? "guide" : "event"}`}
-                          style={{ fontSize: "0.75rem", padding: "2px 8px" }}
+                          style={{ 
+                            fontSize: "0.75rem", 
+                            padding: "2px 8px", 
+                            borderRadius: "4px",
+                            background: user.role === "admin" ? "rgba(242, 139, 130, 0.15)" : user.role === "manager" ? "rgba(251, 188, 4, 0.15)" : "rgba(138, 180, 248, 0.15)", 
+                            color: user.role === "admin" ? "#f28b82" : user.role === "manager" ? "#fbbc04" : "#8ab4f8", 
+                            border: "1px solid rgba(255, 255, 255, 0.05)",
+                            fontWeight: "600"
+                          }}
                         >
-                          {user.role === "admin" ? t.filterRoleAdmin : user.role === "worker" ? t.filterRoleWorker : t.filterRoleStudent}
+                          {user.role === "admin" ? t.filterRoleAdmin : user.role === "manager" ? t.filterRoleManager : t.filterRoleUser}
+                        </span>
+                      </td>
+                      <td>
+                        <span 
+                          style={{ 
+                            fontSize: "0.75rem", 
+                            padding: "2px 8px", 
+                            borderRadius: "4px",
+                            background: user.userType === "student" ? "rgba(138, 180, 248, 0.15)" : user.userType === "worker" ? "rgba(251, 188, 4, 0.15)" : "rgba(195, 166, 255, 0.15)", 
+                            color: user.userType === "student" ? "#8ab4f8" : user.userType === "worker" ? "#fbbc04" : "#c3a6ff", 
+                            border: "1px solid rgba(255, 255, 255, 0.05)",
+                            fontWeight: "600"
+                          }}
+                        >
+                          {user.userType === "student" ? t.filterTypeStudent : user.userType === "worker" ? t.filterTypeWorker : t.filterTypeGraduate}
                         </span>
                       </td>
                       <td>
@@ -2004,16 +2536,31 @@ export default function AdminPage() {
                             fontSize: "0.75rem", 
                             padding: "2px 8px", 
                             borderRadius: "4px", 
-                            background: user.provider === "google" ? "rgba(0, 0, 0, 0.04)" : user.provider === "kakao" ? "rgba(254, 229, 0, 0.15)" : user.provider === "naver" ? "rgba(3, 199, 90, 0.12)" : "rgba(18, 42, 77, 0.08)",
-                            border: user.provider === "google" ? "1px solid rgba(0, 0, 0, 0.08)" : user.provider === "kakao" ? "1px solid rgba(254, 229, 0, 0.3)" : user.provider === "naver" ? "1px solid rgba(3, 199, 90, 0.25)" : "1px solid rgba(18, 42, 77, 0.15)",
+                            background: user.provider === "google" ? "rgba(0, 0, 0, 0.04)" : user.provider === "kakao" ? "rgba(254, 229, 0, 0.15)" : user.provider === "naver" ? "rgba(3, 199, 90, 0.12)" : user.provider === "apple" ? "rgba(255, 255, 255, 0.1)" : "rgba(18, 42, 77, 0.08)",
+                            border: user.provider === "google" ? "1px solid rgba(0, 0, 0, 0.08)" : user.provider === "kakao" ? "1px solid rgba(254, 229, 0, 0.3)" : user.provider === "naver" ? "1px solid rgba(3, 199, 90, 0.25)" : user.provider === "apple" ? "1px solid rgba(255, 255, 255, 0.2)" : "1px solid rgba(18, 42, 77, 0.15)",
                             fontWeight: "600",
-                            color: user.provider === "google" ? "var(--text-primary)" : user.provider === "kakao" ? "#9b7f00" : user.provider === "naver" ? "#03C75A" : "var(--gcu-navy)"
+                            color: user.provider === "google" ? "var(--text-primary)" : user.provider === "kakao" ? "#9b7f00" : user.provider === "naver" ? "#03C75A" : user.provider === "apple" ? "#ffffff" : "var(--gcu-navy)"
                           }}
                         >
                           {user.provider.toUpperCase()}
                         </span>
                       </td>
                       <td style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>{user.joinedDate}</td>
+                      <td>
+                        <span 
+                          style={{ 
+                            fontSize: "0.75rem", 
+                            padding: "2px 8px", 
+                            borderRadius: "4px",
+                            background: user.status === "suspended" ? "rgba(242, 139, 130, 0.15)" : "rgba(114, 191, 68, 0.15)", 
+                            color: user.status === "suspended" ? "#f28b82" : "#72bf44", 
+                            border: user.status === "suspended" ? "1px solid rgba(242, 139, 130, 0.25)" : "1px solid rgba(114, 191, 68, 0.25)",
+                            fontWeight: "600"
+                          }}
+                        >
+                          {user.status === "suspended" ? t.filterStatusSuspended : t.filterStatusActive}
+                        </span>
+                      </td>
                       <td>
                         <div style={{ display: "flex", gap: "8px" }}>
                           <button 
@@ -2036,7 +2583,7 @@ export default function AdminPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} style={{ textAlign: "center", padding: "40px", color: "var(--text-secondary)" }}>
+                    <td colSpan={9} style={{ textAlign: "center", padding: "40px", color: "var(--text-secondary)" }}>
                       현재 필터 조건에 부합하는 연동 사용자 계정이 존재하지 않습니다.
                     </td>
                   </tr>
@@ -2129,9 +2676,9 @@ export default function AdminPage() {
                     onChange={(e) => setFormRole(e.target.value as any)}
                     className="calc-select"
                   >
-                    <option value="student">{t.filterRoleStudent}</option>
-                    <option value="worker">{t.filterRoleWorker}</option>
                     <option value="admin">{t.filterRoleAdmin}</option>
+                    <option value="manager">{t.filterRoleManager}</option>
+                    <option value="user">{t.filterRoleUser}</option>
                   </select>
                 </div>
 
@@ -2146,9 +2693,69 @@ export default function AdminPage() {
                     <option value="google">Google</option>
                     <option value="kakao">Kakao</option>
                     <option value="naver">Naver</option>
+                    <option value="apple">Apple</option>
                   </select>
                 </div>
               </div>
+
+              {/* Grid selectors for User Type and Status */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                <div>
+                  <label className="calc-label" style={{ display: "block", marginBottom: "6px" }}>{t.lblFieldUserType}</label>
+                  <select 
+                    value={formUserType} 
+                    onChange={(e) => setFormUserType(e.target.value as any)}
+                    className="calc-select"
+                  >
+                    <option value="student">{t.filterTypeStudent}</option>
+                    <option value="worker">{t.filterTypeWorker}</option>
+                    <option value="graduate">{t.filterTypeGraduate}</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="calc-label" style={{ display: "block", marginBottom: "6px" }}>{t.lblFieldStatus}</label>
+                  <select 
+                    value={formStatus} 
+                    onChange={(e) => setFormStatus(e.target.value as any)}
+                    className="calc-select"
+                  >
+                    <option value="active">{t.filterStatusActive}</option>
+                    <option value="suspended">{t.filterStatusSuspended}</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Password Reset Section (Only when editing an existing user) */}
+              {editingUser && (
+                <div style={{ 
+                  borderTop: "1px solid rgba(255, 255, 255, 0.08)", 
+                  paddingTop: "16px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center"
+                }}>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)", fontWeight: "600" }}>비밀번호 분실/재설정</span>
+                    <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: "2px" }}>비밀번호를 'gcu1234!'로 재설정합니다.</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleResetPassword}
+                    className="resource-download-btn"
+                    style={{ 
+                      padding: "6px 12px", 
+                      fontSize: "0.75rem", 
+                      background: "rgba(247, 147, 30, 0.15)", 
+                      border: "1px solid var(--gcu-orange)", 
+                      color: "var(--gcu-orange)",
+                      borderRadius: "6px"
+                    }}
+                  >
+                    🔐 {t.btnResetPassword}
+                  </button>
+                </div>
+              )}
 
               {/* Action buttons */}
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "16px" }}>
@@ -2641,6 +3248,236 @@ export default function AdminPage() {
           </div>
         </>
       )}
+
+      {adminActiveTab === "spam" && (
+        <>
+          {/* Section 1: Title and Banner */}
+          <div className="glass-panel" style={{ padding: "24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
+            <div>
+              <h3 style={{ fontSize: "1.2rem", fontWeight: "700", color: "var(--text-primary)", margin: 0 }}>🛡️ 커뮤니티 스팸 및 비속어 필터 시스템 설정</h3>
+              <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", margin: "4px 0 0 0" }}>
+                커뮤니티 소모임 게시판 글 및 전체 학우 댓글의 부적절한 단어, 주식/코인 투자 스팸 및 웹 링크 등록 차단을 제어합니다.
+              </p>
+            </div>
+          </div>
+
+          {/* Configuration Card and Keywords */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "20px", alignItems: "start" }}>
+            
+            {/* Left Column: Filter Settings */}
+            <div className="glass-panel" style={{ padding: "20px", background: "var(--bg-secondary)" }}>
+              <h4 style={{ fontSize: "0.95rem", fontWeight: "700", color: "var(--text-primary)", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "10px", marginBottom: "15px", display: "flex", alignItems: "center", gap: "6px" }}>
+                ⚙️ 필터 작동 환경 설정
+              </h4>
+
+              {/* Mode Select */}
+              <div style={{ marginBottom: "20px" }}>
+                <label className="calc-label" style={{ display: "block", marginBottom: "8px", fontWeight: "600", fontSize: "0.82rem" }}>작동 필터 모드</label>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-primary)", fontSize: "0.85rem", cursor: "pointer" }}>
+                    <input 
+                      type="radio" 
+                      name="filterMode" 
+                      value="disabled" 
+                      checked={spamFilterMode === "disabled"}
+                      onChange={() => handleSaveSpamConfig("disabled", spamKeywords, spamLinkBlock)}
+                    />
+                    <span>🔴 필터링 비활성화 (모두 통과)</span>
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-primary)", fontSize: "0.85rem", cursor: "pointer" }}>
+                    <input 
+                      type="radio" 
+                      name="filterMode" 
+                      value="masking" 
+                      checked={spamFilterMode === "masking"}
+                      onChange={() => handleSaveSpamConfig("masking", spamKeywords, spamLinkBlock)}
+                    />
+                    <span>🟡 마스킹 치환 모드 (비속어 ➔ *** 자동 변환)</span>
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-primary)", fontSize: "0.85rem", cursor: "pointer" }}>
+                    <input 
+                      type="radio" 
+                      name="filterMode" 
+                      value="blocking" 
+                      checked={spamFilterMode === "blocking"}
+                      onChange={() => handleSaveSpamConfig("blocking", spamKeywords, spamLinkBlock)}
+                    />
+                    <span>🚫 작성을 차단함 (포스팅 원천 방지)</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Spam Link Toggle */}
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "15px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <label className="calc-label" style={{ display: "block", fontWeight: "600", fontSize: "0.82rem", margin: 0 }}>🔗 외부 주소(URL) 링크 차단</label>
+                    <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>홍보성 사이트 링크 차단 여부</span>
+                  </div>
+                  <input 
+                    type="checkbox" 
+                    checked={spamLinkBlock} 
+                    onChange={(e) => handleSaveSpamConfig(spamFilterMode, spamKeywords, e.target.checked)}
+                    style={{ width: "20px", height: "20px", cursor: "pointer" }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Keyword Management */}
+            <div className="glass-panel" style={{ padding: "20px", background: "var(--bg-secondary)" }}>
+              <h4 style={{ fontSize: "0.95rem", fontWeight: "700", color: "var(--text-primary)", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "10px", marginBottom: "15px" }}>
+                🏷️ 필터 대상 키워드 관리 ({spamKeywords.length}개)
+              </h4>
+
+              {/* Keyword Add Input */}
+              <form 
+                onSubmit={(e) => { e.preventDefault(); handleAddSpamKeyword(newKeywordInput); }}
+                style={{ display: "flex", gap: "8px", marginBottom: "15px" }}
+              >
+                <input 
+                  type="text" 
+                  placeholder="새 필터링 단어 입력 (예: 코인, 불법)"
+                  value={newKeywordInput}
+                  onChange={(e) => setNewKeywordInput(e.target.value)}
+                  className="search-input"
+                  style={{ padding: "8px 12px", height: "36px", fontSize: "0.85rem" }}
+                />
+                <button 
+                  type="submit" 
+                  className="btn-primary" 
+                  style={{ padding: "0 16px", height: "36px", borderRadius: "8px", color: "#ffffff", fontWeight: "700", whiteSpace: "nowrap" }}
+                >
+                  추가
+                </button>
+              </form>
+
+              {/* Keyword tags container */}
+              <div style={{ 
+                display: "flex", 
+                flexWrap: "wrap", 
+                gap: "8px", 
+                background: "rgba(0, 0, 0, 0.2)", 
+                padding: "12px", 
+                borderRadius: "8px", 
+                minHeight: "120px", 
+                maxHeight: "240px", 
+                overflowY: "auto",
+                border: "1px solid rgba(255,255,255,0.05)"
+              }}>
+                {spamKeywords.length > 0 ? (
+                  spamKeywords.map((kw, i) => (
+                    <span 
+                      key={i} 
+                      style={{ 
+                        fontSize: "0.78rem", 
+                        padding: "4px 8px 4px 10px", 
+                        background: "rgba(138, 180, 248, 0.12)", 
+                        color: "#8ab4f8", 
+                        borderRadius: "16px", 
+                        border: "1px solid rgba(138,180,248,0.2)",
+                        fontWeight: "600",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px"
+                      }}
+                    >
+                      {kw}
+                      <button 
+                        type="button"
+                        onClick={() => handleRemoveSpamKeyword(kw)}
+                        style={{ background: "transparent", color: "#f28b82", border: "none", cursor: "pointer", fontSize: "0.75rem", padding: "0" }}
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  ))
+                ) : (
+                  <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", margin: "auto" }}>등록된 필터링 키워드가 없습니다.</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Card: Audit logs */}
+          <div className="glass-panel" style={{ padding: "20px", background: "var(--bg-secondary)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "10px", marginBottom: "15px" }}>
+              <h4 style={{ fontSize: "0.95rem", fontWeight: "700", color: "var(--text-primary)", margin: 0 }}>🚨 스팸 & 비속어 차단 실시간 탐지 로그 (Audit Logs)</h4>
+              {spamLogs.length > 0 && (
+                <button 
+                  onClick={handleClearSpamLogs}
+                  className="resource-download-btn"
+                  style={{ padding: "4px 10px", fontSize: "0.75rem", background: "rgba(242, 139, 130, 0.1)", border: "1px solid #f28b82", color: "#f28b82" }}
+                >
+                  전체 로그 삭제
+                </button>
+              )}
+            </div>
+
+            <div style={{ overflowX: "auto" }}>
+              <table className="resource-table" style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    <th>탐지 시각</th>
+                    <th>분야</th>
+                    <th>작성자</th>
+                    <th>원본 텍스트</th>
+                    <th>검출된 키워드</th>
+                    <th>조치 사항</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {spamLogs.length > 0 ? (
+                    spamLogs.map((log) => (
+                      <tr key={log.id}>
+                        <td style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>{log.timestamp}</td>
+                        <td>
+                          <span className={`feed-tag ${log.type === "post" ? "notice" : "guide"}`} style={{ fontSize: "0.75rem", padding: "2px 8px" }}>
+                            {log.type === "post" ? "게시글" : "댓글"}
+                          </span>
+                        </td>
+                        <td style={{ fontWeight: "600", color: "var(--text-primary)", fontSize: "0.85rem" }}>{log.author}</td>
+                        <td style={{ fontSize: "0.8rem", color: "var(--text-secondary)", maxWidth: "300px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={log.originalText}>
+                          {log.originalText}
+                        </td>
+                        <td>
+                          <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+                            {log.detectedKeywords.map((kw: string, idx: number) => (
+                              <span key={idx} style={{ background: "rgba(242,139,130,0.15)", color: "#f28b82", fontSize: "0.72rem", padding: "1px 6px", borderRadius: "4px" }}>
+                                {kw}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td>
+                          <span 
+                            className="feed-tag" 
+                            style={{ 
+                              fontSize: "0.75rem", 
+                              padding: "2px 8px", 
+                              background: log.actionTaken === "blocked" ? "rgba(242,139,130,0.15)" : "rgba(251,188,4,0.15)", 
+                              color: log.actionTaken === "blocked" ? "#f28b82" : "#fbbc04", 
+                              border: log.actionTaken === "blocked" ? "1px solid rgba(242,139,130,0.25)" : "1px solid rgba(251,188,4,0.25)" 
+                            }}
+                          >
+                            {log.actionTaken === "blocked" ? "차단됨 (Blocked)" : "마스킹됨 (Masked)"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} style={{ textAlign: "center", padding: "30px", color: "var(--text-secondary)", fontSize: "0.85rem" }}>
+                        탐지 로그가 존재하지 않습니다.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
         </div>
       ) : (
         /* 2. Conversational AI Chat Console Layout */
@@ -2703,6 +3540,20 @@ export default function AdminPage() {
               onClick={() => { setAdminViewMode("classic"); setAdminActiveTab("complaints"); }}
             >
               📋 스마트 민원관리
+            </span>
+            <span 
+              style={{ 
+                fontSize: "0.85rem", 
+                fontWeight: "700", 
+                color: "#888d96", 
+                borderBottom: "none", 
+                paddingBottom: "12px", 
+                cursor: "pointer", 
+                transition: "all 0.2s" 
+              }} 
+              onClick={() => { setAdminViewMode("classic"); setAdminActiveTab("spam"); }}
+            >
+              🛡️ 스팸/비속어 필터
             </span>
             <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "#4d5156", paddingBottom: "12px", cursor: "not-allowed" }}>이미지</span>
             <span style={{ fontSize: "0.85rem", fontWeight: "500", color: "#4d5156", paddingBottom: "12px", cursor: "not-allowed" }}>동영상</span>

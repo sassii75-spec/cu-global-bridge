@@ -235,13 +235,24 @@ export default function ProfilePage() {
             </div>
             <div>
               <h3 style={{ fontSize: "1.25rem", fontWeight: "800", color: "var(--text-primary)", margin: "0 0 4px 0" }}>{activeUser.name}</h3>
-              <span className={`feed-tag ${activeUser.role === "admin" ? "notice" : activeUser.role === "worker" ? "guide" : "event"}`} style={{ fontSize: "0.75rem", padding: "2px 8px" }}>
-                {activeUser.role === "admin" 
-                  ? (lang === "ko" ? "🔑 통합 전산 관리자" : "Admin")
-                  : activeUser.role === "worker" 
-                    ? (lang === "ko" ? "💼 글로벌 근로자" : "Global Worker")
-                    : (lang === "ko" ? "🎓 글로벌 정규 유학생" : "International Student")}
-              </span>
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "4px" }}>
+                <span className={`feed-tag ${activeUser.role === "admin" ? "notice" : activeUser.role === "manager" ? "guide" : "event"}`} style={{ fontSize: "0.75rem", padding: "2px 8px" }}>
+                  {activeUser.role === "admin" 
+                    ? (lang === "ko" ? "🔑 관리자" : "Admin")
+                    : activeUser.role === "manager"
+                      ? (lang === "ko" ? "💼 매니저" : "Manager")
+                      : (lang === "ko" ? "👤 일반 회원" : "General User")}
+                </span>
+                <span className="feed-tag event" style={{ fontSize: "0.75rem", padding: "2px 8px", background: "rgba(114, 191, 68, 0.15)", color: "var(--gcu-green)" }}>
+                  {activeUser.userType === "student" 
+                    ? (lang === "ko" ? "🎓 글로벌 유학생" : "Student")
+                    : activeUser.userType === "worker"
+                      ? (lang === "ko" ? "💼 글로벌 근로자" : "Worker")
+                      : activeUser.userType === "graduate"
+                        ? (lang === "ko" ? "🎓 졸업생" : "Graduate")
+                        : (lang === "ko" ? "🎓 글로벌 유학생" : "Student")}
+                </span>
+              </div>
             </div>
           </div>
 

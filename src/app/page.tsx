@@ -543,7 +543,7 @@ export default function Home() {
     const circ = 2 * Math.PI * radius;
     const offset = circ - (circ * eligibilityScore) / 100;
 
-    const role = activeUser.role || "student";
+    const role = activeUser.userType || (activeUser.role === "admin" || activeUser.role === "manager" ? "student" : activeUser.role) || "student";
     const isStudent = role === "student";
     const isWorker = role === "worker";
     const isGraduate = role === "graduate";
@@ -1807,7 +1807,7 @@ export default function Home() {
   };
 
   // If foreigner is logged in, show personalized student/worker dashboard instead
-  if (activeUser && activeUser.role !== "admin") {
+  if (activeUser && activeUser.role !== "admin" && activeUser.role !== "manager") {
     return renderForeignerDashboard();
   }
 
